@@ -1,0 +1,29 @@
+{
+  "name": "@approvio/api",
+  "author": "Giovanni Baratta",
+  "license": "MIT",
+  "version": "0.0.2",
+  "private": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giovannibaratta/approvio-api"
+  },
+  "scripts": {
+    "generate:api": "openapi-generator-cli generate --openapitools openapitools.json && yarn generate:index && yarn build",
+    "generate:index": "./scripts/generate-index.sh",
+    "lint:api": "spectral lint openapi.yaml --ruleset .spectral.yaml",
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "yarn generate:api"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "2.20.2",
+    "@stoplight/spectral-cli": "6.15.0",
+    "typescript": "5.7.3"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}

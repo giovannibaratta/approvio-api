@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.8.0",
+    "generators": {
+      "typescript": {
+        "generatorName": "typescript-nestjs",
+        "output": "#{cwd}/generated/openapi",
+        "glob": "openapi.yaml",
+        "additionalProperties": {
+          "withInterfaces": true,
+          "withSeparateModelsAndApi": true,
+          "modelPropertyNaming": "camelCase",
+          "strict": true,
+          "fileNaming": "kebab-case"
+        }
+      }
+    }
+  }
+}
