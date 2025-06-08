@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.1
+  version: 0.0.3
 
 tags:
   - name: Workflows
@@ -107,7 +107,7 @@ paths:
   /workflows/{workflowId}/vote:
     post:
       summary: Vote on a workflow
-      description: Allows an authenticated entity to cast a vote (approve or decline) on a specific workflow.
+      description: Allows an authenticated entity to cast a vote (approve or veto) on a specific workflow.
       operationId: voteOnWorkflow
       tags:
         - Workflow Actions
@@ -713,8 +713,9 @@ components:
           x-extensible-enum:
             - PENDING
             - APPROVED
-            - DECLINED
+            - REJECTED
             - CANCELED
+            - EVALUATION_IN_PROGRESS
           description: Current status of the workflow
         approvalRule:
           $ref: "#/components/schemas/ApprovalRule"
@@ -886,39 +887,22 @@ components:
       title: WorkflowVoteRequest
       required:
         - voteType
-        - voteMode
       properties:
-        voteType:
-          type: string
-          x-extensible-enum:
-            - APPROVE
-            - DECLINE
-            - WITHDRAW
-          description: The type of vote to cast.
-        voteMode:
-          $ref: "#/components/schemas/VoteMode"
         reason:
           type: string
-          description: Optional reason for the vote. Can be used for approval comments or decline reasons.
+          description: Optional reason for the vote. Can be used for approval comments or reject reasons.
           example: "Missing critical information or LGTM!"
-
-    VoteMode:
-      type: object
-      title: VoteMode
-      required:
-        - type
-      properties:
-        type:
-          type: string
-          x-extensible-enum:
-            - VOTE_FOR_ALL
-            - VOTE_FOR_GROUPS
-          default: VOTE_FOR_ALL
-          description: >
-            Specifies the mode of voting. 
-            VOTE_FOR_ALL means the vote applies based on the user's direct eligibility. 
-            VOTE_FOR_GROUPS (future) would imply voting on behalf of specific groups.
-          example: VOTE_FOR_ALL
+        voteType:
+          oneOf:
+            - $ref: "#/components/schemas/VoteApprove"
+            - $ref: "#/components/schemas/VoteVeto"
+            - $ref: "#/components/schemas/VoteWithdraw"
+          discriminator:
+            propertyName: type
+            mapping:
+              APPROVE: "#/components/schemas/VoteApprove"
+              VETO: "#/components/schemas/VoteVeto"
+              WITHDRAW: "#/components/schemas/VoteWithdraw"
 
     CanVoteResponse:
       type: object
@@ -935,10 +919,48 @@ components:
           x-extensible-enum:
             - ALREADY_VOTED
             - VOTE_PENDING
-          description: >
-            Indicates the voting status for the user on this workflow. 
+          description: |
+            Indicates the voting status for the user on this workflow.
             Relevant only if 'canVote' is true or if the user had voting rights previously.
           example: VOTE_PENDING
+
+    VoteApprove:
+      type: object
+      required:
+        - type
+        - votedForGroups
+      properties:
+        type:
+          type: string
+          enum: [APPROVE]
+          description: Vote type (APPROVE)
+        votedForGroups:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: List of group IDs the vote is cast for.
+          example: ["a1b2c3d4-e5f6-7890-1234-567890abcdef"]
+
+    VoteVeto:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [VETO]
+          description: Vote type (VETO)
+
+    VoteWithdraw:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [WITHDRAW]
+          description: Vote type (WITHDRAW)
 
   responses:
     BadRequest:
