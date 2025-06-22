@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.5
+  version: 0.0.6
 
 tags:
   - name: Workflows
@@ -913,11 +913,11 @@ components:
         status:
           type: string
           x-extensible-enum:
-            - PENDING
             - APPROVED
             - REJECTED
             - CANCELED
             - EVALUATION_IN_PROGRESS
+            - EXPIRED
           description: Current status of the workflow
         workflowTemplateId:
           type: string
@@ -940,6 +940,12 @@ components:
           type: string
           format: date-time
           description: Last update timestamp
+        expiresAt:
+          type: string
+          format: date-time
+          description: Expiry timestamp
+          readOnly: true
+          example: "2025-04-15T12:05:00Z"
 
     ApprovalRule:
       description: >
@@ -1131,9 +1137,15 @@ components:
             - VOTE_PENDING
           description: |
             Indicates the voting status for the user on this workflow.
-            Relevant only if 'canVote' is true or if the user had voting rights previously.
           example: VOTE_PENDING
-
+        cantVoteReason:
+          type: string
+          description: Reason why the entity cannot vote on the workflow. The value is only set if 'canVote' is false.
+          x-extensible-enum:
+            - WORKFLOW_EXPIRED
+            - WORKFLOW_APPROVED
+            - WORKFLOW_CANCELED
+            - NOT_ELIGIBLE_TO_VOTE
     VoteApprove:
       type: object
       required:
