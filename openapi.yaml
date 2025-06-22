@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.3
+  version: 0.0.5
 
 tags:
   - name: Workflows
@@ -60,6 +60,17 @@ paths:
           schema:
             type: integer
             default: 20
+        - name: include
+          in: query
+          description: Comma-separated list of related objects to include in the response
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - workflow-template
       responses:
         "200":
           description: List of workflows
@@ -94,6 +105,17 @@ paths:
           description: The unique identifier of the workflow
           schema:
             type: string
+        - name: include
+          in: query
+          description: Comma-separated list of related objects to include in the response
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - workflow-template
       responses:
         "200":
           description: Workflow details
@@ -852,7 +874,7 @@ components:
       type: object
       required:
         - name
-        - approvalRule
+        - workflowTemplateId
       properties:
         name:
           type: string
@@ -863,8 +885,10 @@ components:
         metadata:
           type: object
           description: Additional custom metadata for the workflow
-        approvalRule:
-          $ref: "#/components/schemas/ApprovalRule"
+        workflowTemplateId:
+          type: string
+          format: uuid
+          description: The unique identifier of the workflow template to use as parent
 
     Workflow:
       type: object
@@ -872,7 +896,7 @@ components:
         - id
         - name
         - status
-        - approvalRule
+        - workflowTemplateId
         - metadata
         - createdAt
         - updatedAt
@@ -895,11 +919,19 @@ components:
             - CANCELED
             - EVALUATION_IN_PROGRESS
           description: Current status of the workflow
-        approvalRule:
-          $ref: "#/components/schemas/ApprovalRule"
+        workflowTemplateId:
+          type: string
+          format: uuid
+          description: The unique identifier of the workflow template used as parent
         metadata:
           type: object
           description: Additional custom metadata for the workflow
+        ref:
+          type: object
+          description: Referenced objects (optional, controlled by include query parameters)
+          properties:
+            workflowTemplate:
+              $ref: "#/components/schemas/WorkflowTemplate"
         createdAt:
           type: string
           format: date-time
