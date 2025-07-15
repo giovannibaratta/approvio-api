@@ -71,6 +71,12 @@ paths:
               type: string
               enum:
                 - workflow-template
+        - name: include-only-non-terminal-state
+          in: query
+          description: When set to true, only workflows that are not in terminal state (APPROVED, CANCELED, EXPIRED) will be returned
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: List of workflows
