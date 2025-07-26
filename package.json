@@ -2,7 +2,7 @@
   "name": "@approvio/api",
   "author": "Giovanni Baratta",
   "license": "MIT",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -23,8 +23,8 @@
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "2.20.2",
-    "@stoplight/spectral-cli": "6.15.0",
     "@redocly/cli": "1.34.4",
+    "@stoplight/spectral-cli": "6.15.0",
     "typescript": "5.7.3"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
