@@ -2,7 +2,7 @@
   "name": "@approvio/api",
   "author": "Giovanni Baratta",
   "license": "MIT",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
