@@ -2,9 +2,11 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.7
+  version: 0.0.8
 
 tags:
+  - name: Authentication
+    description: OIDC authentication and token management
   - name: Workflows
     description: Workflow management and approval
   - name: Workflow Templates
@@ -17,6 +19,113 @@ tags:
     description: Workflow actions and voting
 
 paths:
+  /auth/login:
+    get:
+      summary: Initiate OIDC login
+      description: Initiates OIDC authentication by generating PKCE challenge and redirecting to the OIDC provider
+      operationId: initiateLogin
+      tags:
+        - Authentication
+      security: []
+      responses:
+        "302":
+          description: Redirect to OIDC provider for authentication
+        "500":
+          description: Failed to initiate login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
+  /auth/callback:
+    get:
+      summary: Handle OIDC callback
+      description: Handles the callback from OIDC provider and redirects to success page with authorization code
+      operationId: handleCallback
+      tags:
+        - Authentication
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code from OIDC provider
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          description: State parameter to prevent CSRF attacks
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect to success page with code and state parameters
+        "400":
+          description: Missing required parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
+  /auth/token:
+    post:
+      summary: Exchange authorization code for JWT token
+      description: Exchanges the authorization code and state for a JWT token containing user information and roles
+      operationId: exchangeToken
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+      responses:
+        "200":
+          description: JWT token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/success:
+    get:
+      summary: Authentication success page
+      description: Returns success message for completed authentication
+      operationId: authSuccess
+      tags:
+        - Authentication
+      security: []
+      responses:
+        "200":
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthMessageResponse"
+
+  /auth/error:
+    get:
+      summary: Authentication error page
+      description: Returns error message for failed authentication
+      operationId: authError
+      tags:
+        - Authentication
+      security: []
+      responses:
+        "200":
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthMessageResponse"
+
   /workflows:
     post:
       summary: Create a new workflow
@@ -687,6 +796,41 @@ paths:
 
 components:
   schemas:
+    TokenRequest:
+      type: object
+      required:
+        - code
+        - state
+      properties:
+        code:
+          type: string
+          description: Authorization code received from OIDC provider
+          example: "auth_code_123"
+        state:
+          type: string
+          description: State parameter used for CSRF protection
+          example: "state_123"
+
+    TokenResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: JWT token containing user information and roles
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    AuthMessageResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Authentication status message
+          example: "Authentication successful. Use the code and state to generate a JWT token."
+
     UserSummary:
       type: object
       required:
