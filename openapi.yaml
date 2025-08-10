@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.8
+  version: 0.0.9
 
 tags:
   - name: Authentication
@@ -15,6 +15,8 @@ tags:
     description: User management
   - name: Groups
     description: Group management
+  - name: Organization Admins
+    description: Organization administrator management
   - name: Workflow Actions
     description: Workflow actions and voting
 
@@ -126,6 +128,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/AuthMessageResponse"
 
+  /auth/info:
+    get:
+      summary: Get authenticated entity information
+      description: Returns basic information about the authenticated entity
+      operationId: getUserInfo
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: Entity information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - entityType
+                properties:
+                  entityType:
+                    type: string
+                    description: Type of the authenticated entity
+                    example: "user"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
   /workflows:
     post:
       summary: Create a new workflow
@@ -142,10 +168,12 @@ paths:
       responses:
         "201":
           description: Workflow created successfully
-          content:
-            application/json:
+          headers:
+            Location:
+              description: URL of the created workflow
               schema:
-                type: object
+                type: string
+                format: uri
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -326,10 +354,12 @@ paths:
       responses:
         "201":
           description: User created successfully
-          content:
-            application/json:
+          headers:
+            Location:
+              description: URL of the created user
               schema:
-                $ref: "#/components/schemas/User"
+                type: string
+                format: uri
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -428,10 +458,12 @@ paths:
       responses:
         "201":
           description: Group created successfully
-          content:
-            application/json:
+          headers:
+            Location:
+              description: URL of the created group
               schema:
-                type: object
+                type: string
+                format: uri
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -874,7 +906,7 @@ components:
           x-extensible-enum:
             - admin
             - member
-          description: Role assigned to the user within the group.
+          description: Role assigned to the user within the organization.
           example: "member"
     User:
       type: object
@@ -882,6 +914,7 @@ components:
         - id
         - displayName
         - email
+        - orgRole
         - createdAt
       properties:
         id:
@@ -899,6 +932,13 @@ components:
           format: email
           description: User's email address.
           example: "alex.chen@example.com"
+        orgRole:
+          type: string
+          x-extensible-enum:
+            - admin
+            - member
+          description: Role assigned to the user within the organization.
+          example: "member"
         createdAt:
           type: string
           format: date-time
@@ -929,19 +969,9 @@ components:
       type: object
       required:
         - entity
-        - role
       properties:
         entity:
           $ref: "#/components/schemas/EntityReference"
-        role:
-          type: string
-          x-extensible-enum:
-            - approver
-            - admin
-            - owner
-            - auditor
-          description: Role assigned to the entity within the group.
-          example: "approver"
 
     EntityMembershipRemove:
       type: object
@@ -979,20 +1009,10 @@ components:
       type: object
       required:
         - entity
-        - role
         - addedAt
       properties:
         entity:
           $ref: "#/components/schemas/EntityReference"
-        role:
-          type: string
-          x-extensible-enum:
-            - approver
-            - admin
-            - owner
-            - auditor
-          description: The role of the entity within the group.
-          example: "approver"
         addedAt:
           type: string
           format: date-time
@@ -1540,6 +1560,16 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: >
+        JWT token containing authentication information for users or agents.
+
+        The JWT payload includes:
+        - Core JWT claims: iss (issuer), sub (subject ID), aud (audience), exp/iat/nbf (time claims), jti (token ID)
+        - Standard claims: email (for users), name (display name)
+        - Custom claims: entityType ("user" or "agent")
+
+        Users must have a valid email, while agents do not require an email field.
+        Permissions and roles are resolved server-side and not included in the token for security.
 
 security:
   - bearerAuth: []
