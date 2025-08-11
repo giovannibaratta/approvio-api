@@ -672,6 +672,133 @@ paths:
               schema:
                 $ref: "#/components/schemas/APIError"
 
+  /organization/{organization-name}/admins:
+    post:
+      summary: Add organization administrator
+      description: Adds a new organization administrator by email to the specified organization
+      operationId: addOrganizationAdminToOrg
+      tags:
+        - Organization Admins
+      parameters:
+        - name: organization-name
+          in: path
+          required: true
+          description: The name or identifier of the organization
+          schema:
+            type: string
+            example: "my-org"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationAdminCreate"
+      responses:
+        "201":
+          description: Organization admin added successfully
+          headers:
+            Location:
+              description: URL of the created organization admin
+              schema:
+                type: string
+                format: uri
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "409":
+          description: Admin with this email already exists in this organization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+    get:
+      summary: List organization administrators
+      description: Returns a list of administrators for the specified organization
+      operationId: listOrganizationAdminsForOrg
+      tags:
+        - Organization Admins
+      parameters:
+        - name: organization-name
+          in: path
+          required: true
+          description: The name or identifier of the organization
+          schema:
+            type: string
+            example: "my-org"
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Number of results per page
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of organization admins for the specified organization
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - pagination
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/OrganizationAdmin"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+    delete:
+      summary: Remove organization administrator
+      description: Removes an organization administrator from the specified organization
+      operationId: removeOrganizationAdminFromOrg
+      tags:
+        - Organization Admins
+      parameters:
+        - name: organization-name
+          in: path
+          required: true
+          description: The name or identifier of the organization
+          schema:
+            type: string
+            example: "my-org"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationAdminRemove"
+      responses:
+        "204":
+          description: Organization admin removed successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
   /workflow-templates:
     post:
       summary: Create a new workflow template
@@ -862,6 +989,54 @@ components:
           type: string
           description: Authentication status message
           example: "Authentication successful. Use the code and state to generate a JWT token."
+
+
+    OrganizationAdminCreate:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the organization administrator
+          example: "admin@example.com"
+
+    OrganizationAdmin:
+      type: object
+      required:
+        - userId
+        - email
+        - createdAt
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: Unique identifier of the user who is an organization admin
+          readOnly: true
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        email:
+          type: string
+          format: email
+          description: Email address of the organization administrator
+          example: "admin@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the admin was created
+          readOnly: true
+          example: "2025-04-15T12:05:00Z"
+
+    OrganizationAdminRemove:
+      type: object
+      required:
+        - userId
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: The unique identifier of the user to remove from organization admins
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
 
     UserSummary:
       type: object
