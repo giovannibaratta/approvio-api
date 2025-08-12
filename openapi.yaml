@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.9
+  version: 0.0.11
 
 tags:
   - name: Authentication
@@ -15,6 +15,8 @@ tags:
     description: User management
   - name: Groups
     description: Group management
+  - name: Spaces
+    description: Space management
   - name: Organization Admins
     description: Organization administrator management
   - name: Workflow Actions
@@ -672,6 +674,131 @@ paths:
               schema:
                 $ref: "#/components/schemas/APIError"
 
+  /spaces:
+    post:
+      summary: Create a new space
+      description: Creates a new organizational space
+      operationId: createSpace
+      tags:
+        - Spaces
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpaceCreate"
+      responses:
+        "201":
+          description: Space created successfully
+          headers:
+            Location:
+              description: URL of the created space
+              schema:
+                type: string
+                format: uri
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: Space with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+    get:
+      summary: List spaces
+      description: Returns a list of spaces
+      operationId: listSpaces
+      tags:
+        - Spaces
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Number of results per page
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of spaces
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                  - pagination
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Space"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /spaces/{spaceId}:
+    get:
+      summary: Get space details
+      description: Returns the details of a specific space
+      operationId: getSpace
+      tags:
+        - Spaces
+      parameters:
+        - name: spaceId
+          in: path
+          required: true
+          description: The unique identifier of the space
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Space details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Space"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      summary: Delete a space
+      description: Deletes a space
+      operationId: deleteSpace
+      tags:
+        - Spaces
+      parameters:
+        - name: spaceId
+          in: path
+          required: true
+          description: The unique identifier of the space
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Space deleted successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Cannot delete space with active resources
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
   /organization/{organization-name}/admins:
     post:
       summary: Add organization administrator
@@ -990,6 +1117,54 @@ components:
           description: Authentication status message
           example: "Authentication successful. Use the code and state to generate a JWT token."
 
+    SpaceCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the space (max 255 characters)
+          example: "Engineering Team"
+        description:
+          type: string
+          description: Description of the space (max 2048 characters)
+          example: "Space for engineering team collaboration"
+
+    Space:
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the space
+          readOnly: true
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        name:
+          type: string
+          description: Name of the space (max 255 characters)
+          example: "Engineering Team"
+        description:
+          type: string
+          description: Description of the space (max 2048 characters)
+          example: "Space for engineering team collaboration"
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the space was created
+          readOnly: true
+          example: "2025-04-15T12:05:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the space was last updated
+          readOnly: true
+          example: "2025-04-15T12:05:00Z"
 
     OrganizationAdminCreate:
       type: object
