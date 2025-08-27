@@ -156,6 +156,102 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /auth/agents/challenge:
+    post:
+      summary: Generate authentication challenge for agent
+      description: |
+        Creates an encrypted challenge that must be signed by the agent to obtain a token.
+
+        **Challenge Format (Server → Agent):**
+        The server generates a challenge encrypted with the agent's public key. When decrypted and base64 decoded, it contains a JSON object with:
+        - `audience`: string (agent name)
+        - `expires_at`: ISO 8601 formatted date-time string
+        - `issuer`: string (the name of the SaaS platform, e.g., "Approvio")
+        - `nonce`: a random string to ensure uniqueness (the actual challenge)
+      operationId: generateAgentChallenge
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentChallengeRequest"
+      responses:
+        "200":
+          description: Challenge generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentChallengeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
+  /auth/agents/token:
+    post:
+      summary: Exchange JWT assertion for access token
+      description: |
+        Validates a JWT assertion and returns a JWT access token for the authenticated agent using OAuth 2.0 JWT Bearer profile (RFC 7523).
+
+        **JWT Assertion Requirements:**
+        The agent must create and sign a JWT assertion with their private key containing:
+        - `iss` (issuer): Agent name
+        - `sub` (subject): Agent name (same as issuer for client authentication)
+        - `aud` (audience): Authorization server identifier 
+        - `exp` (expiration): JWT expiration time (Unix timestamp)
+        - `jti` (JWT ID): Unique nonce from the server's challenge (prevents replay attacks)
+        - `iat` (issued at): JWT issued time (Unix timestamp, optional)
+
+        **Security Notes:**
+        - JWT must be signed with RS256 algorithm using the agent's private key
+        - Server verifies signature using agent's registered public key
+        - Each challenge nonce can only be used once (replay protection)
+        - Agent identity is extracted from the JWT issuer claim
+      operationId: exchangeAgentToken
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentTokenRequest"
+      responses:
+        "200":
+          description: JWT token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid or expired challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "409":
+          description: Challenge already used
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
   /agents/register:
     post:
       summary: Register a new agent
@@ -1121,6 +1217,37 @@ paths:
 
 components:
   schemas:
+    AgentChallengeRequest:
+      type: object
+      required:
+        - agent_name
+      properties:
+        agent_name:
+          type: string
+          description: Name of the agent requesting authentication
+          example: "ci-deployment-agent"
+
+    AgentChallengeResponse:
+      type: object
+      required:
+        - challenge
+      properties:
+        challenge:
+          type: string
+          description: |
+            Base64 encoded encrypted challenge that must be signed by the agent.
+
+            **Decrypted Format (JSON object):**
+            ```json
+            {
+              "audience": "agent-name",
+              "expires_at": "2025-04-15T12:15:00Z",
+              "issuer": "Approvio",
+              "nonce": "random-string-challenge"
+            }
+            ```
+          example: "eyJhdWRpZW5jZSI6ImNpLWRlcGxveW1lbnQtYWdlbnQiLCJleHBpcmVzX2F0IjoiMjAyNS0wNC0xNVQxMjoxNTowMFoiLCJpc3N1ZXIiOiJBcHByb3ZpbyIsIm5vbmNlIjoiYWJjZGVmZ2hpams5ODc2NTQzMjEifQ=="
+
     AgentRegistrationRequest:
       type: object
       required:
@@ -1165,6 +1292,68 @@ components:
           description: Timestamp when the agent was registered
           readOnly: true
           example: "2025-04-15T12:05:00Z"
+
+    AgentTokenRequest:
+      type: object
+      required:
+        - grant_type
+        - client_assertion_type
+        - client_assertion
+      properties:
+        grant_type:
+          type: string
+          description: OAuth 2.0 grant type for JWT Bearer profile
+          enum:
+            - "urn:ietf:params:oauth:grant-type:jwt-bearer"
+          example: "urn:ietf:params:oauth:grant-type:jwt-bearer"
+        client_assertion_type:
+          type: string
+          description: OAuth 2.0 client assertion type for JWT Bearer profile
+          enum:
+            - "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+          example: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+        client_assertion:
+          type: string
+          description: |
+            JWT assertion signed with the agent's private key using RS256 algorithm.
+
+            **JWT Header:**
+            ```json
+            {
+              "alg": "RS256",
+              "typ": "JWT"
+            }
+            ```
+
+            **JWT Payload:**
+            ```json
+            {
+              "iss": "agent-name",
+              "sub": "agent-name", 
+              "aud": "authorization-server-identifier",
+              "exp": 1640995200,
+              "jti": "nonce-from-challenge",
+              "iat": 1640991600
+            }
+            ```
+
+            **Requirements:**
+            - Must be signed with agent's private key using RS256
+            - JWT ID (jti) must match nonce from server's challenge
+            - Issuer (iss) and subject (sub) must be the agent name
+            - Audience (aud) must be the authorization server identifier
+            - Agent identity is extracted from the issuer claim
+          example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJjaS1kZXBsb3ltZW50LWFnZW50Iiwic3ViIjoiY2ktZGVwbG95bWVudC1hZ2VudCIsImF1ZCI6IkFwcHJvdmlvIiwiZXhwIjoxNjQwOTk1MjAwLCJqdGkiOiJhYmNkZWZnaGlqazk4NzY1NDMyMSIsImlhdCI6MTY0MDk5MTYwMH0.signature"
+
+    AgentTokenResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: JWT token for the authenticated agent
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaS1kZXBsb3ltZW50LWFnZW50IiwiZW50aXR5VHlwZSI6ImFnZW50IiwiaWF0IjoxNjc4OTAxMjAwLCJleHAiOjE2Nzg5ODc2MDB9.signature"
 
     TokenRequest:
       type: object
