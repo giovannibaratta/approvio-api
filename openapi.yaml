@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.11
+  version: 0.0.12
 
 tags:
   - name: Authentication
@@ -21,6 +21,8 @@ tags:
     description: Organization administrator management
   - name: Workflow Actions
     description: Workflow actions and voting
+  - name: Agents
+    description: Agent registration and management
 
 paths:
   /auth/login:
@@ -153,6 +155,43 @@ paths:
                     example: "user"
         "401":
           $ref: "#/components/responses/Unauthorized"
+
+  /agents/register:
+    post:
+      summary: Register a new agent
+      description: Creates a new agent registration entry with generated asymmetric key pair for future authentication
+      operationId: registerAgent
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRegistrationRequest"
+      responses:
+        "201":
+          description: Agent registered successfully
+          headers:
+            Location:
+              description: URL of the created agent
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentRegistrationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: Agent with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
 
   /workflows:
     post:
@@ -1082,6 +1121,51 @@ paths:
 
 components:
   schemas:
+    AgentRegistrationRequest:
+      type: object
+      required:
+        - agentName
+      properties:
+        agentName:
+          type: string
+          description: Unique name for the agent (must be unique across the system)
+          example: "ci-deployment-agent"
+          minLength: 1
+          maxLength: 1024
+
+    AgentRegistrationResponse:
+      type: object
+      required:
+        - agentId
+        - agentName
+        - publicKey
+        - privateKey
+        - createdAt
+      properties:
+        agentId:
+          type: string
+          format: uuid
+          description: Unique identifier for the registered agent
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        agentName:
+          type: string
+          description: Name of the registered agent
+          example: "ci-deployment-agent"
+        publicKey:
+          type: string
+          description: RSA public key in base64 encoded PEM format for the agent
+          example: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUEuLi4KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
+        privateKey:
+          type: string
+          description: RSA private key in base64 encoded PEM format for the agent (store securely!)
+          example: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUVWd0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnZ2dnU2tBZ0VBQW9JQkFRQy4uLgotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0t"
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the agent was registered
+          readOnly: true
+          example: "2025-04-15T12:05:00Z"
+
     TokenRequest:
       type: object
       required:
