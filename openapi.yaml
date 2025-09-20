@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.12
+  version: 0.0.13
 
 tags:
   - name: Authentication
@@ -23,6 +23,8 @@ tags:
     description: Workflow actions and voting
   - name: Agents
     description: Agent registration and management
+  - name: Roles
+    description: Role template management and listing
 
 paths:
   /auth/login:
@@ -288,6 +290,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/APIError"
+
+  /roles:
+    get:
+      summary: List predefined role templates
+      description: Returns a list of all predefined role templates available in the system
+      operationId: listRoleTemplates
+      tags:
+        - Roles
+      responses:
+        "200":
+          description: List of role templates
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - roles
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/RoleTemplate"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /workflows:
     post:
@@ -1354,6 +1380,33 @@ components:
           type: string
           description: JWT token for the authenticated agent
           example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaS1kZXBsb3ltZW50LWFnZW50IiwiZW50aXR5VHlwZSI6ImFnZW50IiwiaWF0IjoxNjc4OTAxMjAwLCJleHAiOjE2Nzg5ODc2MDB9.signature"
+
+    RoleTemplate:
+      type: object
+      required:
+        - name
+        - permissions
+        - scope
+      properties:
+        name:
+          type: string
+          description: Unique identifier for the role template
+          example: "GroupReadOnly"
+        permissions:
+          type: array
+          items:
+            type: string
+          description: List of permissions granted by this role
+          example: ["read"]
+        scope:
+          type: string
+          x-extensible-enum:
+            - org
+            - space
+            - group
+            - workflow_template
+          description: The scope type this role applies to
+          example: "group"
 
     TokenRequest:
       type: object
