@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.13
+  version: 0.0.14
 
 tags:
   - name: Authentication
@@ -286,6 +286,55 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "409":
           description: Agent with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
+  /agents/{agentId}/roles:
+    put:
+      summary: Assign roles to an agent
+      description: >
+        Assigns standard roles to an agent by replacing all existing role assignments.
+        Roles are specified by their system-defined names and scopes. The user must be authenticated
+        as a human (not an agent) to use this endpoint.
+      operationId: assignAgentRoles
+      tags:
+        - Agents
+        - Roles
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the agent.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleAssignmentRequest"
+      responses:
+        "204":
+          description: Roles assigned successfully
+        "400":
+          description: Invalid request (e.g., unknown role name, invalid scope, duplicate roles)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - only human users can assign roles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "404":
+          description: Agent not found
           content:
             application/json:
               schema:
@@ -604,6 +653,55 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+
+  /users/{userId}/roles:
+    put:
+      summary: Assign roles to a user
+      description: >
+        Assigns standard roles to a user by replacing all existing role assignments.
+        Roles are specified by their system-defined names and scopes. The user must be authenticated
+        as a human (not an agent) to use this endpoint.
+      operationId: assignUserRoles
+      tags:
+        - Users
+        - Roles
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the user.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleAssignmentRequest"
+      responses:
+        "204":
+          description: Roles assigned successfully
+        "400":
+          description: Invalid request (e.g., unknown role name, invalid scope, duplicate roles)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - only human users can assign roles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
 
   /groups:
     post:
@@ -1407,6 +1505,120 @@ components:
             - workflow_template
           description: The scope type this role applies to
           example: "group"
+
+    RoleScope:
+      description: >
+        Defines the scope where a role applies. Can be organization-wide, space-specific, 
+        group-specific, or workflow template-specific.
+      oneOf:
+        - $ref: "#/components/schemas/OrgScope"
+        - $ref: "#/components/schemas/SpaceScope"
+        - $ref: "#/components/schemas/GroupScope"
+        - $ref: "#/components/schemas/WorkflowTemplateScope"
+      discriminator:
+        propertyName: type
+        mapping:
+          org: "#/components/schemas/OrgScope"
+          space: "#/components/schemas/SpaceScope"
+          group: "#/components/schemas/GroupScope"
+          workflow_template: "#/components/schemas/WorkflowTemplateScope"
+
+    OrgScope:
+      type: object
+      description: Organization-wide scope - applies to entire organization
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [org]
+          description: Scope type (org)
+
+    SpaceScope:
+      type: object
+      description: Space-specific scope - applies to a specific space
+      required:
+        - type
+        - spaceId
+      properties:
+        type:
+          type: string
+          enum: [space]
+          description: Scope type (space)
+        spaceId:
+          type: string
+          format: uuid
+          description: The unique identifier of the space
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+
+    GroupScope:
+      type: object
+      description: Group-specific scope - applies to a specific group
+      required:
+        - type
+        - groupId
+      properties:
+        type:
+          type: string
+          enum: [group]
+          description: Scope type (group)
+        groupId:
+          type: string
+          format: uuid
+          description: The unique identifier of the group
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+
+    WorkflowTemplateScope:
+      type: object
+      description: Workflow template-specific scope - applies to a specific workflow template
+      required:
+        - type
+        - workflowTemplateId
+      properties:
+        type:
+          type: string
+          enum: [workflow_template]
+          description: Scope type (workflow_template)
+        workflowTemplateId:
+          type: string
+          format: uuid
+          description: The unique identifier of the workflow template
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+
+    RoleAssignmentItem:
+      type: object
+      description: >
+        A role assignment item that references a system-defined role by name and provides
+        the scope where it should apply.
+      required:
+        - roleName
+        - scope
+      properties:
+        roleName:
+          type: string
+          description: >
+            Name of the system-defined role template (e.g., "GroupReadOnly", "SpaceManager").
+            Must match a role available from the /roles endpoint.
+          example: "GroupReadOnly"
+        scope:
+          $ref: "#/components/schemas/RoleScope"
+
+    RoleAssignmentRequest:
+      type: object
+      description: Request to assign roles to a user or agent
+      required:
+        - roles
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoleAssignmentItem"
+          description: Array of role assignments specifying role names and their scopes
+          example:
+            - roleName: "GroupReadOnly"
+              scope:
+                type: "group"
+                groupId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
 
     TokenRequest:
       type: object
