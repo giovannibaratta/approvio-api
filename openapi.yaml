@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.14
+  version: 0.0.15
 
 tags:
   - name: Authentication
@@ -2269,6 +2269,7 @@ components:
       required:
         - name
         - approvalRule
+        - spaceId
       properties:
         name:
           type: string
@@ -2291,6 +2292,10 @@ components:
           minimum: 1
           maximum: 8760
           description: Default expiry time for workflows created from this template (in hours, max 1 year)
+        spaceId:
+          type: string
+          format: uuid
+          description: ID of the space to which this workflow template belongs
 
     WorkflowTemplate:
       type: object
@@ -2301,6 +2306,7 @@ components:
         - status
         - allowVotingOnDeprecatedTemplate
         - approvalRule
+        - spaceId
         - createdAt
         - updatedAt
       properties:
@@ -2345,6 +2351,10 @@ components:
           minimum: 1
           maximum: 8760
           description: Default expiry time for workflows created from this template (in hours, max 1 year)
+        spaceId:
+          type: string
+          format: uuid
+          description: ID of the space to which this workflow template belongs
         createdAt:
           type: string
           format: date-time
