@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.15
+  version: 0.0.16
 
 tags:
   - name: Authentication
@@ -329,6 +329,52 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           description: Forbidden - only human users can assign roles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+    delete:
+      summary: Remove roles from an agent
+      description: >
+        Removes specified roles from an agent. Only the roles matching both the role name and scope will be removed.
+        The user must be authenticated as a human (not an agent) to use this endpoint.
+      operationId: removeAgentRoles
+      tags:
+        - Agents
+        - Roles
+      parameters:
+        - name: agentId
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the agent.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleRemovalRequest"
+      responses:
+        "204":
+          description: Roles removed successfully
+        "400":
+          description: Invalid request (e.g., unknown role name, invalid scope)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - only human users can remove roles
           content:
             application/json:
               schema:
@@ -692,6 +738,52 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           description: Forbidden - only human users can assign roles
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+    delete:
+      summary: Remove roles from a user
+      description: >
+        Removes specified roles from a user. Only the roles matching both the role name and scope will be removed.
+        The user must be authenticated as a human (not an agent) to use this endpoint.
+      operationId: removeUserRoles
+      tags:
+        - Users
+        - Roles
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The unique identifier (UUID) of the user.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoleRemovalRequest"
+      responses:
+        "204":
+          description: Roles removed successfully
+        "400":
+          description: Invalid request (e.g., unknown role name, invalid scope)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Forbidden - only human users can remove roles
           content:
             application/json:
               schema:
@@ -1585,11 +1677,11 @@ components:
           description: The unique identifier of the workflow template
           example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
 
-    RoleAssignmentItem:
+    RoleOperationItem:
       type: object
       description: >
-        A role assignment item that references a system-defined role by name and provides
-        the scope where it should apply.
+        A role operation item that references a system-defined role by name and provides
+        the scope where it should apply (for assignment or removal).
       required:
         - roleName
         - scope
@@ -1603,22 +1695,26 @@ components:
         scope:
           $ref: "#/components/schemas/RoleScope"
 
-    RoleAssignmentRequest:
+    RoleOperationRequest: &RoleOperationRequest
       type: object
-      description: Request to assign roles to a user or agent
+      description: Request to assign or remove roles from a user or agent
       required:
         - roles
       properties:
         roles:
           type: array
           items:
-            $ref: "#/components/schemas/RoleAssignmentItem"
+            $ref: "#/components/schemas/RoleOperationItem"
           description: Array of role assignments specifying role names and their scopes
           example:
             - roleName: "GroupReadOnly"
               scope:
                 type: "group"
                 groupId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+
+    RoleAssignmentRequest: *RoleOperationRequest
+
+    RoleRemovalRequest: *RoleOperationRequest
 
     TokenRequest:
       type: object
