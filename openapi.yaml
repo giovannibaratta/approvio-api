@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.16
+  version: 0.0.17
 
 tags:
   - name: Authentication
@@ -2494,10 +2494,38 @@ components:
         Currently supports email actions.
       oneOf:
         - $ref: "#/components/schemas/EmailAction"
+        - $ref: "#/components/schemas/WebhookAction"
       discriminator:
         propertyName: type
         mapping:
           EMAIL: "#/components/schemas/EmailAction"
+          WEBHOOK: "#/components/schemas/WebhookAction"
+
+    WebhookAction:
+      type: object
+      description: Calls a webhook when workflow is approved
+      required:
+        - type
+        - url
+      properties:
+        type:
+          type: string
+          enum: [WEBHOOK]
+          description: Action type (WEBHOOK)
+        url:
+          type: string
+          format: uri
+          description: The URL to call
+        method:
+          type: string
+          enum: [POST, PUT, GET]
+          default: POST
+          description: HTTP method to use
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Optional headers to send with the request
 
     EmailAction:
       type: object
