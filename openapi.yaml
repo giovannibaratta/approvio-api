@@ -1340,18 +1340,18 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
-  /workflow-templates/{templateId}:
+  /workflow-templates/{templateIdentifier}:
     get:
       summary: Get workflow template details
-      description: Returns the details of a specific workflow template
+      description: Returns the details of a specific workflow template.
       operationId: getWorkflowTemplate
       tags:
         - Workflow Templates
       parameters:
-        - name: templateId
+        - name: templateIdentifier
           in: path
           required: true
-          description: The unique identifier of the workflow template
+          description: The unique identifier of the workflow template (UUID)
           schema:
             type: string
       responses:
@@ -1365,7 +1365,6 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
-  /workflow-templates/{templateName}:
     put:
       summary: Update a workflow template
       description: Updates an existing workflow template by creating a new version and optionally canceling active workflows
@@ -1373,7 +1372,7 @@ paths:
       tags:
         - Workflow Templates
       parameters:
-        - name: templateName
+        - name: templateIdentifier
           in: path
           required: true
           description: The name of the workflow template to update
