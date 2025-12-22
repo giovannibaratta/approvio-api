@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.18
+  version: 0.0.19
 
 tags:
   - name: Authentication
@@ -101,6 +101,36 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+
+  /auth/refresh:
+    post:
+      summary: Refresh JWT token
+      description: Exchanges a refresh token for a new pair of access and refresh tokens
+      operationId: refreshUserToken
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
 
   /auth/success:
     get:
@@ -262,6 +292,43 @@ paths:
                 $ref: "#/components/schemas/APIError"
         "409":
           description: Challenge already used
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
+  /auth/agents/refresh:
+    post:
+      summary: Refresh agent JWT token
+      description: Exchanges a refresh token for a new pair of access and refresh tokens. Requires DPoP proof.
+      operationId: refreshAgentToken
+      tags:
+        - Authentication
+      security: []
+      parameters:
+        - name: DPoP
+          in: header
+          required: true
+          description: DPoP proof based on RFC 9449
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid or expired refresh token, or DPoP mismatch
           content:
             application/json:
               schema:
@@ -1576,12 +1643,17 @@ components:
     AgentTokenResponse:
       type: object
       required:
-        - token
+        - accessToken
+        - refreshToken
       properties:
-        token:
+        accessToken:
           type: string
           description: JWT token for the authenticated agent
           example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaS1kZXBsb3ltZW50LWFnZW50IiwiZW50aXR5VHlwZSI6ImFnZW50IiwiaWF0IjoxNjc4OTAxMjAwLCJleHAiOjE2Nzg5ODc2MDB9.signature"
+        refreshToken:
+          type: string
+          description: Refresh token used to obtain a new access token
+          example: "sd8Axmi9Xkalsmcd..."
 
     RoleTemplate:
       type: object
@@ -1743,15 +1815,30 @@ components:
           description: State parameter used for CSRF protection
           example: "state_123"
 
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: Refresh token used to obtain a new access token
+          example: "sd8Axmi9Xkalsmcd..."
+
     TokenResponse:
       type: object
       required:
-        - token
+        - accessToken
+        - refreshToken
       properties:
-        token:
+        accessToken:
           type: string
           description: JWT token containing user information and roles
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          description: Refresh token used to obtain a new access token
+          example: "sd8Axmi9Xkalsmcd..."
 
     SuccessfulAuthResponse:
       type: object
