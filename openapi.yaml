@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.17
+  version: 0.0.18
 
 tags:
   - name: Authentication
@@ -110,13 +110,26 @@ paths:
       tags:
         - Authentication
       security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code received from OIDC provider
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: true
+          description: State parameter used for CSRF protection
+          schema:
+            type: string
       responses:
         "200":
           description: Authentication successful
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthMessageResponse"
+                $ref: "#/components/schemas/SuccessfulAuthResponse"
 
   /auth/error:
     get:
@@ -132,7 +145,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthMessageResponse"
+                $ref: "#/components/schemas/FailedAuthResponse"
 
   /auth/info:
     get:
@@ -1740,7 +1753,32 @@ components:
           description: JWT token containing user information and roles
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
-    AuthMessageResponse:
+    SuccessfulAuthResponse:
+      type: object
+      required:
+        - message
+        - code
+        - state
+        - b64encoded
+      properties:
+        message:
+          type: string
+          description: Authentication status message
+          example: "Authentication successful. Use the code and state to generate a JWT token."
+        code:
+          type: string
+          description: Authorization code received from OIDC provider
+          example: "auth_code_123"
+        state:
+          type: string
+          description: State parameter used for CSRF protection
+          example: "state_123"
+        b64encoded:
+          type: string
+          description: Base64-encoded combination of code and state (format - code:state). Alternative to providing code and state separately.
+          example: "YXV0aF9jb2RlXzEyMzpzdGF0ZV8xMjM="
+
+    FailedAuthResponse:
       type: object
       required:
         - message
@@ -1748,7 +1786,7 @@ components:
         message:
           type: string
           description: Authentication status message
-          example: "Authentication successful. Use the code and state to generate a JWT token."
+          example: "Authentication failed."
 
     SpaceCreate:
       type: object
