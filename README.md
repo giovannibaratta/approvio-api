@@ -65,3 +65,5 @@ To publish this package to an NPM registry:
     ```bash
     yarn publish --access public
     ```
+
+> If you get an error like `error Couldn't publish package: "https://registry.yarnpkg.com/@approvio%2fapi: Not found"`, try running `npm login` first.
