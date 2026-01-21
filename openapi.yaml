@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.19
+  version: 0.0.20
 
 tags:
   - name: Authentication
@@ -1515,9 +1515,9 @@ components:
     AgentChallengeRequest:
       type: object
       required:
-        - agent_name
+        - agentName
       properties:
-        agent_name:
+        agentName:
           type: string
           description: Name of the agent requesting authentication
           example: "ci-deployment-agent"
@@ -1591,23 +1591,23 @@ components:
     AgentTokenRequest:
       type: object
       required:
-        - grant_type
-        - client_assertion_type
-        - client_assertion
+        - grantType
+        - clientAssertionType
+        - clientAssertion
       properties:
-        grant_type:
+        grantType:
           type: string
           description: OAuth 2.0 grant type for JWT Bearer profile
           enum:
             - "urn:ietf:params:oauth:grant-type:jwt-bearer"
           example: "urn:ietf:params:oauth:grant-type:jwt-bearer"
-        client_assertion_type:
+        clientAssertionType:
           type: string
           description: OAuth 2.0 client assertion type for JWT Bearer profile
           enum:
             - "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
           example: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
-        client_assertion:
+        clientAssertion:
           type: string
           description: |
             JWT assertion signed with the agent's private key using RS256 algorithm.
