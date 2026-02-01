@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.20
+  version: 0.0.21
 
 tags:
   - name: Authentication
@@ -523,37 +523,12 @@ paths:
       tags:
         - Workflows
       parameters:
-        - name: page
+        - name: params
           in: query
-          description: Page number for pagination
-          schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          description: Number of results per page
-          schema:
-            type: integer
-            default: 20
-        - name: include
-          in: query
-          description: Comma-separated list of related objects to include in the response
           style: form
-          explode: false
+          explode: true
           schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - workflow-template
-        - name: include-only-non-terminal-state
-          in: query
-          description: >
-            When set to true, only workflows that are not in terminal state will be returned.
-            Terminal states are: APPROVED, CANCELED, EXPIRED. Non-terminal state: EVALUATION_IN_PROGRESS.
-          schema:
-            type: boolean
-            default: false
+            $ref: "#/components/schemas/ListWorkflowsParams"
       responses:
         "200":
           description: List of workflows
@@ -588,17 +563,12 @@ paths:
           description: The unique identifier of the workflow
           schema:
             type: string
-        - name: include
+        - name: params
           in: query
-          description: Comma-separated list of related objects to include in the response
           style: form
-          explode: false
+          explode: true
           schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - workflow-template
+            $ref: "#/components/schemas/GetWorkflowParams"
       responses:
         "200":
           description: Workflow details
@@ -2395,6 +2365,42 @@ components:
                 type: string
               message:
                 type: string
+
+    WorkflowInclude:
+      type: string
+      x-extensible-enum:
+        - workflow-template
+      description: Related objects to include in the workflow response
+
+    ListWorkflowsParams:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+          description: Page number for pagination
+        limit:
+          type: integer
+          default: 20
+          description: Number of results per page
+        include:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowInclude"
+          description: Comma-separated list of related objects to include in the response
+        include-only-non-terminal-state:
+          type: boolean
+          default: false
+          description: When set to true, only workflows that are not in terminal state will be returned.
+
+    GetWorkflowParams:
+      type: object
+      properties:
+        include:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkflowInclude"
+          description: Comma-separated list of related objects to include in the response
 
     WorkflowVoteRequest:
       type: object
