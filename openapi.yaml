@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.21
+  version: 0.0.22
 
 tags:
   - name: Authentication
@@ -370,6 +370,32 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/APIError"
+
+  /agents/{agentIdOrName}:
+    get:
+      summary: Get agent details
+      description: Returns the details of a specific agent by their ID or name.
+      operationId: getAgent
+      tags:
+        - Agents
+      parameters:
+        - name: agentIdOrName
+          in: path
+          required: true
+          description: The unique identifier (UUID) or the name of the agent.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Agent details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentGet200Response"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   /agents/{agentId}/roles:
     put:
@@ -1556,6 +1582,33 @@ components:
           format: date-time
           description: Timestamp when the agent was registered
           readOnly: true
+          example: "2025-04-15T12:05:00Z"
+
+    AgentGet200Response:
+      type: object
+      required:
+        - id
+        - agentName
+        - publicKey
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the agent
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        agentName:
+          type: string
+          description: Name of the agent
+          example: "ci-deployment-agent"
+        publicKey:
+          type: string
+          description: RSA public key in base64 encoded PEM format for the agent
+          example: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUEuLi4KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the agent was registered
           example: "2025-04-15T12:05:00Z"
 
     AgentTokenRequest:
