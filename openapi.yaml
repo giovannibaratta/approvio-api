@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.22
+  version: 0.0.23
 
 tags:
   - name: Authentication
@@ -181,7 +181,7 @@ paths:
     get:
       summary: Get authenticated entity information
       description: Returns basic information about the authenticated entity
-      operationId: getUserInfo
+      operationId: getEntityInfo
       tags:
         - Authentication
       responses:
@@ -193,11 +193,16 @@ paths:
                 type: object
                 required:
                   - entityType
+                  - groups
                 properties:
                   entityType:
                     type: string
                     description: Type of the authenticated entity
                     example: "user"
+                  groups:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/GroupInfo"
         "401":
           $ref: "#/components/responses/Unauthorized"
 
@@ -2739,6 +2744,18 @@ components:
             If true, all in-progress workflows associated with this template will be canceled.
             This affects the allowVotingOnDeprecatedTemplate setting: when true, voting is disabled on the deprecated template.
           default: false
+
+    GroupInfo:
+      type: object
+      required:
+        - groupId
+        - groupName
+      properties:
+        groupId:
+          type: string
+          format: uuid
+        groupName:
+          type: string
 
   responses:
     BadRequest:
