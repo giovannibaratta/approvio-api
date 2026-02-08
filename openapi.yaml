@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.23
+  version: 0.0.24
 
 tags:
   - name: Authentication
@@ -25,8 +25,26 @@ tags:
     description: Agent registration and management
   - name: Roles
     description: Role template management and listing
+  - name: Health
+    description: Health check endpoints
 
 paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the service
+      operationId: healthCheck
+      tags:
+        - Health
+      security: []
+      responses:
+        "200":
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
   /auth/login:
     get:
       summary: Initiate OIDC login
@@ -339,6 +357,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/APIError"
 
+  /agents:
+    get:
+      summary: List agents
+      description: Returns a list of agents
+      operationId: listAgents
+      tags:
+        - Agents
+      parameters:
+        - name: params
+          in: query
+          style: form
+          explode: true
+          schema:
+            $ref: "#/components/schemas/ListAgentsParams"
+      responses:
+        "200":
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - agents
+                  - pagination
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AgentSummary"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
   /agents/register:
     post:
       summary: Register a new agent
@@ -591,7 +643,7 @@ paths:
         - name: workflowId
           in: path
           required: true
-          description: The unique identifier of the workflow
+          description: The unique identifier or name of the workflow
           schema:
             type: string
         - name: params
@@ -648,6 +700,39 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /workflows/{workflowId}/votes:
+    get:
+      summary: Retrieve votes for a workflow
+      description: Returns a list of all votes cast for the specified workflow.
+      operationId: getWorkflowVotes
+      tags:
+        - Workflow Actions
+      parameters:
+        - name: workflowId
+          in: path
+          required: true
+          description: The unique identifier of the workflow
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of votes
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - votes
+                properties:
+                  votes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WorkflowVote"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -2092,7 +2177,7 @@ components:
           type: string
           x-extensible-enum:
             - human
-            - system
+            - agent
           description: The type of the entity being referenced.
           example: human
         entityId:
@@ -2756,6 +2841,86 @@ components:
           format: uuid
         groupName:
           type: string
+
+    AgentSummary:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the agent
+        name:
+          type: string
+          description: Name of the agent
+
+    ListAgentsParams:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+          description: Page number for pagination
+        limit:
+          type: integer
+          default: 20
+          description: Number of results per page
+
+    WorkflowVote:
+      type: object
+      required:
+        - voterId
+        - voterType
+        - voteType
+        - timestamp
+      properties:
+        voterId:
+          type: string
+          format: uuid
+          description: Unique identifier of the entity that cast the vote
+        voterType:
+          type: string
+          x-extensible-enum:
+            - human
+            - agent
+          description: Type of the entity that cast the vote
+        voteType:
+          type: string
+          x-extensible-enum:
+            - APPROVE
+            - VETO
+            - WITHDRAW
+          description: Type of vote cast
+        reason:
+          type: string
+          description: Reason for the vote
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the vote was cast
+        votedForGroups:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: List of group IDs the vote was cast on behalf of (only for APPROVE)
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          x-extensible-enum:
+            - OK
+            - DEPENDENCY_ERROR
+          description: Current health status of the service
+        message:
+          type: string
+          description: Optional message providing more details about the status
 
   responses:
     BadRequest:
