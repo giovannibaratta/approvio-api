@@ -365,18 +365,12 @@ paths:
       tags:
         - Agents
       parameters:
-        - name: page
+        - name: params
           in: query
-          description: Page number for pagination
+          style: form
+          explode: true
           schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          description: Number of results per page
-          schema:
-            type: integer
-            default: 20
+            $ref: "#/components/schemas/ListAgentsParams"
       responses:
         "200":
           description: List of agents
@@ -649,7 +643,7 @@ paths:
         - name: workflowId
           in: path
           required: true
-          description: The unique identifier of the workflow
+          description: The unique identifier or name of the workflow
           schema:
             type: string
         - name: params
@@ -2183,7 +2177,7 @@ components:
           type: string
           x-extensible-enum:
             - human
-            - system
+            - agent
           description: The type of the entity being referenced.
           example: human
         entityId:
@@ -2862,6 +2856,18 @@ components:
           type: string
           description: Name of the agent
 
+    ListAgentsParams:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+          description: Page number for pagination
+        limit:
+          type: integer
+          default: 20
+          description: Number of results per page
+
     WorkflowVote:
       type: object
       required:
@@ -2879,11 +2885,10 @@ components:
           x-extensible-enum:
             - human
             - agent
-            - system
           description: Type of the entity that cast the vote
         voteType:
           type: string
-          enum:
+          x-extensible-enum:
             - APPROVE
             - VETO
             - WITHDRAW
