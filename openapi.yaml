@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.24
+  version: 0.0.25
 
 tags:
   - name: Authentication
@@ -194,6 +194,50 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/FailedAuthResponse"
+
+  /auth/initiatePrivilegedTokenExchange:
+    get:
+      summary: Initiate privilege token generation (step-up)
+      description: Initiates the step-up authentication flow by generating an authorization URL for the IDP provider.
+      operationId: initiatePrivilegedTokenExchange
+      tags:
+        - Authentication
+      responses:
+        "302":
+          description: Redirect to IDP for step-up authentication
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          description: Failed to initiate step-up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
+  /auth/exchangePrivilegedToken:
+    post:
+      summary: Exchange privilege token
+      description: Exchanges an IDP token for a high-privilege step-up token.
+      operationId: exchangePrivilegedToken
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivilegedTokenExchangeRequest"
+      responses:
+        "200":
+          description: Privilege token generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivilegedTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   /auth/info:
     get:
@@ -1953,6 +1997,16 @@ components:
           description: Refresh token used to obtain a new access token
           example: "sd8Axmi9Xkalsmcd..."
 
+    PrivilegedTokenResponse:
+      type: object
+      required:
+        - accessToken
+      properties:
+        accessToken:
+          type: string
+          description: JWT token containing user information and roles
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
     SuccessfulAuthResponse:
       type: object
       required:
@@ -2921,6 +2975,31 @@ components:
         message:
           type: string
           description: Optional message providing more details about the status
+
+    PrivilegedOperation:
+      type: string
+      x-extensible-enum:
+        - vote
+      description: The operation requiring high privilege authentication
+
+    PrivilegedTokenExchangeRequest:
+      type: object
+      required:
+        - code
+        - state
+        - operation
+      properties:
+        code:
+          type: string
+          description: The authorization code returned from the IDP
+        state:
+          type: string
+          description: The state parameter returned from the IDP
+        resourceId:
+          type: string
+          description: The identifier of the resource being accessed
+        operation:
+          $ref: "#/components/schemas/PrivilegedOperation"
 
   responses:
     BadRequest:
