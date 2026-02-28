@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.25
+  version: 0.0.26
 
 tags:
   - name: Authentication
@@ -2483,6 +2483,9 @@ components:
           type: integer
           description: Minimum number of approvals required from the group. Must be at least 1.
           minimum: 1
+        requireHighPrivilege:
+          type: boolean
+          description: Indicates whether a high-privilege token is required for votes fulfilling this rule.
 
     GroupCreate:
       type: object
@@ -2647,6 +2650,9 @@ components:
             - WORKFLOW_APPROVED
             - WORKFLOW_CANCELED
             - NOT_ELIGIBLE_TO_VOTE
+        requireHighPrivilege:
+          type: boolean
+          description: Indicates whether a high-privilege token is required to cast a vote for the entity.
     VoteApprove:
       type: object
       required:
