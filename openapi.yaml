@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.26
+  version: 0.0.27
 
 tags:
   - name: Authentication
@@ -1518,18 +1518,12 @@ paths:
       tags:
         - Workflow Templates
       parameters:
-        - name: page
+        - name: params
           in: query
-          description: Page number for pagination
+          style: form
+          explode: true
           schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          description: Number of results per page
-          schema:
-            type: integer
-            default: 20
+            $ref: "#/components/schemas/ListWorkflowTemplatesParams"
       responses:
         "200":
           description: List of workflow templates
@@ -2592,6 +2586,24 @@ components:
           type: boolean
           default: false
           description: When set to true, only workflows that are not in terminal state will be returned.
+        workflowTemplateIdentifier:
+          type: string
+          description: Optional workflow template identifier (UUID or name) to filter workflows.
+
+    ListWorkflowTemplatesParams:
+      type: object
+      properties:
+        page:
+          type: integer
+          default: 1
+          description: Page number for pagination
+        limit:
+          type: integer
+          default: 20
+          description: Number of results per page
+        spaceIdentifier:
+          type: string
+          description: Optional space identifier (UUID or name) to filter workflow templates.
 
     GetWorkflowParams:
       type: object
