@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.28
+  version: 0.0.29
 
 tags:
   - name: Authentication
@@ -227,6 +227,56 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PrivilegedTokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/cli/token:
+    post:
+      summary: Exchange authorization code for CLI tokens
+      description: Exchanges an IDP authorization code and state for a pair of access and refresh tokens, returned as JSON.
+      operationId: exchangeCliToken
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+      responses:
+        "200":
+          description: Tokens generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/cli/refresh:
+    post:
+      summary: Refresh CLI JWT token
+      description: Exchanges a refresh token for a new pair of access and refresh tokens, returned as JSON.
+      operationId: refreshCliToken
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -1731,6 +1781,32 @@ components:
           format: date-time
           description: Timestamp when the agent was registered
           example: "2025-04-15T12:05:00Z"
+
+    TokenRequest:
+      type: object
+      required:
+        - code
+        - state
+      properties:
+        code:
+          type: string
+          description: Authorization code returned by the IDP
+        state:
+          type: string
+          description: State parameter passed to the IDP for CSRF protection
+
+    TokenResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+      properties:
+        accessToken:
+          type: string
+          description: Access token for the authenticated user
+        refreshToken:
+          type: string
+          description: Refresh token used to obtain a new access token
 
     AgentTokenRequest:
       type: object
