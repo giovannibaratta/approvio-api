@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.27
+  version: 0.0.28
 
 tags:
   - name: Authentication
@@ -45,7 +45,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
 
-  /auth/login:
+  /auth/web/login:
     get:
       summary: Initiate OIDC login
       description: Initiates OIDC authentication by generating PKCE challenge and redirecting to the OIDC provider
@@ -63,84 +63,71 @@ paths:
               schema:
                 $ref: "#/components/schemas/APIError"
 
-  /auth/callback:
+  /auth/cli/initiate:
+    post:
+      summary: Initiate OIDC login for CLI
+      description: Initiates OIDC authentication specifying a loopback redirect URI for the CLI
+      operationId: initiateCliLogin
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - redirectUri
+              properties:
+                redirectUri:
+                  type: string
+                  description: The local loopback URL to redirect the user to after authentication
+      responses:
+        "200":
+          description: Authorization URL generated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - authorizationUrl
+                properties:
+                  authorizationUrl:
+                    type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /auth/web/callback:
     get:
-      summary: Handle OIDC callback
-      description: Handles the callback from OIDC provider and redirects to success page with authorization code
-      operationId: handleCallback
+      summary: Handle Web OIDC callback
+      description: Exchanges authorization code for tokens and sets them as HttpOnly cookies, then redirects to frontend
+      operationId: webCallback
       tags:
         - Authentication
       security: []
       parameters:
-        - name: code
-          in: query
-          required: true
-          description: Authorization code from OIDC provider
+        - in: query
+          name: query
           schema:
-            type: string
-        - name: state
-          in: query
-          required: true
-          description: State parameter to prevent CSRF attacks
-          schema:
-            type: string
+            $ref: "#/components/schemas/OidcCallbackRequest"
+          style: form
+          explode: true
       responses:
         "302":
-          description: Redirect to success page with code and state parameters
-        "400":
-          description: Missing required parameters
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/APIError"
+          description: Redirect to the frontend depending on success or failure of the auth exchange
 
-  /auth/token:
+  /auth/web/refresh:
     post:
-      summary: Exchange authorization code for JWT token
-      description: Exchanges the authorization code and state for a JWT token containing user information and roles
-      operationId: exchangeToken
+      summary: Refresh Web JWT token
+      description: Takes the refresh_token from the HttpOnly cookie and issues a new pair of tokens as cookies
+      operationId: refreshUserTokenWeb
       tags:
         - Authentication
       security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TokenRequest"
       responses:
-        "200":
-          description: JWT token generated successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponse"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-
-  /auth/refresh:
-    post:
-      summary: Refresh JWT token
-      description: Exchanges a refresh token for a new pair of access and refresh tokens
-      operationId: refreshUserToken
-      tags:
-        - Authentication
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RefreshTokenRequest"
-      responses:
-        "200":
-          description: Tokens refreshed successfully
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponse"
+        "204":
+          description: Tokens refreshed successfully, set as cookies
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -150,61 +137,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/APIError"
 
-  /auth/success:
-    get:
-      summary: Authentication success page
-      description: Returns success message for completed authentication
-      operationId: authSuccess
+  /auth/web/initiatePrivilegedTokenExchange:
+    post:
+      summary: Initiate Web privilege token generation (step-up)
+      description: Initiates step-up authentication flow returning the authorization URL as JSON.
+      operationId: initiatePrivilegeTokenWeb
       tags:
         - Authentication
-      security: []
-      parameters:
-        - name: code
-          in: query
-          required: true
-          description: Authorization code received from OIDC provider
-          schema:
-            type: string
-        - name: state
-          in: query
-          required: true
-          description: State parameter used for CSRF protection
-          schema:
-            type: string
       responses:
         "200":
-          description: Authentication successful
+          description: Authorization URL generated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessfulAuthResponse"
-
-  /auth/error:
-    get:
-      summary: Authentication error page
-      description: Returns error message for failed authentication
-      operationId: authError
-      tags:
-        - Authentication
-      security: []
-      responses:
-        "200":
-          description: Authentication failed
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/FailedAuthResponse"
-
-  /auth/initiatePrivilegedTokenExchange:
-    get:
-      summary: Initiate privilege token generation (step-up)
-      description: Initiates the step-up authentication flow by generating an authorization URL for the IDP provider.
-      operationId: initiatePrivilegedTokenExchange
-      tags:
-        - Authentication
-      responses:
-        "302":
-          description: Redirect to IDP for step-up authentication
+                type: object
+                required:
+                  - authorizationUrl
+                properties:
+                  authorizationUrl:
+                    type: string
         "400":
           $ref: "#/components/responses/BadRequest"
         "500":
@@ -214,11 +165,53 @@ paths:
               schema:
                 $ref: "#/components/schemas/APIError"
 
-  /auth/exchangePrivilegedToken:
+  /auth/web/exchangePrivilegedToken:
     post:
-      summary: Exchange privilege token
-      description: Exchanges an IDP token for a high-privilege step-up token.
-      operationId: exchangePrivilegedToken
+      summary: Exchange Web privilege token
+      description: Exchanges an IDP token for a high-privilege step-up token and sets it as an HttpOnly cookie.
+      operationId: exchangePrivilegeTokenWeb
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivilegedTokenExchangeRequest"
+      responses:
+        "204":
+          description: Privilege token set as cookie successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/cli/initiatePrivilegedTokenExchange:
+    get:
+      summary: Initiate CLI privilege token generation (step-up)
+      description: |
+        Initiates the step-up authentication flow for the CLI by redirecting to the IDP.
+        The CLI should open the returned redirect URL in a browser. After the user authenticates,
+        the IDP will redirect to the CLI local server with a `code` and `state` parameter,
+        which must then be exchanged via `POST /auth/cli/exchangePrivilegedToken`.
+      operationId: initiatePrivilegeTokenCli
+      tags:
+        - Authentication
+      responses:
+        "302":
+          description: Redirect to IDP for step-up authentication
+        "500":
+          description: Failed to initiate step-up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIError"
+
+  /auth/cli/exchangePrivilegedToken:
+    post:
+      summary: Exchange CLI privilege token
+      description: Exchanges an IDP authorization code for a high-privilege step-up token, returned as JSON.
+      operationId: exchangePrivilegeTokenCli
       tags:
         - Authentication
       requestBody:
@@ -1951,7 +1944,7 @@ components:
 
     RoleRemovalRequest: *RoleOperationRequest
 
-    TokenRequest:
+    OidcCallbackRequest:
       type: object
       required:
         - code
@@ -1960,32 +1953,15 @@ components:
         code:
           type: string
           description: Authorization code received from OIDC provider
-          example: "auth_code_123"
         state:
           type: string
           description: State parameter used for CSRF protection
-          example: "state_123"
 
     RefreshTokenRequest:
       type: object
       required:
         - refreshToken
       properties:
-        refreshToken:
-          type: string
-          description: Refresh token used to obtain a new access token
-          example: "sd8Axmi9Xkalsmcd..."
-
-    TokenResponse:
-      type: object
-      required:
-        - accessToken
-        - refreshToken
-      properties:
-        accessToken:
-          type: string
-          description: JWT token containing user information and roles
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
         refreshToken:
           type: string
           description: Refresh token used to obtain a new access token
@@ -1998,7 +1974,7 @@ components:
       properties:
         accessToken:
           type: string
-          description: JWT token containing user information and roles
+          description: Short-lived high-privilege JWT token for sensitive operations
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
     SuccessfulAuthResponse:
