@@ -343,6 +343,24 @@ describe("Workflow Templates Validators", () => {
       expect(result).toBeRight()
     })
 
+    it("should validate an empty data list", () => {
+      // Given
+      const input: ListWorkflowTemplates200Response = {
+        data: [],
+        pagination: {
+          total: 0,
+          page: 1,
+          limit: 10
+        }
+      }
+
+      // When
+      const result = validateListWorkflowTemplates200Response(input)
+
+      // Expect
+      expect(result).toBeRight()
+    })
+
     it("should reject invalid data elements", () => {
       // Given
       const input = {
