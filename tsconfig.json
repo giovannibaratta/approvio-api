@@ -2,12 +2,11 @@
   "extends": "./tsconfig-google.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./generated/openapi/model",
     "emitDeclarationOnly": false,
     "noEmit": false,
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["generated/openapi/model/**/*.ts"],
+  "include": ["generated/openapi/model/**/*.ts", "src/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

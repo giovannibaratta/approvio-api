@@ -71,7 +71,6 @@ The project you are working on is a TypeScript package that provides OpenAPI spe
    - Run `yarn generate:api` to update TypeScript client
 
 2. **Quality Assurance:**
-
    - Test generated client against backend API
    - Verify TypeScript compilation of generated code
    - Check documentation generation with `yarn generate:docs`
@@ -149,7 +148,6 @@ For local development with the Approvio bakcned (if available) and testing with 
    ```
 
 3. **Development Workflow:**
-
    - Make changes to `openapi.yaml`
    - Run `yarn generate:api` to update client
    - Test changes in consuming project
