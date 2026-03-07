@@ -1,4 +1,4 @@
-import {Either, left, right} from "fp-ts/Either"
+import {Either, left, right, isLeft} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString} from "../utils/validation.utils"
 import {getStringAsEnum} from "../utils/enum"
 import {
@@ -139,7 +139,7 @@ function validateAndRule(object: unknown): Either<ValidationError, AndRule> {
   const rules: ApprovalRule[] = []
   for (const rule of object.rules) {
     const validatedRule = validateApprovalRule(rule)
-    if (validatedRule._tag === "Left") return left("invalid_rules_element")
+    if (isLeft(validatedRule)) return left("invalid_rules_element")
     rules.push(validatedRule.right)
   }
 
@@ -163,7 +163,7 @@ function validateOrRule(object: unknown): Either<ValidationError, OrRule> {
   const rules: ApprovalRule[] = []
   for (const rule of object.rules) {
     const validatedRule = validateApprovalRule(rule)
-    if (validatedRule._tag === "Left") return left("invalid_rules_element")
+    if (isLeft(validatedRule)) return left("invalid_rules_element")
     rules.push(validatedRule.right)
   }
 
@@ -206,7 +206,7 @@ export function validateWorkflowTemplate(object: unknown): Either<ValidationErro
 
   if (!hasOwnProperty(object, "approvalRule")) return left("missing_approval_rule")
   const approvalRuleValidation = validateApprovalRule(object.approvalRule)
-  if (approvalRuleValidation._tag === "Left") return left("invalid_approval_rule")
+  if (isLeft(approvalRuleValidation)) return left("invalid_approval_rule")
 
   if (!hasOwnProperty(object, "spaceId") || !isNonEmptyString(object.spaceId)) return left("invalid_space_id")
   if (!hasOwnProperty(object, "createdAt") || !isNonEmptyString(object.createdAt)) return left("invalid_created_at")
@@ -240,7 +240,7 @@ export function validateWorkflowTemplate(object: unknown): Either<ValidationErro
     const actions: WorkflowAction[] = []
     for (const action of object.actions) {
       const validatedAction = validateWorkflowAction(action)
-      if (validatedAction._tag === "Left") return left("invalid_actions_element")
+      if (isLeft(validatedAction)) return left("invalid_actions_element")
       actions.push(validatedAction.right)
     }
     result.actions = actions
@@ -261,7 +261,7 @@ export function validateWorkflowTemplateCreate(object: unknown): Either<Validati
 
   if (!hasOwnProperty(object, "approvalRule")) return left("missing_approval_rule")
   const approvalRuleValidation = validateApprovalRule(object.approvalRule)
-  if (approvalRuleValidation._tag === "Left") return left("invalid_approval_rule")
+  if (isLeft(approvalRuleValidation)) return left("invalid_approval_rule")
 
   if (!hasOwnProperty(object, "spaceId") || !isNonEmptyString(object.spaceId)) return left("invalid_space_id")
 
@@ -287,7 +287,7 @@ export function validateWorkflowTemplateCreate(object: unknown): Either<Validati
     const actions: WorkflowAction[] = []
     for (const action of object.actions) {
       const validatedAction = validateWorkflowAction(action)
-      if (validatedAction._tag === "Left") return left("invalid_actions_element")
+      if (isLeft(validatedAction)) return left("invalid_actions_element")
       actions.push(validatedAction.right)
     }
     result.actions = actions
@@ -319,7 +319,7 @@ export function validateWorkflowTemplateUpdate(object: unknown): Either<Validati
 
   if (hasOwnProperty(object, "approvalRule") && object.approvalRule !== undefined) {
     const approvalRuleValidation = validateApprovalRule(object.approvalRule)
-    if (approvalRuleValidation._tag === "Left") return left("invalid_approval_rule")
+    if (isLeft(approvalRuleValidation)) return left("invalid_approval_rule")
     result.approvalRule = approvalRuleValidation.right
   }
 
@@ -328,7 +328,7 @@ export function validateWorkflowTemplateUpdate(object: unknown): Either<Validati
     const actions: WorkflowAction[] = []
     for (const action of object.actions) {
       const validatedAction = validateWorkflowAction(action)
-      if (validatedAction._tag === "Left") return left("invalid_actions_element")
+      if (isLeft(validatedAction)) return left("invalid_actions_element")
       actions.push(validatedAction.right)
     }
     result.actions = actions
@@ -412,13 +412,13 @@ export function validateListWorkflowTemplates200Response(
   const data: WorkflowTemplateSummary[] = []
   for (const item of object.data) {
     const validatedItem = validateWorkflowTemplateSummary(item)
-    if (validatedItem._tag === "Left") return left("invalid_data_element")
+    if (isLeft(validatedItem)) return left("invalid_data_element")
     data.push(validatedItem.right)
   }
 
   if (!hasOwnProperty(object, "pagination")) return left("missing_pagination")
   const paginationValidation = validatePagination(object.pagination)
-  if (paginationValidation._tag === "Left") return left("invalid_pagination")
+  if (isLeft(paginationValidation)) return left("invalid_pagination")
 
   return right({
     data: data,

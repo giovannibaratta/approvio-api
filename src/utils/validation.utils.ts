@@ -8,3 +8,11 @@ export function hasOwnProperty<T extends object, K extends PropertyKey>(
 export function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.length > 0
 }
+
+export function isNumber(value: unknown): value is number {
+  return typeof value === "number" && !isNaN(value)
+}
+
+export function isArray(value: unknown): value is unknown[] {
+  return Array.isArray(value)
+}
