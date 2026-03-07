@@ -1,0 +1,72 @@
+TokenRequest:
+  type: object
+  required:
+    - code
+    - state
+  properties:
+    code:
+      type: string
+      description: Authorization code returned by the IDP
+    state:
+      type: string
+      description: State parameter passed to the IDP for CSRF protection
+TokenResponse:
+  type: object
+  required:
+    - accessToken
+    - refreshToken
+  properties:
+    accessToken:
+      type: string
+      description: Access token for the authenticated user
+    refreshToken:
+      type: string
+      description: Refresh token used to obtain a new access token
+OidcCallbackRequest:
+  type: object
+  required:
+    - code
+    - state
+  properties:
+    code:
+      type: string
+      description: Authorization code received from OIDC provider
+    state:
+      type: string
+      description: State parameter used for CSRF protection
+RefreshTokenRequest:
+  type: object
+  required:
+    - refreshToken
+  properties:
+    refreshToken:
+      type: string
+      description: Refresh token used to obtain a new access token
+      example: sd8Axmi9Xkalsmcd...
+PrivilegedTokenResponse:
+  type: object
+  required:
+    - accessToken
+  properties:
+    accessToken:
+      type: string
+      description: Short-lived high-privilege JWT token for sensitive operations
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+PrivilegedTokenExchangeRequest:
+  type: object
+  required:
+    - code
+    - state
+    - operation
+  properties:
+    code:
+      type: string
+      description: The authorization code returned from the IDP
+    state:
+      type: string
+      description: The state parameter returned from the IDP
+    resourceId:
+      type: string
+      description: The identifier of the resource being accessed
+    operation:
+      $ref: ../shared/schemas.yaml#/PrivilegedOperation

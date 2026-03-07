@@ -1,0 +1,14 @@
+HealthResponse:
+  type: object
+  required:
+    - status
+  properties:
+    status:
+      type: string
+      x-extensible-enum:
+        - OK
+        - DEPENDENCY_ERROR
+      description: Current health status of the service
+    message:
+      type: string
+      description: Optional message providing more details about the status

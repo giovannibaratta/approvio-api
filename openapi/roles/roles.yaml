@@ -1,0 +1,22 @@
+get:
+  summary: List predefined role templates
+  description: Returns a list of all predefined role templates available in the system
+  operationId: listRoleTemplates
+  tags:
+    - Roles
+  responses:
+    "200":
+      description: List of role templates
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - roles
+            properties:
+              roles:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/RoleTemplate
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

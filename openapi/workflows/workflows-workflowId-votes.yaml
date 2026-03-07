@@ -1,0 +1,31 @@
+get:
+  summary: Retrieve votes for a workflow
+  description: Returns a list of all votes cast for the specified workflow.
+  operationId: getWorkflowVotes
+  tags:
+    - Workflow Actions
+  parameters:
+    - name: workflowId
+      in: path
+      required: true
+      description: The unique identifier of the workflow
+      schema:
+        type: string
+  responses:
+    "200":
+      description: List of votes
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - votes
+            properties:
+              votes:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/WorkflowVote
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound

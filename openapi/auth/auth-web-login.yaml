@@ -1,0 +1,16 @@
+get:
+  summary: Initiate OIDC login
+  description: Initiates OIDC authentication by generating PKCE challenge and redirecting to the OIDC provider
+  operationId: initiateLogin
+  tags:
+    - Authentication
+  security: []
+  responses:
+    "302":
+      description: Redirect to OIDC provider for authentication
+    "500":
+      description: Failed to initiate login
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

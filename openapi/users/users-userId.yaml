@@ -1,0 +1,25 @@
+get:
+  summary: Get user details
+  description: Returns the details of a specific user by their ID.
+  operationId: getUser
+  tags:
+    - Users
+  parameters:
+    - name: userId
+      in: path
+      required: true
+      description: The unique identifier (UUID) of the user.
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "200":
+      description: User details
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/User
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound

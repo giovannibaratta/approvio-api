@@ -1,0 +1,56 @@
+post:
+  summary: Exchange JWT assertion for access token
+  description: |
+    Validates a JWT assertion and returns a JWT access token for the authenticated agent using OAuth 2.0 JWT Bearer profile (RFC 7523).
+
+    **JWT Assertion Requirements:**
+    The agent must create and sign a JWT assertion with their private key containing:
+    - `iss` (issuer): Agent name
+    - `sub` (subject): Agent name (same as issuer for client authentication)
+    - `aud` (audience): Authorization server identifier 
+    - `exp` (expiration): JWT expiration time (Unix timestamp)
+    - `jti` (JWT ID): Unique nonce from the server's challenge (prevents replay attacks)
+    - `iat` (issued at): JWT issued time (Unix timestamp, optional)
+
+    **Security Notes:**
+    - JWT must be signed with RS256 algorithm using the agent's private key
+    - Server verifies signature using agent's registered public key
+    - Each challenge nonce can only be used once (replay protection)
+    - Agent identity is extracted from the JWT issuer claim
+  operationId: exchangeAgentToken
+  tags:
+    - Authentication
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../agents/schemas.yaml#/AgentTokenRequest
+  responses:
+    "200":
+      description: JWT token generated successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../agents/schemas.yaml#/AgentTokenResponse
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      description: Invalid or expired challenge
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+    "404":
+      description: Agent not found
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+    "409":
+      description: Challenge already used
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

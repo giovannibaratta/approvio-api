@@ -1,0 +1,106 @@
+GroupScope:
+  type: object
+  description: Group-specific scope - applies to a specific group
+  required:
+    - type
+    - groupId
+  properties:
+    type:
+      type: string
+      enum:
+        - group
+      description: Scope type (group)
+    groupId:
+      type: string
+      format: uuid
+      description: The unique identifier of the group
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+GroupMembership:
+  type: object
+  required:
+    - entity
+    - addedAt
+  properties:
+    entity:
+      $ref: ../shared/schemas.yaml#/EntityReference
+    addedAt:
+      type: string
+      format: date-time
+      description: Timestamp when the entity was added to the group.
+      readOnly: true
+      example: "2025-04-16T10:30:00Z"
+GroupRequirementRule:
+  type: object
+  description: Requires a minimum number of approvals from a specific group.
+  required:
+    - type
+    - groupId
+    - minCount
+  properties:
+    type:
+      type: string
+      enum:
+        - GROUP_REQUIREMENT
+      description: Rule type (GROUP_REQUIREMENT)
+    groupId:
+      type: string
+      description: ID of the approver group.
+    minCount:
+      type: integer
+      description: Minimum number of approvals required from the group. Must be at least 1.
+      minimum: 1
+    requireHighPrivilege:
+      type: boolean
+      description: Indicates whether a high-privilege token is required for votes fulfilling this rule.
+GroupCreate:
+  type: object
+  required:
+    - name
+  properties:
+    name:
+      type: string
+      description: Name of the group
+    description:
+      type: string
+      description: Description of the group
+Group:
+  type: object
+  required:
+    - id
+    - name
+    - entitiesCount
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Unique identifier for the group
+    name:
+      type: string
+      description: Name of the group
+    description:
+      type: string
+      description: Description of the group
+    entitiesCount:
+      type: integer
+      description: Number of entities in the group
+    createdAt:
+      type: string
+      format: date-time
+      description: Creation timestamp
+    updatedAt:
+      type: string
+      format: date-time
+      description: Last update timestamp
+GroupInfo:
+  type: object
+  required:
+    - groupId
+    - groupName
+  properties:
+    groupId:
+      type: string
+      format: uuid
+    groupName:
+      type: string

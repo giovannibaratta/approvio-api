@@ -1,0 +1,36 @@
+post:
+  summary: Generate authentication challenge for agent
+  description: |
+    Creates an encrypted challenge that must be signed by the agent to obtain a token.
+
+    **Challenge Format (Server → Agent):**
+    The server generates a challenge encrypted with the agent's public key. When decrypted and base64 decoded, it contains a JSON object with:
+    - `audience`: string (agent name)
+    - `expires_at`: ISO 8601 formatted date-time string
+    - `issuer`: string (the name of the SaaS platform, e.g., "Approvio")
+    - `nonce`: a random string to ensure uniqueness (the actual challenge)
+  operationId: generateAgentChallenge
+  tags:
+    - Authentication
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../agents/schemas.yaml#/AgentChallengeRequest
+  responses:
+    "200":
+      description: Challenge generated successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../agents/schemas.yaml#/AgentChallengeResponse
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "404":
+      description: Agent not found
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

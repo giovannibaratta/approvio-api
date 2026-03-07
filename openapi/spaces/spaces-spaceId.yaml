@@ -1,0 +1,52 @@
+get:
+  summary: Get space details
+  description: Returns the details of a specific space
+  operationId: getSpace
+  tags:
+    - Spaces
+  parameters:
+    - name: spaceId
+      in: path
+      required: true
+      description: The unique identifier of the space
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "200":
+      description: Space details
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/Space
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound
+delete:
+  summary: Delete a space
+  description: Deletes a space
+  operationId: deleteSpace
+  tags:
+    - Spaces
+  parameters:
+    - name: spaceId
+      in: path
+      required: true
+      description: The unique identifier of the space
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "204":
+      description: Space deleted successfully
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound
+    "409":
+      description: Cannot delete space with active resources
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

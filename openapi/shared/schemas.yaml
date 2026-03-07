@@ -1,0 +1,357 @@
+OrgScope:
+  type: object
+  description: Organization-wide scope - applies to entire organization
+  required:
+    - type
+  properties:
+    type:
+      type: string
+      enum:
+        - org
+      description: Scope type (org)
+OrganizationAdminCreate:
+  type: object
+  required:
+    - email
+  properties:
+    email:
+      type: string
+      format: email
+      description: Email address of the organization administrator
+      example: admin@example.com
+OrganizationAdmin:
+  type: object
+  required:
+    - userId
+    - email
+    - createdAt
+  properties:
+    userId:
+      type: string
+      format: uuid
+      description: Unique identifier of the user who is an organization admin
+      readOnly: true
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+    email:
+      type: string
+      format: email
+      description: Email address of the organization administrator
+      example: admin@example.com
+    createdAt:
+      type: string
+      format: date-time
+      description: Timestamp when the admin was created
+      readOnly: true
+      example: "2025-04-15T12:05:00Z"
+OrganizationAdminRemove:
+  type: object
+  required:
+    - userId
+  properties:
+    userId:
+      type: string
+      format: uuid
+      description: The unique identifier of the user to remove from organization admins
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+EntityReference:
+  type: object
+  required:
+    - entityType
+    - entityId
+  properties:
+    entityType:
+      type: string
+      x-extensible-enum:
+        - human
+        - agent
+      description: The type of the entity being referenced.
+      example: human
+    entityId:
+      type: string
+      format: uuid
+      description: The unique identifier (UUID) of the entity.
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+EntityMembershipAdd:
+  type: object
+  required:
+    - entity
+  properties:
+    entity:
+      $ref: ./schemas.yaml#/EntityReference
+EntityMembershipRemove:
+  type: object
+  required:
+    - entity
+  properties:
+    entity:
+      $ref: ./schemas.yaml#/EntityReference
+AddGroupEntitiesRequest:
+  type: object
+  description: Defines operations to add entities within a group
+  required:
+    - entities
+  properties:
+    entities:
+      type: array
+      items:
+        $ref: ./schemas.yaml#/EntityMembershipAdd
+      description: List of entities to add to the group.
+RemoveGroupEntitiesRequest:
+  type: object
+  description: Defines operations to remove entities within a group
+  required:
+    - entities
+  properties:
+    entities:
+      type: array
+      items:
+        $ref: ./schemas.yaml#/EntityMembershipRemove
+      description: List of entities to remove from the group.
+ApprovalRule:
+  description: |
+    Configuration of approval rules. Can be a boolean operator (AND/OR) combining nested rules, or a specific requirement (minimum count from a group).
+  oneOf:
+    - $ref: ./schemas.yaml#/AndRule
+    - $ref: ./schemas.yaml#/OrRule
+    - $ref: ../groups/schemas.yaml#/GroupRequirementRule
+  discriminator:
+    propertyName: type
+    mapping:
+      AND: "./schemas.yaml#/AndRule"
+      OR: "./schemas.yaml#/OrRule"
+      GROUP_REQUIREMENT: "../groups/schemas.yaml#/GroupRequirementRule"
+AndRule:
+  type: object
+  description: An AND rule requiring all nested rules to be satisfied.
+  required:
+    - type
+    - rules
+  properties:
+    type:
+      type: string
+      enum:
+        - AND
+      description: Rule type (AND)
+    rules:
+      type: array
+      description: List of rules that must all be satisfied. Cannot be empty.
+      minItems: 1
+      items:
+        $ref: ./schemas.yaml#/ApprovalRule
+OrRule:
+  type: object
+  description: An OR rule requiring at least one of the nested rules to be satisfied.
+  required:
+    - type
+    - rules
+  properties:
+    type:
+      type: string
+      enum:
+        - OR
+      description: Rule type (OR)
+    rules:
+      type: array
+      description: List of rules where at least one must be satisfied. Cannot be empty.
+      minItems: 1
+      items:
+        $ref: ./schemas.yaml#/ApprovalRule
+Pagination:
+  type: object
+  required:
+    - total
+    - page
+    - limit
+  properties:
+    total:
+      type: integer
+      description: Total number of items
+    page:
+      type: integer
+      description: Current page number
+    limit:
+      type: integer
+      description: Items per page
+APIError:
+  type: object
+  properties:
+    code:
+      type: string
+      description: Error code
+    message:
+      type: string
+      description: Error message
+    details:
+      type: array
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+          message:
+            type: string
+ListWorkflowsParams:
+  type: object
+  properties:
+    page:
+      type: integer
+      default: 1
+      description: Page number for pagination
+    limit:
+      type: integer
+      default: 20
+      description: Number of results per page
+    include:
+      type: array
+      items:
+        $ref: ../workflows/schemas.yaml#/WorkflowInclude
+      description: Comma-separated list of related objects to include in the response
+    include-only-non-terminal-state:
+      type: boolean
+      default: false
+      description: When set to true, only workflows that are not in terminal state will be returned.
+    workflowTemplateIdentifier:
+      type: string
+      description: Optional workflow template identifier (UUID or name) to filter workflows.
+GetWorkflowParams:
+  type: object
+  properties:
+    include:
+      type: array
+      items:
+        $ref: ../workflows/schemas.yaml#/WorkflowInclude
+      description: Comma-separated list of related objects to include in the response
+CanVoteResponse:
+  type: object
+  title: CanVoteResponse
+  required:
+    - canVote
+    - voteStatus
+  properties:
+    canVote:
+      type: boolean
+      description: True if the authenticated entity can currently vote on the workflow, false otherwise.
+    voteStatus:
+      type: string
+      x-extensible-enum:
+        - ALREADY_VOTED
+        - VOTE_PENDING
+      description: |
+        Indicates the voting status for the user on this workflow.
+      example: VOTE_PENDING
+    cantVoteReason:
+      type: string
+      description: Reason why the entity cannot vote on the workflow. The value is only set if 'canVote' is false.
+      x-extensible-enum:
+        - WORKFLOW_EXPIRED
+        - WORKFLOW_APPROVED
+        - WORKFLOW_CANCELED
+        - NOT_ELIGIBLE_TO_VOTE
+    requireHighPrivilege:
+      type: boolean
+      description: Indicates whether a high-privilege token is required to cast a vote for the entity.
+VoteApprove:
+  type: object
+  required:
+    - type
+    - votedForGroups
+  properties:
+    type:
+      type: string
+      enum:
+        - APPROVE
+      description: Vote type (APPROVE)
+    votedForGroups:
+      type: array
+      items:
+        type: string
+        format: uuid
+      description: |
+        List of group IDs the vote is cast for. The voter must be a member of these groups with appropriate role (approver, admin, or owner) to cast votes for them.
+      example:
+        - a1b2c3d4-e5f6-7890-1234-567890abcdef
+VoteVeto:
+  type: object
+  required:
+    - type
+  properties:
+    type:
+      type: string
+      enum:
+        - VETO
+      description: Vote type (VETO)
+VoteWithdraw:
+  type: object
+  required:
+    - type
+  properties:
+    type:
+      type: string
+      enum:
+        - WITHDRAW
+      description: Vote type (WITHDRAW)
+WebhookAction:
+  type: object
+  description: Calls a webhook when workflow is approved
+  required:
+    - type
+    - url
+  properties:
+    type:
+      type: string
+      enum:
+        - WEBHOOK
+      description: Action type (WEBHOOK)
+    url:
+      type: string
+      format: uri
+      description: The URL to call
+    method:
+      type: string
+      enum:
+        - POST
+        - PUT
+        - GET
+      default: POST
+      description: HTTP method to use
+    headers:
+      type: object
+      additionalProperties:
+        type: string
+      description: Optional headers to send with the request
+EmailAction:
+  type: object
+  description: Sends an email when workflow is approved
+  required:
+    - type
+    - recipients
+  properties:
+    type:
+      type: string
+      enum:
+        - EMAIL
+      description: Action type (EMAIL)
+    recipients:
+      type: array
+      items:
+        type: string
+        format: email
+      description: List of email addresses to send the notification to
+      minItems: 1
+      maxItems: 5
+ListAgentsParams:
+  type: object
+  properties:
+    page:
+      type: integer
+      default: 1
+      description: Page number for pagination
+    limit:
+      type: integer
+      default: 20
+      description: Number of results per page
+PrivilegedOperation:
+  type: string
+  x-extensible-enum:
+    - vote
+  description: The operation requiring high privilege authentication

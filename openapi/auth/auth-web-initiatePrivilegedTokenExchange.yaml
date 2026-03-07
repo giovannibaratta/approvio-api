@@ -1,0 +1,26 @@
+post:
+  summary: Initiate Web privilege token generation (step-up)
+  description: Initiates step-up authentication flow returning the authorization URL as JSON.
+  operationId: initiatePrivilegeTokenWeb
+  tags:
+    - Authentication
+  responses:
+    "200":
+      description: Authorization URL generated
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - authorizationUrl
+            properties:
+              authorizationUrl:
+                type: string
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "500":
+      description: Failed to initiate step-up
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

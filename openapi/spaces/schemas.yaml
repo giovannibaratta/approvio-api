@@ -1,0 +1,64 @@
+SpaceScope:
+  type: object
+  description: Space-specific scope - applies to a specific space
+  required:
+    - type
+    - spaceId
+  properties:
+    type:
+      type: string
+      enum:
+        - space
+      description: Scope type (space)
+    spaceId:
+      type: string
+      format: uuid
+      description: The unique identifier of the space
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+SpaceCreate:
+  type: object
+  required:
+    - name
+  properties:
+    name:
+      type: string
+      description: Name of the space (max 255 characters)
+      example: Engineering Team
+    description:
+      type: string
+      description: Description of the space (max 2048 characters)
+      example: Space for engineering team collaboration
+Space:
+  type: object
+  required:
+    - id
+    - name
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Unique identifier for the space
+      readOnly: true
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+    name:
+      type: string
+      description: Name of the space (max 255 characters)
+      example: Engineering Team
+    description:
+      type: string
+      description: Description of the space (max 2048 characters)
+      example: Space for engineering team collaboration
+    createdAt:
+      type: string
+      format: date-time
+      description: Timestamp when the space was created
+      readOnly: true
+      example: "2025-04-15T12:05:00Z"
+    updatedAt:
+      type: string
+      format: date-time
+      description: Timestamp when the space was last updated
+      readOnly: true
+      example: "2025-04-15T12:05:00Z"

@@ -17,13 +17,14 @@
     "node": "22"
   },
   "scripts": {
-    "clean": "rm -rf dist generated/openapi/model generated/openapi/.openapi-generator",
-    "generate:api": "yarn clean && openapi-generator-cli generate --openapitools openapitools.json",
+    "clean": "rm -rf dist generated/openapi/model generated/openapi/.openapi-generator generated/openapi.yaml",
+    "bundle": "yarn redocly bundle openapi.yaml -o generated/openapi.yaml",
+    "generate:api": "yarn clean && yarn bundle && openapi-generator-cli generate --openapitools openapitools.json",
     "lint": "yarn lint:code && yarn lint:api",
     "lint:code": "yarn eslint --cache --fix .",
-    "lint:api": "spectral lint openapi.yaml --ruleset .spectral.yaml",
+    "lint:api": "spectral lint generated/openapi.yaml --ruleset .spectral.yaml",
     "build": "yarn generate:api && tsc -p tsconfig.json",
-    "generate:docs": "redocly build-docs openapi.yaml --output ./dist/index.html",
+    "generate:docs": "yarn bundle && redocly build-docs generated/openapi.yaml --output ./dist/index.html",
     "prepublishOnly": "yarn build",
     "format:prettier": "yarn prettier --config .prettierrc . --write",
     "test": "yarn jest --maxWorkers=50%",

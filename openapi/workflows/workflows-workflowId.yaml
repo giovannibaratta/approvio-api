@@ -1,0 +1,30 @@
+get:
+  summary: Get workflow details
+  description: Returns the details of a specific workflow
+  operationId: getWorkflow
+  tags:
+    - Workflows
+  parameters:
+    - name: workflowId
+      in: path
+      required: true
+      description: The unique identifier or name of the workflow
+      schema:
+        type: string
+    - name: params
+      in: query
+      style: form
+      explode: true
+      schema:
+        $ref: ../shared/schemas.yaml#/GetWorkflowParams
+  responses:
+    "200":
+      description: Workflow details
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/Workflow
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound

@@ -1,0 +1,349 @@
+WorkflowTemplateScope:
+  type: object
+  description: Workflow template-specific scope - applies to a specific workflow template
+  required:
+    - type
+    - workflowTemplateId
+  properties:
+    type:
+      type: string
+      enum:
+        - workflow_template
+      description: Scope type (workflow_template)
+    workflowTemplateId:
+      type: string
+      format: uuid
+      description: The unique identifier of the workflow template
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+WorkflowTemplateSummary:
+  type: object
+  required:
+    - id
+    - name
+    - version
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Internal unique identifier for the workflow template.
+      readOnly: true
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+    name:
+      type: string
+      description: User-friendly name for the workflow template.
+      example: New Workflow Template
+    version:
+      type: string
+      description: Version of the workflow template.
+      example: "1"
+    description:
+      type: string
+      description: Detailed description of the workflow template.
+      example: This is a new workflow template
+    createdAt:
+      type: string
+      format: date-time
+      description: Timestamp when the workflow template was created.
+      readOnly: true
+      example: "2025-04-15T12:05:00Z"
+    updatedAt:
+      type: string
+      format: date-time
+      description: Timestamp when the workflow template was last updated.
+      readOnly: true
+      example: "2025-04-15T12:05:00Z"
+WorkflowCreate:
+  type: object
+  required:
+    - name
+    - workflowTemplateId
+  properties:
+    name:
+      type: string
+      description: User-friendly name for the workflow
+    description:
+      type: string
+      description: Detailed description of the workflow
+    metadata:
+      type: object
+      description: Additional custom metadata for the workflow
+    workflowTemplateId:
+      type: string
+      format: uuid
+      description: The unique identifier of the workflow template to use as parent
+Workflow:
+  type: object
+  required:
+    - id
+    - name
+    - status
+    - workflowTemplateId
+    - metadata
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: string
+      description: Unique identifier for the workflow
+    name:
+      type: string
+      description: User-friendly name for the workflow
+    description:
+      type: string
+      description: Detailed description of the workflow
+    status:
+      type: string
+      x-extensible-enum:
+        - APPROVED
+        - REJECTED
+        - CANCELED
+        - EVALUATION_IN_PROGRESS
+        - EXPIRED
+      description: Current status of the workflow
+    workflowTemplateId:
+      type: string
+      format: uuid
+      description: The unique identifier of the workflow template used as parent
+    metadata:
+      type: object
+      description: Additional custom metadata for the workflow
+    ref:
+      type: object
+      description: Referenced objects (optional, controlled by include query parameters)
+      properties:
+        workflowTemplate:
+          $ref: ./schemas.yaml#/WorkflowTemplate
+    createdAt:
+      type: string
+      format: date-time
+      description: Creation timestamp
+    updatedAt:
+      type: string
+      format: date-time
+      description: Last update timestamp
+    expiresAt:
+      type: string
+      format: date-time
+      description: Expiry timestamp
+      readOnly: true
+      example: "2025-04-15T12:05:00Z"
+WorkflowInclude:
+  type: string
+  x-extensible-enum:
+    - workflow-template
+  description: Related objects to include in the workflow response
+ListWorkflowTemplatesParams:
+  type: object
+  properties:
+    page:
+      type: integer
+      default: 1
+      description: Page number for pagination
+    limit:
+      type: integer
+      default: 20
+      description: Number of results per page
+    spaceIdentifier:
+      type: string
+      description: Optional space identifier (UUID or name) to filter workflow templates.
+WorkflowVoteRequest:
+  type: object
+  title: WorkflowVoteRequest
+  required:
+    - voteType
+  properties:
+    reason:
+      type: string
+      description: Optional reason for the vote. Can be used for approval comments or reject reasons.
+      example: Missing critical information or LGTM!
+    voteType:
+      oneOf:
+        - $ref: ../shared/schemas.yaml#/VoteApprove
+        - $ref: ../shared/schemas.yaml#/VoteVeto
+        - $ref: ../shared/schemas.yaml#/VoteWithdraw
+      discriminator:
+        propertyName: type
+        mapping:
+          APPROVE: "../shared/schemas.yaml#/VoteApprove"
+          VETO: "../shared/schemas.yaml#/VoteVeto"
+          WITHDRAW: "../shared/schemas.yaml#/VoteWithdraw"
+WorkflowTemplateCreate:
+  type: object
+  required:
+    - name
+    - approvalRule
+    - spaceId
+  properties:
+    name:
+      type: string
+      description: User-friendly name for the workflow template
+    description:
+      type: string
+      description: Detailed description of the workflow template
+    metadata:
+      type: object
+      description: Additional custom metadata for the workflow template
+    approvalRule:
+      $ref: ../shared/schemas.yaml#/ApprovalRule
+    actions:
+      type: array
+      items:
+        $ref: ./schemas.yaml#/WorkflowAction
+      description: Actions to be executed when workflow is approved
+    defaultExpiresInHours:
+      type: integer
+      minimum: 1
+      maximum: 8760
+      description: Default expiry time for workflows created from this template (in hours, max 1 year)
+    spaceId:
+      type: string
+      format: uuid
+      description: ID of the space to which this workflow template belongs
+WorkflowTemplate:
+  type: object
+  required:
+    - id
+    - name
+    - version
+    - status
+    - allowVotingOnDeprecatedTemplate
+    - approvalRule
+    - spaceId
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: string
+      description: Unique identifier for the workflow template
+    name:
+      type: string
+      description: User-friendly name for the workflow template
+    version:
+      type: string
+      description: Version of the workflow template. "latest" for active templates, numeric for versioned templates
+    description:
+      type: string
+      description: Detailed description of the workflow template
+    status:
+      type: string
+      enum:
+        - ACTIVE
+        - PENDING_DEPRECATION
+        - DEPRECATED
+      description: |
+        Lifecycle status of the template: * ACTIVE - Template can be referenced to create new workflows * PENDING_DEPRECATION - Template has been deprecated but there are still active workflows (intermediate status for async deprecation) * DEPRECATED - Template cannot be referenced for new workflows, voting may still be allowed based on settings
+    allowVotingOnDeprecatedTemplate:
+      type: boolean
+      description: Whether voting is allowed on workflows using this template when it's deprecated
+    approvalRule:
+      $ref: ../shared/schemas.yaml#/ApprovalRule
+    metadata:
+      type: object
+      description: Additional custom metadata for the workflow template
+    actions:
+      type: array
+      items:
+        $ref: ./schemas.yaml#/WorkflowAction
+      description: Actions to be executed when workflow is approved
+    defaultExpiresInHours:
+      type: integer
+      minimum: 1
+      maximum: 8760
+      description: Default expiry time for workflows created from this template (in hours, max 1 year)
+    spaceId:
+      type: string
+      format: uuid
+      description: ID of the space to which this workflow template belongs
+    createdAt:
+      type: string
+      format: date-time
+      description: Creation timestamp
+    updatedAt:
+      type: string
+      format: date-time
+      description: Last update timestamp
+WorkflowTemplateUpdate:
+  type: object
+  properties:
+    description:
+      type: string
+      description: Detailed description of the workflow template
+    metadata:
+      type: object
+      description: Additional custom metadata for the workflow template
+    approvalRule:
+      $ref: ../shared/schemas.yaml#/ApprovalRule
+    actions:
+      type: array
+      items:
+        $ref: ./schemas.yaml#/WorkflowAction
+      description: Actions to be executed when workflow is approved
+    defaultExpiresInHours:
+      type: integer
+      minimum: 1
+      maximum: 8760
+      description: Default expiry time for workflows created from this template (in hours, max 1 year)
+    cancelWorkflows:
+      type: boolean
+      description: |
+        If true, all in-progress workflows associated with this template will be canceled when creating a new version. This affects the allowVotingOnDeprecatedTemplate setting: when true, voting is disabled on the deprecated template.
+      default: false
+WorkflowAction:
+  description: |
+    Configuration for actions to be executed when workflow is approved. Currently supports email actions.
+  oneOf:
+    - $ref: ../shared/schemas.yaml#/EmailAction
+    - $ref: ../shared/schemas.yaml#/WebhookAction
+  discriminator:
+    propertyName: type
+    mapping:
+      EMAIL: "../shared/schemas.yaml#/EmailAction"
+      WEBHOOK: "../shared/schemas.yaml#/WebhookAction"
+WorkflowTemplateDeprecate:
+  type: object
+  properties:
+    cancelWorkflows:
+      type: boolean
+      description: |
+        If true, all in-progress workflows associated with this template will be canceled. This affects the allowVotingOnDeprecatedTemplate setting: when true, voting is disabled on the deprecated template.
+      default: false
+WorkflowVote:
+  type: object
+  required:
+    - voterId
+    - voterType
+    - voteType
+    - timestamp
+  properties:
+    voterId:
+      type: string
+      format: uuid
+      description: Unique identifier of the entity that cast the vote
+    voterType:
+      type: string
+      x-extensible-enum:
+        - human
+        - agent
+      description: Type of the entity that cast the vote
+    voteType:
+      type: string
+      x-extensible-enum:
+        - APPROVE
+        - VETO
+        - WITHDRAW
+      description: Type of vote cast
+    reason:
+      type: string
+      description: Reason for the vote
+    timestamp:
+      type: string
+      format: date-time
+      description: Timestamp when the vote was cast
+    votedForGroups:
+      type: array
+      items:
+        type: string
+        format: uuid
+      description: List of group IDs the vote was cast on behalf of (only for APPROVE)

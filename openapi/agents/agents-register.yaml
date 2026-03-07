@@ -1,0 +1,35 @@
+post:
+  summary: Register a new agent
+  description: Creates a new agent registration entry with generated asymmetric key pair for future authentication
+  operationId: registerAgent
+  tags:
+    - Agents
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/AgentRegistrationRequest
+  responses:
+    "201":
+      description: Agent registered successfully
+      headers:
+        Location:
+          description: URL of the created agent
+          schema:
+            type: string
+            format: uri
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/AgentRegistrationResponse
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "409":
+      description: Agent with this name already exists
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

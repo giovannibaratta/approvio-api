@@ -1,0 +1,23 @@
+post:
+  summary: Exchange CLI privilege token
+  description: Exchanges an IDP authorization code for a high-privilege step-up token, returned as JSON.
+  operationId: exchangePrivilegeTokenCli
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/PrivilegedTokenExchangeRequest
+  responses:
+    "200":
+      description: Privilege token generated successfully
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/PrivilegedTokenResponse
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

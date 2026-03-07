@@ -1,0 +1,90 @@
+put:
+  summary: Assign roles to a user
+  description: |
+    Assigns standard roles to a user by replacing all existing role assignments. Roles are specified by their system-defined names and scopes. The user must be authenticated as a human (not an agent) to use this endpoint.
+  operationId: assignUserRoles
+  tags:
+    - Users
+    - Roles
+  parameters:
+    - name: userId
+      in: path
+      required: true
+      description: The unique identifier (UUID) of the user.
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../roles/schemas.yaml#/RoleAssignmentRequest
+  responses:
+    "204":
+      description: Roles assigned successfully
+    "400":
+      description: Invalid request (e.g., unknown role name, invalid scope, duplicate roles)
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "403":
+      description: Forbidden - only human users can assign roles
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+    "404":
+      description: User not found
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+delete:
+  summary: Remove roles from a user
+  description: |
+    Removes specified roles from a user. Only the roles matching both the role name and scope will be removed. The user must be authenticated as a human (not an agent) to use this endpoint.
+  operationId: removeUserRoles
+  tags:
+    - Users
+    - Roles
+  parameters:
+    - name: userId
+      in: path
+      required: true
+      description: The unique identifier (UUID) of the user.
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../roles/schemas.yaml#/RoleRemovalRequest
+  responses:
+    "204":
+      description: Roles removed successfully
+    "400":
+      description: Invalid request (e.g., unknown role name, invalid scope)
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "403":
+      description: Forbidden - only human users can remove roles
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+    "404":
+      description: User not found
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

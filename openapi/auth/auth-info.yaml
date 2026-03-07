@@ -1,0 +1,27 @@
+get:
+  summary: Get authenticated entity information
+  description: Returns basic information about the authenticated entity
+  operationId: getEntityInfo
+  tags:
+    - Authentication
+  responses:
+    "200":
+      description: Entity information retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - entityType
+              - groups
+            properties:
+              entityType:
+                type: string
+                description: Type of the authenticated entity
+                example: user
+              groups:
+                type: array
+                items:
+                  $ref: ../groups/schemas.yaml#/GroupInfo
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

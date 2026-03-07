@@ -1,0 +1,176 @@
+AgentChallengeRequest:
+  type: object
+  required:
+    - agentName
+  properties:
+    agentName:
+      type: string
+      description: Name of the agent requesting authentication
+      example: ci-deployment-agent
+AgentChallengeResponse:
+  type: object
+  required:
+    - challenge
+  properties:
+    challenge:
+      type: string
+      description: |
+        Base64 encoded encrypted challenge that must be signed by the agent.
+
+        **Decrypted Format (JSON object):**
+        ```json
+        {
+          "audience": "agent-name",
+          "expires_at": "2025-04-15T12:15:00Z",
+          "issuer": "Approvio",
+          "nonce": "random-string-challenge"
+        }
+        ```
+      example: eyJhdWRpZW5jZSI6ImNpLWRlcGxveW1lbnQtYWdlbnQiLCJleHBpcmVzX2F0IjoiMjAyNS0wNC0xNVQxMjoxNTowMFoiLCJpc3N1ZXIiOiJBcHByb3ZpbyIsIm5vbmNlIjoiYWJjZGVmZ2hpams5ODc2NTQzMjEifQ==
+AgentRegistrationRequest:
+  type: object
+  required:
+    - agentName
+  properties:
+    agentName:
+      type: string
+      description: Unique name for the agent (must be unique across the system)
+      example: ci-deployment-agent
+      minLength: 1
+      maxLength: 1024
+AgentRegistrationResponse:
+  type: object
+  required:
+    - agentId
+    - agentName
+    - publicKey
+    - privateKey
+    - createdAt
+  properties:
+    agentId:
+      type: string
+      format: uuid
+      description: Unique identifier for the registered agent
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+    agentName:
+      type: string
+      description: Name of the registered agent
+      example: ci-deployment-agent
+    publicKey:
+      type: string
+      description: RSA public key in base64 encoded PEM format for the agent
+      example: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUEuLi4KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
+    privateKey:
+      type: string
+      description: RSA private key in base64 encoded PEM format for the agent (store securely!)
+      example: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUVWd0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnZ2dnU2tBZ0VBQW9JQkFRQy4uLgotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0t
+    createdAt:
+      type: string
+      format: date-time
+      description: Timestamp when the agent was registered
+      readOnly: true
+      example: "2025-04-15T12:05:00Z"
+AgentGet200Response:
+  type: object
+  required:
+    - id
+    - agentName
+    - publicKey
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Unique identifier for the agent
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+    agentName:
+      type: string
+      description: Name of the agent
+      example: ci-deployment-agent
+    publicKey:
+      type: string
+      description: RSA public key in base64 encoded PEM format for the agent
+      example: LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUEuLi4KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t
+    createdAt:
+      type: string
+      format: date-time
+      description: Timestamp when the agent was registered
+      example: "2025-04-15T12:05:00Z"
+AgentTokenRequest:
+  type: object
+  required:
+    - grantType
+    - clientAssertionType
+    - clientAssertion
+  properties:
+    grantType:
+      type: string
+      description: OAuth 2.0 grant type for JWT Bearer profile
+      enum:
+        - urn:ietf:params:oauth:grant-type:jwt-bearer
+      example: urn:ietf:params:oauth:grant-type:jwt-bearer
+    clientAssertionType:
+      type: string
+      description: OAuth 2.0 client assertion type for JWT Bearer profile
+      enum:
+        - urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+      example: urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    clientAssertion:
+      type: string
+      description: |
+        JWT assertion signed with the agent's private key using RS256 algorithm.
+
+        **JWT Header:**
+        ```json
+        {
+          "alg": "RS256",
+          "typ": "JWT"
+        }
+        ```
+
+        **JWT Payload:**
+        ```json
+        {
+          "iss": "agent-name",
+          "sub": "agent-name", 
+          "aud": "authorization-server-identifier",
+          "exp": 1640995200,
+          "jti": "nonce-from-challenge",
+          "iat": 1640991600
+        }
+        ```
+
+        **Requirements:**
+        - Must be signed with agent's private key using RS256
+        - JWT ID (jti) must match nonce from server's challenge
+        - Issuer (iss) and subject (sub) must be the agent name
+        - Audience (aud) must be the authorization server identifier
+        - Agent identity is extracted from the issuer claim
+      example: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJjaS1kZXBsb3ltZW50LWFnZW50Iiwic3ViIjoiY2ktZGVwbG95bWVudC1hZ2VudCIsImF1ZCI6IkFwcHJvdmlvIiwiZXhwIjoxNjQwOTk1MjAwLCJqdGkiOiJhYmNkZWZnaGlqazk4NzY1NDMyMSIsImlhdCI6MTY0MDk5MTYwMH0.signature
+AgentTokenResponse:
+  type: object
+  required:
+    - accessToken
+    - refreshToken
+  properties:
+    accessToken:
+      type: string
+      description: JWT token for the authenticated agent
+      example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjaS1kZXBsb3ltZW50LWFnZW50IiwiZW50aXR5VHlwZSI6ImFnZW50IiwiaWF0IjoxNjc4OTAxMjAwLCJleHAiOjE2Nzg5ODc2MDB9.signature
+    refreshToken:
+      type: string
+      description: Refresh token used to obtain a new access token
+      example: sd8Axmi9Xkalsmcd...
+AgentSummary:
+  type: object
+  required:
+    - id
+    - name
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Unique identifier for the agent
+    name:
+      type: string
+      description: Name of the agent

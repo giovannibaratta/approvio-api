@@ -1,0 +1,23 @@
+post:
+  summary: Refresh CLI JWT token
+  description: Exchanges a refresh token for a new pair of access and refresh tokens, returned as JSON.
+  operationId: refreshCliToken
+  tags:
+    - Authentication
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/RefreshTokenRequest
+  responses:
+    "200":
+      description: Tokens refreshed successfully
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/TokenResponse
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

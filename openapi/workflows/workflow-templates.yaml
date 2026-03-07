@@ -1,0 +1,55 @@
+post:
+  summary: Create a new workflow template
+  description: Creates a new workflow template with approval rules, actions, and default expiry settings
+  operationId: createWorkflowTemplate
+  tags:
+    - Workflow Templates
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/WorkflowTemplateCreate
+  responses:
+    "201":
+      description: Workflow template created successfully
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/WorkflowTemplate
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+get:
+  summary: List workflow templates
+  description: Returns a list of workflow templates with optional filtering
+  operationId: listWorkflowTemplates
+  tags:
+    - Workflow Templates
+  parameters:
+    - name: params
+      in: query
+      style: form
+      explode: true
+      schema:
+        $ref: ./schemas.yaml#/ListWorkflowTemplatesParams
+  responses:
+    "200":
+      description: List of workflow templates
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - data
+              - pagination
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/WorkflowTemplateSummary
+              pagination:
+                $ref: ../shared/schemas.yaml#/Pagination
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

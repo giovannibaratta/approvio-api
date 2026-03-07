@@ -1,0 +1,24 @@
+get:
+  summary: Check if the current entity can vote on a workflow
+  description: Determines if the authenticated entity is eligible to cast a vote on the specified workflow.
+  operationId: canVoteOnWorkflow
+  tags:
+    - Workflow Actions
+  parameters:
+    - name: workflowId
+      in: path
+      required: true
+      description: The unique identifier of the workflow.
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Eligibility to vote confirmed.
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/CanVoteResponse
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound

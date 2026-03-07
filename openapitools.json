@@ -7,7 +7,7 @@
       "typescript": {
         "generatorName": "typescript-nestjs",
         "output": "#{cwd}/generated/openapi",
-        "glob": "openapi.yaml",
+        "glob": "generated/openapi.yaml",
         "additionalProperties": {
           "withInterfaces": true,
           "withSeparateModelsAndApi": true,

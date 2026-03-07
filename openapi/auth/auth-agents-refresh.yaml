@@ -1,0 +1,35 @@
+post:
+  summary: Refresh agent JWT token
+  description: Exchanges a refresh token for a new pair of access and refresh tokens. Requires DPoP proof.
+  operationId: refreshAgentToken
+  tags:
+    - Authentication
+  security: []
+  parameters:
+    - name: DPoP
+      in: header
+      required: true
+      description: DPoP proof based on RFC 9449
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/RefreshTokenRequest
+  responses:
+    "200":
+      description: Tokens refreshed successfully
+      content:
+        application/json:
+          schema:
+            $ref: ../agents/schemas.yaml#/AgentTokenResponse
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      description: Invalid or expired refresh token, or DPoP mismatch
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

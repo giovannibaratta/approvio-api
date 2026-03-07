@@ -1,0 +1,69 @@
+post:
+  summary: Create a new space
+  description: Creates a new organizational space
+  operationId: createSpace
+  tags:
+    - Spaces
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/SpaceCreate
+  responses:
+    "201":
+      description: Space created successfully
+      headers:
+        Location:
+          description: URL of the created space
+          schema:
+            type: string
+            format: uri
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "409":
+      description: Space with this name already exists
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+get:
+  summary: List spaces
+  description: Returns a list of spaces
+  operationId: listSpaces
+  tags:
+    - Spaces
+  parameters:
+    - name: page
+      in: query
+      description: Page number for pagination
+      schema:
+        type: integer
+        default: 1
+    - name: limit
+      in: query
+      description: Number of results per page
+      schema:
+        type: integer
+        default: 20
+  responses:
+    "200":
+      description: List of spaces
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - data
+              - pagination
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/Space
+              pagination:
+                $ref: ../shared/schemas.yaml#/Pagination
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

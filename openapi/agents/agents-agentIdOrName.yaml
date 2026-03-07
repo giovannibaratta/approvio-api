@@ -1,0 +1,24 @@
+get:
+  summary: Get agent details
+  description: Returns the details of a specific agent by their ID or name.
+  operationId: getAgent
+  tags:
+    - Agents
+  parameters:
+    - name: agentIdOrName
+      in: path
+      required: true
+      description: The unique identifier (UUID) or the name of the agent.
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Agent details retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/AgentGet200Response
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound

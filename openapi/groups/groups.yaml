@@ -1,0 +1,63 @@
+post:
+  summary: Create a new approver group
+  description: Create a new group for organizing approvers
+  operationId: createGroup
+  tags:
+    - Groups
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/GroupCreate
+  responses:
+    "201":
+      description: Group created successfully
+      headers:
+        Location:
+          description: URL of the created group
+          schema:
+            type: string
+            format: uri
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+get:
+  summary: List groups
+  description: Returns a list of groups
+  operationId: listGroups
+  tags:
+    - Groups
+  parameters:
+    - name: page
+      in: query
+      description: Page number for pagination
+      schema:
+        type: integer
+        default: 1
+    - name: limit
+      in: query
+      description: Number of results per page
+      schema:
+        type: integer
+        default: 20
+  responses:
+    "200":
+      description: List of groups
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              groups:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/Group
+              pagination:
+                $ref: ../shared/schemas.yaml#/Pagination
+            required:
+              - groups
+              - pagination
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

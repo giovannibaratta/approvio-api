@@ -1,0 +1,32 @@
+get:
+  summary: List agents
+  description: Returns a list of agents
+  operationId: listAgents
+  tags:
+    - Agents
+  parameters:
+    - name: params
+      in: query
+      style: form
+      explode: true
+      schema:
+        $ref: ../shared/schemas.yaml#/ListAgentsParams
+  responses:
+    "200":
+      description: List of agents
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - agents
+              - pagination
+            properties:
+              agents:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/AgentSummary
+              pagination:
+                $ref: ../shared/schemas.yaml#/Pagination
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

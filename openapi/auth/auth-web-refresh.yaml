@@ -1,0 +1,18 @@
+post:
+  summary: Refresh Web JWT token
+  description: Takes the refresh_token from the HttpOnly cookie and issues a new pair of tokens as cookies
+  operationId: refreshUserTokenWeb
+  tags:
+    - Authentication
+  security: []
+  responses:
+    "204":
+      description: Tokens refreshed successfully, set as cookies
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      description: Invalid or expired refresh token
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

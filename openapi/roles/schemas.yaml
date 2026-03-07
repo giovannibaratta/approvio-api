@@ -1,0 +1,75 @@
+RoleTemplate:
+  type: object
+  required:
+    - name
+    - permissions
+    - scope
+  properties:
+    name:
+      type: string
+      description: Unique identifier for the role template
+      example: GroupReadOnly
+    permissions:
+      type: array
+      items:
+        type: string
+      description: List of permissions granted by this role
+      example:
+        - read
+    scope:
+      type: string
+      x-extensible-enum:
+        - org
+        - space
+        - group
+        - workflow_template
+      description: The scope type this role applies to
+      example: group
+RoleScope:
+  description: |
+    Defines the scope where a role applies. Can be organization-wide, space-specific,  group-specific, or workflow template-specific.
+  oneOf:
+    - $ref: ../shared/schemas.yaml#/OrgScope
+    - $ref: ../spaces/schemas.yaml#/SpaceScope
+    - $ref: ../groups/schemas.yaml#/GroupScope
+    - $ref: ../workflows/schemas.yaml#/WorkflowTemplateScope
+  discriminator:
+    propertyName: type
+    mapping:
+      org: "../shared/schemas.yaml#/OrgScope"
+      space: "../spaces/schemas.yaml#/SpaceScope"
+      group: "../groups/schemas.yaml#/GroupScope"
+      workflow_template: "../workflows/schemas.yaml#/WorkflowTemplateScope"
+RoleOperationItem:
+  type: object
+  description: |
+    A role operation item that references a system-defined role by name and provides the scope where it should apply (for assignment or removal).
+  required:
+    - roleName
+    - scope
+  properties:
+    roleName:
+      type: string
+      description: |
+        Name of the system-defined role template (e.g., "GroupReadOnly", "SpaceManager"). Must match a role available from the /roles endpoint.
+      example: GroupReadOnly
+    scope:
+      $ref: ./schemas.yaml#/RoleScope
+RoleOperationRequest: &ref_0
+  type: object
+  description: Request to assign or remove roles from a user or agent
+  required:
+    - roles
+  properties:
+    roles:
+      type: array
+      items:
+        $ref: ./schemas.yaml#/RoleOperationItem
+      description: Array of role assignments specifying role names and their scopes
+      example:
+        - roleName: GroupReadOnly
+          scope:
+            type: group
+            groupId: a1b2c3d4-e5f6-7890-1234-567890abcdef
+RoleAssignmentRequest: *ref_0
+RoleRemovalRequest: *ref_0

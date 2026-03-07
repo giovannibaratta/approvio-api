@@ -1,0 +1,19 @@
+get:
+  summary: Initiate CLI privilege token generation (step-up)
+  description: |
+    Initiates the step-up authentication flow for the CLI by redirecting to the IDP.
+    The CLI should open the returned redirect URL in a browser. After the user authenticates,
+    the IDP will redirect to the CLI local server with a `code` and `state` parameter,
+    which must then be exchanged via `POST /auth/cli/exchangePrivilegedToken`.
+  operationId: initiatePrivilegeTokenCli
+  tags:
+    - Authentication
+  responses:
+    "302":
+      description: Redirect to IDP for step-up authentication
+    "500":
+      description: Failed to initiate step-up
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

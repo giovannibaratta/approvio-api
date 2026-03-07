@@ -1,0 +1,82 @@
+UserSummary:
+  type: object
+  required:
+    - id
+    - displayName
+    - email
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Internal unique identifier for the user.
+      readOnly: true
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+    displayName:
+      type: string
+      description: User's display name.
+      example: Alex Chen
+    email:
+      type: string
+      format: email
+      description: User's email address.
+      example: alex.chen@example.com
+UserCreate:
+  type: object
+  required:
+    - displayName
+    - email
+    - orgRole
+  properties:
+    displayName:
+      type: string
+      description: User's display name.
+      example: Alex Chen
+    email:
+      type: string
+      format: email
+      description: User's email address (must be unique).
+      example: alex.chen@example.com
+    orgRole:
+      type: string
+      x-extensible-enum:
+        - admin
+        - member
+      description: Role assigned to the user within the organization.
+      example: member
+User:
+  type: object
+  required:
+    - id
+    - displayName
+    - email
+    - orgRole
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Internal unique identifier for the user.
+      readOnly: true
+      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+    displayName:
+      type: string
+      description: User's display name.
+      example: Alex Chen
+    email:
+      type: string
+      format: email
+      description: User's email address.
+      example: alex.chen@example.com
+    orgRole:
+      type: string
+      x-extensible-enum:
+        - admin
+        - member
+      description: Role assigned to the user within the organization.
+      example: member
+    createdAt:
+      type: string
+      format: date-time
+      description: Timestamp when the user was created.
+      readOnly: true
+      example: "2025-04-15T12:05:00Z"

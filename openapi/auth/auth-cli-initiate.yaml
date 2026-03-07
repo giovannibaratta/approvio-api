@@ -1,0 +1,33 @@
+post:
+  summary: Initiate OIDC login for CLI
+  description: Initiates OIDC authentication specifying a loopback redirect URI for the CLI
+  operationId: initiateCliLogin
+  tags:
+    - Authentication
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - redirectUri
+          properties:
+            redirectUri:
+              type: string
+              description: The local loopback URL to redirect the user to after authentication
+  responses:
+    "200":
+      description: Authorization URL generated
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - authorizationUrl
+            properties:
+              authorizationUrl:
+                type: string
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest

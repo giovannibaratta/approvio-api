@@ -1,0 +1,17 @@
+get:
+  summary: Handle Web OIDC callback
+  description: Exchanges authorization code for tokens and sets them as HttpOnly cookies, then redirects to frontend
+  operationId: webCallback
+  tags:
+    - Authentication
+  security: []
+  parameters:
+    - in: query
+      name: query
+      schema:
+        $ref: ./schemas.yaml#/OidcCallbackRequest
+      style: form
+      explode: true
+  responses:
+    "302":
+      description: Redirect to the frontend depending on success or failure of the auth exchange

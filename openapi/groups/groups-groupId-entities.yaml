@@ -1,0 +1,136 @@
+get:
+  summary: List entities in a group
+  description: Returns a list of all entities (users, systems, etc.) that belong to a specific group, including their roles.
+  operationId: listGroupEntities
+  tags:
+    - Groups
+    - Users
+  parameters:
+    - name: groupId
+      in: path
+      required: true
+      description: The unique identifier (UUID) of the group.
+      schema:
+        type: string
+        format: uuid
+    - name: page
+      in: query
+      description: Page number for pagination
+      schema:
+        type: integer
+        default: 1
+    - name: limit
+      in: query
+      description: Number of results per page
+      schema:
+        type: integer
+        default: 20
+  responses:
+    "200":
+      description: List of entities in the group
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - entities
+              - pagination
+            properties:
+              entities:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/GroupMembership
+              pagination:
+                $ref: ../shared/schemas.yaml#/Pagination
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound
+post:
+  summary: Add group entities
+  description: Add entities (like users) within a specific group.
+  operationId: addGroupEntities
+  tags:
+    - Groups
+    - Users
+  parameters:
+    - name: groupId
+      in: path
+      required: true
+      description: The unique identifier (UUID) of the group.
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../shared/schemas.yaml#/AddGroupEntitiesRequest
+  responses:
+    "200":
+      description: Entities managed successfully. Returns updated group details.
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/Group
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      description: Group not found
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+    "409":
+      description: Conflict detected (e.g., adding an existing member).
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+delete:
+  summary: Remove group entities
+  description: Remove entities (like users) from a specific group.
+  operationId: removeGroupEntities
+  tags:
+    - Groups
+    - Users
+  parameters:
+    - name: groupId
+      in: path
+      required: true
+      description: The unique identifier (UUID) of the group.
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../shared/schemas.yaml#/RemoveGroupEntitiesRequest
+  responses:
+    "200":
+      description: Entities removed successfully. Returns updated group details.
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/Group
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      description: Group not found
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError
+    "409":
+      description: Conflict detected (e.g. removing a non-member).
+      content:
+        application/json:
+          schema:
+            $ref: ../shared/schemas.yaml#/APIError

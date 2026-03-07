@@ -1,0 +1,56 @@
+get:
+  summary: Get workflow template details
+  description: Returns the details of a specific workflow template.
+  operationId: getWorkflowTemplate
+  tags:
+    - Workflow Templates
+  parameters:
+    - name: templateIdentifier
+      in: path
+      required: true
+      description: The unique identifier of the workflow template (UUID)
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Workflow template details
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/WorkflowTemplate
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound
+put:
+  summary: Update a workflow template
+  description: Updates an existing workflow template by creating a new version and optionally canceling active workflows
+  operationId: updateWorkflowTemplate
+  tags:
+    - Workflow Templates
+  parameters:
+    - name: templateIdentifier
+      in: path
+      required: true
+      description: The name of the workflow template to update
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/WorkflowTemplateUpdate
+  responses:
+    "200":
+      description: Workflow template updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/WorkflowTemplate
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound

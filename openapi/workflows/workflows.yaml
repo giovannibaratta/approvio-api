@@ -1,0 +1,57 @@
+post:
+  summary: Create a new workflow
+  description: Creates a new workflow with approvers and rules
+  operationId: createWorkflow
+  tags:
+    - Workflows
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/WorkflowCreate
+  responses:
+    "201":
+      description: Workflow created successfully
+      headers:
+        Location:
+          description: URL of the created workflow
+          schema:
+            type: string
+            format: uri
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+get:
+  summary: List workflows
+  description: Returns a list of workflows with optional filtering
+  operationId: listWorkflows
+  tags:
+    - Workflows
+  parameters:
+    - name: params
+      in: query
+      style: form
+      explode: true
+      schema:
+        $ref: ../shared/schemas.yaml#/ListWorkflowsParams
+  responses:
+    "200":
+      description: List of workflows
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - data
+              - pagination
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/Workflow
+              pagination:
+                $ref: ../shared/schemas.yaml#/Pagination
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
