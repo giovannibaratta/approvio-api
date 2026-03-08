@@ -3,14 +3,14 @@ import {
   UserCreate,
   UserSummary,
   ListUsers200Response,
-  Pagination,
   RoleAssignmentRequest,
   RoleRemovalRequest,
   RoleOperationItem,
   RoleScope
 } from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft, isRight} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString, isNumber, isArray} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
+import {validatePagination} from "./common.validators"
 
 export type UserValidationError =
   | "malformed_object"
@@ -42,15 +42,6 @@ export type UserSummaryValidationError =
   | "invalid_display_name"
   | "missing_email"
   | "invalid_email"
-
-export type PaginationValidationError =
-  | "malformed_object"
-  | "missing_page"
-  | "invalid_page"
-  | "missing_limit"
-  | "invalid_limit"
-  | "missing_total"
-  | "invalid_total"
 
 export type ListUsers200ResponseValidationError =
   | "malformed_object"
@@ -141,25 +132,6 @@ export function validateUserSummary(object: unknown): Either<UserSummaryValidati
     id: object.id,
     displayName: object.displayName,
     email: object.email
-  })
-}
-
-function validatePagination(object: unknown): Either<PaginationValidationError, Pagination> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
-
-  if (!hasOwnProperty(object, "page")) return left("missing_page")
-  if (!isNumber(object.page)) return left("invalid_page")
-
-  if (!hasOwnProperty(object, "limit")) return left("missing_limit")
-  if (!isNumber(object.limit)) return left("invalid_limit")
-
-  if (!hasOwnProperty(object, "total")) return left("missing_total")
-  if (!isNumber(object.total)) return left("invalid_total")
-
-  return right({
-    page: object.page,
-    limit: object.limit,
-    total: object.total
   })
 }
 
