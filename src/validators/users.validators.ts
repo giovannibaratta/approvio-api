@@ -116,7 +116,7 @@ export function validateUserCreate(object: unknown): Either<UserCreateValidation
   })
 }
 
-export function validateUserSummary(object: unknown): Either<UserSummaryValidationError, UserSummary> {
+function validateUserSummary(object: unknown): Either<UserSummaryValidationError, UserSummary> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "id")) return left("missing_id")

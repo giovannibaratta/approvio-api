@@ -98,7 +98,7 @@ export type WorkflowValidationError =
   | "invalid_updated_at"
   | "invalid_expires_at"
 
-export function validateWorkflow(object: unknown): Either<WorkflowValidationError, Workflow> {
+function validateWorkflow(object: unknown): Either<WorkflowValidationError, Workflow> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "id") || !isNonEmptyString(object["id"]))
@@ -375,7 +375,7 @@ export type WorkflowVoteValidationError =
   | "invalid_timestamp"
   | "invalid_voted_for_groups"
 
-export function validateWorkflowVote(object: unknown): Either<WorkflowVoteValidationError, WorkflowVote> {
+function validateWorkflowVote(object: unknown): Either<WorkflowVoteValidationError, WorkflowVote> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "voterId") || !isNonEmptyString(object["voterId"]))

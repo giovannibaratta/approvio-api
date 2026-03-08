@@ -1,6 +1,14 @@
-import {Either, left, right} from "fp-ts/Either"
-import {hasOwnProperty, isNumber} from "../utils/validation.utils"
-import {Pagination} from "../../generated/openapi/model/models"
+import {Either, left, right, isLeft} from "fp-ts/Either"
+import {hasOwnProperty, isNumber, isNonEmptyString, isArray} from "../utils/validation.utils"
+import {
+  Pagination,
+  APIError,
+  APIErrorDetailsInner,
+  HealthResponse,
+  GetEntityInfo200Response,
+  GroupInfo
+} from "../../generated/openapi/model/models"
+import {validateGroupInfo} from "./groups.validators"
 
 export type PaginationValidationError =
   | "malformed_object"
@@ -27,5 +35,110 @@ export function validatePagination(object: unknown): Either<PaginationValidation
     total: object.total,
     page: object.page,
     limit: object.limit
+  })
+}
+
+export type APIErrorDetailsInnerValidationError = "malformed_object" | "invalid_field" | "invalid_message"
+
+function validateAPIErrorDetailsInner(
+  object: unknown
+): Either<APIErrorDetailsInnerValidationError, APIErrorDetailsInner> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  const result: APIErrorDetailsInner = {}
+
+  if (hasOwnProperty(object, "field") && object.field !== undefined) {
+    if (typeof object.field !== "string") return left("invalid_field")
+    result.field = object.field
+  }
+
+  if (hasOwnProperty(object, "message") && object.message !== undefined) {
+    if (typeof object.message !== "string") return left("invalid_message")
+    result.message = object.message
+  }
+
+  return right(result)
+}
+
+export type APIErrorValidationError = "malformed_object" | "invalid_code" | "invalid_message" | "invalid_details"
+
+export function validateAPIError(object: unknown): Either<APIErrorValidationError, APIError> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  const result: APIError = {}
+
+  if (hasOwnProperty(object, "code") && object.code !== undefined) {
+    if (typeof object.code !== "string") return left("invalid_code")
+    result.code = object.code
+  }
+
+  if (hasOwnProperty(object, "message") && object.message !== undefined) {
+    if (typeof object.message !== "string") return left("invalid_message")
+    result.message = object.message
+  }
+
+  if (hasOwnProperty(object, "details") && object.details !== undefined) {
+    if (!isArray(object.details)) return left("invalid_details")
+
+    const details: APIErrorDetailsInner[] = []
+    for (const item of object.details) {
+      const validatedItem = validateAPIErrorDetailsInner(item)
+      if (isLeft(validatedItem)) return left("invalid_details")
+      details.push(validatedItem.right)
+    }
+    result.details = details
+  }
+
+  return right(result)
+}
+
+export type HealthResponseValidationError = "malformed_object" | "missing_status" | "invalid_status" | "invalid_message"
+
+export function validateHealthResponse(object: unknown): Either<HealthResponseValidationError, HealthResponse> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  if (!hasOwnProperty(object, "status") || !isNonEmptyString(object.status))
+    return left(hasOwnProperty(object, "status") ? "invalid_status" : "missing_status")
+
+  const result: HealthResponse = {
+    status: object.status
+  }
+
+  if (hasOwnProperty(object, "message") && object.message !== undefined) {
+    if (typeof object.message !== "string") return left("invalid_message")
+    result.message = object.message
+  }
+
+  return right(result)
+}
+
+export type GetEntityInfo200ResponseValidationError =
+  | "malformed_object"
+  | "missing_entity_type"
+  | "invalid_entity_type"
+  | "missing_groups"
+  | "invalid_groups"
+
+export function validateGetEntityInfo200Response(
+  object: unknown
+): Either<GetEntityInfo200ResponseValidationError, GetEntityInfo200Response> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  if (!hasOwnProperty(object, "entityType") || !isNonEmptyString(object.entityType))
+    return left(hasOwnProperty(object, "entityType") ? "invalid_entity_type" : "missing_entity_type")
+
+  if (!hasOwnProperty(object, "groups") || !isArray(object.groups))
+    return left(hasOwnProperty(object, "groups") ? "invalid_groups" : "missing_groups")
+
+  const groups: GroupInfo[] = []
+  for (const item of object.groups) {
+    const validatedItem = validateGroupInfo(item)
+    if (isLeft(validatedItem)) return left("invalid_groups")
+    groups.push(validatedItem.right)
+  }
+
+  return right({
+    entityType: object.entityType,
+    groups
   })
 }
