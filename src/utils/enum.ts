@@ -4,6 +4,7 @@ export function getStringAsEnum<T extends Record<string, string>>(str: string, e
   if (enumValues.includes(str)) {
     // If it does, we can safely cast the string back to the enum type.
     // This cast is safe because we've just verified the string is one of the enum's values.
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return str as T[keyof T]
   }
 

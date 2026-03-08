@@ -52,7 +52,13 @@ export default tseslint.config(
       "n/no-empty-function": "off",
       "n/no-unsupported-features/es-syntax": "off",
       "n/no-missing-require": "off",
-      "no-dupe-class-members": "off"
+      "no-dupe-class-members": "off",
+      "@typescript-eslint/consistent-type-assertions": [
+        "error",
+        {
+          assertionStyle: "never"
+        }
+      ]
     }
   },
   {
