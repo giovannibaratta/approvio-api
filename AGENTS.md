@@ -7,6 +7,7 @@ The project you are working on is a TypeScript package that provides OpenAPI spe
 
 - The project contains OpenAPI 3.0 specifications for a SaaS approval workflow platform
 - The project generates TypeScript API clients from OpenAPI specifications
+- The project implements TypeScript validators for the generated models using fp-ts
 - The project uses OpenAPI Generator CLI for client generation
 - The project uses Spectral for OpenAPI linting and validation
 - The project uses ReDoc for documentation generation
@@ -16,6 +17,8 @@ The project you are working on is a TypeScript package that provides OpenAPI spe
 
 - **openapi.yaml**: Main OpenAPI specification defining all API endpoints
 - **generated/openapi/model/**: Auto-generated TypeScript models and client code
+- **src/validators/**: TypeScript validators for the generated models
+- **test/validators/**: Unit tests for the model validators
 - **scripts/**: Build, generation, and utility scripts
 - **dist/**: Compiled TypeScript output for npm publishing
   </project_context>
@@ -61,12 +64,23 @@ The project you are working on is a TypeScript package that provides OpenAPI spe
 - Maintain backward compatibility when updating specifications
   </generation>
 
+</openapi>
+
+<validators>
+
+- Return validation results using `fp-ts/Either` (`left` for errors, `right` for success)
+- **Do not use type casting** (`as Type`). Always use proper runtime type checking (e.g., `typeof`, `in`, `Array.isArray`) when validating `unknown` inputs
+- Validation failures should return a descriptive error string matching the defined error type (e.g., `malformed_object`, `missing_field`)
+- Use custom Jest matchers for assertions in tests (e.g., `expect(result).toBeLeftOf("error")`, `expect(result).toBeRightOf(data)`). These are defined in `src/utils/matchers.ts`
+</validators>
+
 </style_guide>
 
 <workflow name="development">
 <steps>
 1. **Specification Updates:**
-   - Modify `openapi.yaml` with API changes
+   - Modify `openapi.yaml` (and the `openapi/` directory) with API changes
+   - **Important:** Every time a new endpoint or model is added, you must also add the corresponding validator in `src/validators/` and tests in `test/validators/`
    - Run `yarn lint:api` to validate OpenAPI specification
    - Run `yarn generate:api` to update TypeScript client
 
@@ -113,6 +127,7 @@ Always run `yarn lint:api` after modifying `openapi.yaml` to ensure specificatio
 | `generate:docs` | `yarn generate:docs` | Generates HTML API documentation from OpenAPI specification using ReDoc. Creates interactive documentation in `dist/index.html`. | ReDoc build output with generated documentation file. | No |
 | `generate:index` | `yarn generate:index` | Generates index.ts export file for all TypeScript models in `generated/openapi/model/`. Enables clean imports for client users. | Creates/updates `generated/openapi/model/index.ts` with export statements. | No |
 | `prepublishOnly` | `yarn prepublishOnly` | Pre-publish hook that automatically runs `generate:api` to ensure generated code is current before publishing. | Same output as `generate:api` command. | No |
+| `test` | `yarn test` | Runs the Jest test suite for the validators. | Jest test output showing passed/failed validator tests. | No |
 </table>
 
 <directory_structure>
@@ -120,6 +135,11 @@ Always run `yarn lint:api` after modifying `openapi.yaml` to ensure specificatio
 **Root Level:**
 
 - `openapi.yaml` - Main OpenAPI 3.0 specification
+- `openapi/` - Split OpenAPI specification files
+- `src/` - Source code for validators and utilities
+  - `src/validators/` - TypeScript validators
+  - `src/utils/` - Utility functions (e.g., custom Jest matchers)
+- `test/` - Unit tests for validators
 - `package.json` - Package configuration and dependencies
 - `README.md` - Project documentation and usage instructions
 - `AGENTS.md` - Development guidelines and workflows

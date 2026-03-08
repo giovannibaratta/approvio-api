@@ -1,6 +1,17 @@
 # Approvio API
 
-This repository contains the OpenAPI specification for the Approvio backend and the tooling to generate the TypeScript API client.
+This repository contains the OpenAPI specification for the Approvio backend, the tooling to generate the TypeScript API client, and TypeScript validators for the generated models using `fp-ts`.
+
+
+## Project Structure
+
+- `openapi.yaml`: Main entry point for the OpenAPI 3.0 specification.
+- `openapi/`: Directory containing split OpenAPI specification files referenced by the main `openapi.yaml`.
+- `src/`: Source code directory.
+  - `src/validators/`: TypeScript validators for the generated OpenAPI models using `fp-ts/Either`.
+  - `src/utils/`: Utility functions, including custom Jest matchers for testing validators.
+- `test/`: Test directory containing unit tests for the validators.
+- `generated/`: Auto-generated output directory containing the TypeScript API client models and code.
 
 ## Getting Started
 
