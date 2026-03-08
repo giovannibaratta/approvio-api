@@ -16,25 +16,11 @@ import {
   GroupRequirementRule,
   WorkflowAction,
   EmailAction,
-  WebhookAction,
-  Pagination
+  WebhookAction
 } from "../../generated/openapi/model/models"
+import {validatePagination} from "./common.validators"
 
 export type ValidationError = string
-
-function validatePagination(object: unknown): Either<ValidationError, Pagination> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
-
-  if (!hasOwnProperty(object, "total") || typeof object.total !== "number") return left("invalid_total")
-  if (!hasOwnProperty(object, "page") || typeof object.page !== "number") return left("invalid_page")
-  if (!hasOwnProperty(object, "limit") || typeof object.limit !== "number") return left("invalid_limit")
-
-  return right({
-    total: object.total,
-    page: object.page,
-    limit: object.limit
-  })
-}
 
 function validateEmailAction(object: unknown): Either<ValidationError, EmailAction> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
