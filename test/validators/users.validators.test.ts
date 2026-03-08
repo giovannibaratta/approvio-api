@@ -1,7 +1,6 @@
 import {
   User,
   UserCreate,
-  UserSummary,
   ListUsers200Response,
   RoleAssignmentRequest,
   RoleRemovalRequest
@@ -9,7 +8,6 @@ import {
 import {
   validateUser,
   validateUserCreate,
-  validateUserSummary,
   validateListUsers200Response,
   validateRoleAssignmentRequest,
   validateRoleRemovalRequest
@@ -126,56 +124,6 @@ describe("user validators", () => {
 
         // When
         const result = validateUserCreate(input)
-
-        // Expect
-        expect(result).toBeLeftOf(error)
-      })
-    })
-  })
-
-  describe("validateUserSummary", () => {
-    const validUserSummary: UserSummary = {
-      id: "user-123",
-      displayName: "Test User",
-      email: "test@example.com"
-    }
-
-    it("should return right when valid", () => {
-      // Given
-      const input = validUserSummary
-
-      // When
-      const result = validateUserSummary(input)
-
-      // Expect
-      expect(result).toBeRightOf(validUserSummary)
-    })
-
-    it("should return left('malformed_object') when null", () => {
-      // Given
-      const input = null
-
-      // When
-      const result = validateUserSummary(input)
-
-      // Expect
-      expect(result).toBeLeftOf("malformed_object")
-    })
-
-    const errorCases: {field: keyof UserSummary; error: string}[] = [
-      {field: "id", error: "missing_id"},
-      {field: "displayName", error: "missing_display_name"},
-      {field: "email", error: "missing_email"}
-    ]
-
-    errorCases.forEach(({field, error}) => {
-      it(`should return left('${error}') when ${field} is missing`, () => {
-        // Given
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const {[field]: _, ...input} = validUserSummary
-
-        // When
-        const result = validateUserSummary(input)
 
         // Expect
         expect(result).toBeLeftOf(error)

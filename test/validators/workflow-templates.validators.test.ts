@@ -4,7 +4,6 @@ import {
   validateWorkflowTemplateUpdate,
   validateWorkflowTemplateDeprecate,
   validateWorkflowTemplateScope,
-  validateWorkflowTemplateSummary,
   validateListWorkflowTemplates200Response,
   validateListWorkflowTemplatesParams
 } from "../../src/validators/workflow-templates.validators"
@@ -15,7 +14,6 @@ import {
   WorkflowTemplateUpdate,
   WorkflowTemplateDeprecate,
   WorkflowTemplateScope,
-  WorkflowTemplateSummary,
   ListWorkflowTemplates200Response,
   ListWorkflowTemplatesParams
 } from "../../generated/openapi/model/models"
@@ -267,50 +265,6 @@ describe("Workflow Templates Validators", () => {
 
       // Expect
       expect(result).toBeLeftOf("invalid_workflow_template_id")
-    })
-  })
-
-  describe("validateWorkflowTemplateSummary", () => {
-    const validSummary: WorkflowTemplateSummary = {
-      id: "wt1",
-      name: "Template 1",
-      version: "1.0",
-      createdAt: "2023-01-01T00:00:00Z",
-      updatedAt: "2023-01-01T00:00:00Z"
-    }
-
-    it("should validate a valid summary", () => {
-      // Given
-      const input = validSummary
-
-      // When
-      const result = validateWorkflowTemplateSummary(input)
-
-      // Expect
-      expect(result).toBeRight()
-    })
-
-    it("should validate with description", () => {
-      // Given
-      const input = {...validSummary, description: "Desc"}
-
-      // When
-      const result = validateWorkflowTemplateSummary(input)
-
-      // Expect
-      expect(result).toBeRight()
-    })
-
-    it("should reject missing required fields", () => {
-      // Given
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const {name, ...input} = validSummary
-
-      // When
-      const result = validateWorkflowTemplateSummary(input)
-
-      // Expect
-      expect(result).toBeLeftOf("invalid_name")
     })
   })
 

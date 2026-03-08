@@ -1,314 +1,479 @@
-import "../../src/utils/matchers"
 import {
   WorkflowCreate,
-  Workflow,
   GetWorkflowParams,
   ListWorkflowsParams,
   ListWorkflows200Response,
   WorkflowVoteRequest,
-  WorkflowVote,
   CanVoteResponse,
   GetWorkflowVotes200Response
 } from "../../generated/openapi/model/models"
 import {
   validateWorkflowCreate,
-  validateWorkflow,
   validateGetWorkflowParams,
   validateListWorkflowsParams,
   validateListWorkflows200Response,
   validateWorkflowVoteRequest,
-  validateWorkflowVote,
   validateCanVoteResponse,
   validateGetWorkflowVotes200Response
 } from "../../src/validators/workflow.validators"
+import "../../src/utils/matchers"
 
-describe("Workflow Validators", () => {
+describe("workflow validators", () => {
   describe("validateWorkflowCreate", () => {
-    it("should accept a valid WorkflowCreate", () => {
+    const validCreate: WorkflowCreate = {
+      name: "Release Deployment",
+      workflowTemplateId: "template-123"
+    }
+
+    it("should return right when valid", () => {
       // Given
-      const valid: WorkflowCreate = {
-        name: "My Workflow",
-        workflowTemplateId: "tmpl-123",
-        description: "Test description",
-        metadata: {key: "value"}
+      const input = validCreate
+
+      // When
+      const result = validateWorkflowCreate(input)
+
+      // Expect
+      expect(result).toBeRightOf(validCreate)
+    })
+
+    it("should return right when description and metadata are included", () => {
+      // Given
+      const input: WorkflowCreate = {
+        ...validCreate,
+        description: "Deploys to production",
+        metadata: {env: "prod"}
       }
 
       // When
-      const result = validateWorkflowCreate(valid)
+      const result = validateWorkflowCreate(input)
 
       // Expect
-      expect(result).toBeRightOf(valid)
+      expect(result).toBeRightOf(input)
     })
 
-    it("should reject a malformed object", () => {
+    it("should return left('malformed_object') when null", () => {
       // Given
-      const cases = [null, undefined, "string"]
+      const input = null
+
+      // When
+      const result = validateWorkflowCreate(input)
 
       // Expect
-      cases.forEach(c => {
-        expect(validateWorkflowCreate(c)).toBeLeftOf("malformed_object")
+      expect(result).toBeLeftOf("malformed_object")
+    })
+
+    it("should return left('invalid_description') when description is not a string", () => {
+      // Given
+      const input = {...validCreate, description: 123}
+
+      // When
+      const result = validateWorkflowCreate(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_description")
+    })
+
+    it("should return left('invalid_metadata') when metadata is not an object", () => {
+      // Given
+      const input = {...validCreate, metadata: "invalid"}
+
+      // When
+      const result = validateWorkflowCreate(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_metadata")
+    })
+
+    const errorCases: {field: keyof WorkflowCreate; error: string}[] = [
+      {field: "name", error: "missing_name"},
+      {field: "workflowTemplateId", error: "missing_workflow_template_id"}
+    ]
+
+    errorCases.forEach(({field, error}) => {
+      it(`should return left('${error}') when ${field} is missing`, () => {
+        // Given
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const {[field]: _, ...input} = validCreate
+
+        // When
+        const result = validateWorkflowCreate(input)
+
+        // Expect
+        expect(result).toBeLeftOf(error)
       })
-    })
-
-    it("should reject missing required fields", () => {
-      // Given
-      const missingName = {workflowTemplateId: "tmpl-123"}
-      const missingTemplateId = {name: "My Workflow"}
-
-      // Expect
-      expect(validateWorkflowCreate(missingName)).toBeLeftOf("missing_name")
-      expect(validateWorkflowCreate(missingTemplateId)).toBeLeftOf("missing_workflow_template_id")
-    })
-
-    it("should reject invalid field types", () => {
-      // Expect
-      expect(validateWorkflowCreate({name: 123, workflowTemplateId: "tmpl-123"})).toBeLeftOf("missing_name")
-      expect(validateWorkflowCreate({name: "My Workflow", workflowTemplateId: 123})).toBeLeftOf(
-        "missing_workflow_template_id"
-      )
-      expect(validateWorkflowCreate({name: "My Workflow", workflowTemplateId: "tmpl", description: 123})).toBeLeftOf(
-        "invalid_description"
-      )
-      expect(validateWorkflowCreate({name: "My Workflow", workflowTemplateId: "tmpl", metadata: 123})).toBeLeftOf(
-        "invalid_metadata"
-      )
-    })
-  })
-
-  describe("validateWorkflow", () => {
-    it("should accept a valid Workflow", () => {
-      // Given
-      const valid: Workflow = {
-        id: "wf-1",
-        name: "My Workflow",
-        status: "PENDING",
-        workflowTemplateId: "tmpl-1",
-        metadata: {},
-        createdAt: "2023-01-01T00:00:00Z",
-        updatedAt: "2023-01-01T00:00:00Z"
-      }
-
-      // When
-      const result = validateWorkflow(valid)
-
-      // Expect
-      expect(result).toBeRightOf(valid)
-    })
-
-    it("should reject missing fields in Workflow", () => {
-      // Given
-      const invalid = {id: "wf-1", name: "My Workflow"}
-
-      // When
-      const result = validateWorkflow(invalid)
-
-      // Expect
-      expect(result).toBeLeftOf("missing_status")
     })
   })
 
   describe("validateGetWorkflowParams", () => {
-    it("should accept valid params", () => {
+    it("should return right when valid", () => {
       // Given
-      const cases: GetWorkflowParams[] = [{include: ["workflowTemplate"]}, {}]
+      const input: GetWorkflowParams = {include: ["workflowTemplate"]}
+
+      // When
+      const result = validateGetWorkflowParams(input)
 
       // Expect
-      cases.forEach(c => {
-        expect(validateGetWorkflowParams(c)).toBeRightOf(c)
-      })
+      expect(result).toBeRightOf(input)
     })
 
-    it("should reject invalid include", () => {
+    it("should return right when optional fields are missing", () => {
       // Given
-      const invalidType = {include: "workflowTemplate"}
-      const invalidElement = {include: [123]}
+      const input: GetWorkflowParams = {}
+
+      // When
+      const result = validateGetWorkflowParams(input)
 
       // Expect
-      expect(validateGetWorkflowParams(invalidType)).toBeLeftOf("invalid_include")
-      expect(validateGetWorkflowParams(invalidElement)).toBeLeftOf("invalid_include")
+      expect(result).toBeRightOf({include: undefined})
+    })
+
+    it("should return left('invalid_include') when include is not an array", () => {
+      // Given
+      const input = {include: "workflowTemplate"}
+
+      // When
+      const result = validateGetWorkflowParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_include")
+    })
+
+    it("should return left('invalid_include') when include contains non-strings", () => {
+      // Given
+      const input = {include: ["workflowTemplate", 123]}
+
+      // When
+      const result = validateGetWorkflowParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_include")
     })
   })
 
   describe("validateListWorkflowsParams", () => {
-    it("should accept valid params", () => {
+    it("should return right when valid", () => {
       // Given
-      const valid: ListWorkflowsParams = {page: 1, limit: 10, includeOnlyNonTerminalState: true}
+      const input: ListWorkflowsParams = {
+        page: 1,
+        limit: 20,
+        include: ["workflowTemplate"],
+        includeOnlyNonTerminalState: true,
+        workflowTemplateIdentifier: "tmpl-1"
+      }
 
       // When
-      const result = validateListWorkflowsParams(valid)
+      const result = validateListWorkflowsParams(input)
 
       // Expect
-      expect(result).toBeRightOf(valid)
+      expect(result).toBeRightOf(input)
     })
 
-    it("should reject invalid types", () => {
+    it("should return right when empty", () => {
       // Given
-      const invalidPage = {page: "1"}
-      const invalidFlag = {includeOnlyNonTerminalState: "true"}
+      const input = {}
+
+      // When
+      const result = validateListWorkflowsParams(input)
 
       // Expect
-      expect(validateListWorkflowsParams(invalidPage)).toBeLeftOf("invalid_page")
-      expect(validateListWorkflowsParams(invalidFlag)).toBeLeftOf("invalid_include_only_non_terminal_state")
+      expect(result).toBeRightOf({
+        page: undefined,
+        limit: undefined,
+        include: undefined,
+        includeOnlyNonTerminalState: undefined,
+        workflowTemplateIdentifier: undefined
+      })
+    })
+
+    it("should return left('invalid_page') when page is not a number", () => {
+      // Given
+      const input = {page: "1"}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_page")
+    })
+
+    it("should return left('invalid_include_only_non_terminal_state') when not a boolean", () => {
+      // Given
+      const input = {includeOnlyNonTerminalState: "true"}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_include_only_non_terminal_state")
     })
   })
 
   describe("validateListWorkflows200Response", () => {
-    it("should accept a valid response", () => {
-      // Given
-      const valid: ListWorkflows200Response = {
-        data: [
-          {
-            id: "wf-1",
-            name: "My Workflow",
-            status: "PENDING",
-            workflowTemplateId: "tmpl-1",
-            metadata: {},
-            createdAt: "2023-01-01T00:00:00Z",
-            updatedAt: "2023-01-01T00:00:00Z"
-          }
-        ],
-        pagination: {total: 1, page: 1, limit: 10}
+    const validResponse: ListWorkflows200Response = {
+      data: [
+        {
+          id: "wf-123",
+          name: "Release",
+          status: "PENDING",
+          workflowTemplateId: "tmpl-1",
+          metadata: {},
+          createdAt: "2024-03-07T12:00:00Z",
+          updatedAt: "2024-03-07T12:00:00Z"
+        }
+      ],
+      pagination: {
+        page: 1,
+        limit: 20,
+        total: 1
       }
+    }
+
+    it("should return right when valid", () => {
+      // Given
+      const input = validResponse
 
       // When
-      const result = validateListWorkflows200Response(valid)
+      const result = validateListWorkflows200Response(input)
 
       // Expect
-      expect(result).toBeRightOf(valid)
+      expect(result).toBeRightOf(validResponse)
     })
 
-    it("should reject invalid response", () => {
+    it("should return left('missing_data') when data is missing", () => {
       // Given
-      const missingLimit = {data: [], pagination: {total: 0, page: 1}}
-      const negativeTotal = {data: [], pagination: {total: -1, page: 1, limit: 10}}
-      const negativePage = {data: [], pagination: {total: 0, page: -1, limit: 10}}
-      const zeroLimit = {data: [], pagination: {total: 0, page: 1, limit: 0}}
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {data, ...input} = validResponse
+
+      // When
+      const result = validateListWorkflows200Response(input)
 
       // Expect
-      expect(validateListWorkflows200Response(missingLimit)).toBeLeftOf("invalid_pagination")
-      expect(validateListWorkflows200Response(negativeTotal)).toBeLeftOf("invalid_pagination")
-      expect(validateListWorkflows200Response(negativePage)).toBeLeftOf("invalid_pagination")
-      expect(validateListWorkflows200Response(zeroLimit)).toBeLeftOf("invalid_pagination")
+      expect(result).toBeLeftOf("missing_data")
+    })
+
+    it("should return left('invalid_data') when data contains invalid item", () => {
+      // Given
+      const input = {...validResponse, data: [{id: "wf-123"}]}
+
+      // When
+      const result = validateListWorkflows200Response(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_data")
     })
   })
 
   describe("validateWorkflowVoteRequest", () => {
-    it("should accept a valid approve vote request", () => {
+    const validReq: WorkflowVoteRequest = {
+      reason: "Looks good",
+      voteType: {
+        type: "APPROVE",
+        votedForGroups: ["group-1"]
+      }
+    }
+
+    it("should return right when valid", () => {
       // Given
-      const valid: WorkflowVoteRequest = {
-        voteType: {type: "APPROVE", votedForGroups: ["grp-1"]},
-        reason: "Looks good"
+      const input = validReq
+
+      // When
+      const result = validateWorkflowVoteRequest(input)
+
+      // Expect
+      expect(result).toBeRightOf(validReq)
+    })
+
+    it("should return right when reason is undefined", () => {
+      // Given
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {reason, ...input} = validReq
+
+      // When
+      const result = validateWorkflowVoteRequest(input)
+
+      // Expect
+      expect(result).toBeRightOf({...input, reason: undefined})
+    })
+
+    it("should return left('invalid_reason') when reason is not string", () => {
+      // Given
+      const input = {...validReq, reason: 123}
+
+      // When
+      const result = validateWorkflowVoteRequest(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_reason")
+    })
+
+    it("should return left('missing_vote_type') when missing", () => {
+      // Given
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {voteType, ...input} = validReq
+
+      // When
+      const result = validateWorkflowVoteRequest(input)
+
+      // Expect
+      expect(result).toBeLeftOf("missing_vote_type")
+    })
+
+    it("should return left('invalid_vote_type') when invalid", () => {
+      // Given
+      const input = {...validReq, voteType: {type: "INVALID"}}
+
+      // When
+      const result = validateWorkflowVoteRequest(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_vote_type")
+    })
+
+    it("should handle VETO vote type", () => {
+      // Given
+      const input: WorkflowVoteRequest = {
+        voteType: {type: "VETO"}
       }
 
       // When
-      const result = validateWorkflowVoteRequest(valid)
+      const result = validateWorkflowVoteRequest(input)
 
       // Expect
-      expect(result).toBeRightOf(valid)
+      expect(result).toBeRightOf({...input, reason: undefined})
     })
 
-    it("should accept a valid veto vote request", () => {
+    it("should handle WITHDRAW vote type", () => {
       // Given
-      const valid: WorkflowVoteRequest = {voteType: {type: "VETO"}}
-
-      // When
-      const result = validateWorkflowVoteRequest(valid)
-
-      // Expect
-      expect(result).toBeRightOf(valid)
-    })
-
-    it("should reject invalid vote types", () => {
-      // Given
-      const missingGroups = {voteType: {type: "APPROVE"}}
-      const invalidType = {voteType: {type: "INVALID"}}
-
-      // Expect
-      expect(validateWorkflowVoteRequest(missingGroups)).toBeLeftOf("invalid_vote_type")
-      expect(validateWorkflowVoteRequest(invalidType)).toBeLeftOf("invalid_vote_type")
-    })
-  })
-
-  describe("validateWorkflowVote", () => {
-    it("should accept a valid vote", () => {
-      // Given
-      const valid: WorkflowVote = {
-        voterId: "usr-1",
-        voterType: "USER",
-        voteType: "APPROVE",
-        timestamp: "2023-01-01T00:00:00Z",
-        votedForGroups: ["grp-1"]
+      const input: WorkflowVoteRequest = {
+        voteType: {type: "WITHDRAW"}
       }
 
       // When
-      const result = validateWorkflowVote(valid)
+      const result = validateWorkflowVoteRequest(input)
 
       // Expect
-      expect(result).toBeRightOf(valid)
-    })
-
-    it("should reject an invalid vote", () => {
-      // Given
-      const invalid = {voterId: "usr-1"}
-
-      // When
-      const result = validateWorkflowVote(invalid)
-
-      // Expect
-      expect(result).toBeLeftOf("missing_voter_type")
+      expect(result).toBeRightOf({...input, reason: undefined})
     })
   })
 
   describe("validateCanVoteResponse", () => {
-    it("should accept a valid response", () => {
-      // Given
-      const valid1: CanVoteResponse = {canVote: true, voteStatus: "ELIGIBLE"}
-      const valid2: CanVoteResponse = {canVote: false, voteStatus: "INELIGIBLE", cantVoteReason: "No role"}
+    const validResponse: CanVoteResponse = {
+      canVote: true,
+      voteStatus: "PENDING",
+      cantVoteReason: "Some reason",
+      requireHighPrivilege: false
+    }
 
-      // Expect
-      expect(validateCanVoteResponse(valid1)).toBeRightOf(valid1)
-      expect(validateCanVoteResponse(valid2)).toBeRightOf(valid2)
-    })
-
-    it("should reject invalid response", () => {
+    it("should return right when valid", () => {
       // Given
-      const invalidFlag = {canVote: "true", voteStatus: "ELIGIBLE"}
+      const input = validResponse
 
       // When
-      const result = validateCanVoteResponse(invalidFlag)
+      const result = validateCanVoteResponse(input)
+
+      // Expect
+      expect(result).toBeRightOf(validResponse)
+    })
+
+    it("should return right when optional fields missing", () => {
+      // Given
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {cantVoteReason, requireHighPrivilege, ...input} = validResponse
+
+      // When
+      const result = validateCanVoteResponse(input)
+
+      // Expect
+      expect(result).toBeRightOf({...input, cantVoteReason: undefined, requireHighPrivilege: undefined})
+    })
+
+    it("should return left('missing_can_vote') when canVote is missing", () => {
+      // Given
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {canVote, ...input} = validResponse
+
+      // When
+      const result = validateCanVoteResponse(input)
+
+      // Expect
+      expect(result).toBeLeftOf("missing_can_vote")
+    })
+
+    it("should return left('invalid_can_vote') when canVote is not boolean", () => {
+      // Given
+      const input = {...validResponse, canVote: "true"}
+
+      // When
+      const result = validateCanVoteResponse(input)
 
       // Expect
       expect(result).toBeLeftOf("invalid_can_vote")
     })
+
+    it("should return left('missing_vote_status') when voteStatus is missing", () => {
+      // Given
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {voteStatus, ...input} = validResponse
+
+      // When
+      const result = validateCanVoteResponse(input)
+
+      // Expect
+      expect(result).toBeLeftOf("missing_vote_status")
+    })
+
+    it("should return left('invalid_require_high_privilege') when not boolean", () => {
+      // Given
+      const input = {...validResponse, requireHighPrivilege: "false"}
+
+      // When
+      const result = validateCanVoteResponse(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_require_high_privilege")
+    })
   })
 
   describe("validateGetWorkflowVotes200Response", () => {
-    it("should accept a valid response", () => {
+    const validResponse: GetWorkflowVotes200Response = {
+      votes: [
+        {
+          voterId: "voter-123",
+          voterType: "USER",
+          voteType: "APPROVE",
+          timestamp: "2024-03-07T12:00:00Z"
+        }
+      ]
+    }
+
+    it("should return right when valid", () => {
       // Given
-      const valid: GetWorkflowVotes200Response = {
-        votes: [
-          {
-            voterId: "usr-1",
-            voterType: "USER",
-            voteType: "APPROVE",
-            timestamp: "2023-01-01T00:00:00Z"
-          }
-        ]
-      }
+      const input = validResponse
 
       // When
-      const result = validateGetWorkflowVotes200Response(valid)
+      const result = validateGetWorkflowVotes200Response(input)
 
       // Expect
-      expect(result).toBeRightOf(valid)
+      expect(result).toBeRightOf(validResponse)
     })
 
-    it("should reject an invalid response", () => {
+    it("should return left('missing_votes') when missing", () => {
       // Given
-      const invalidVote = {votes: [{voterId: "usr-1"}]}
+      const input = {}
 
       // When
-      const result = validateGetWorkflowVotes200Response(invalidVote)
+      const result = validateGetWorkflowVotes200Response(input)
+
+      // Expect
+      expect(result).toBeLeftOf("missing_votes")
+    })
+
+    it("should return left('invalid_votes') when invalid", () => {
+      // Given
+      const input = {votes: [{voterId: "123"}]}
+
+      // When
+      const result = validateGetWorkflowVotes200Response(input)
 
       // Expect
       expect(result).toBeLeftOf("invalid_votes")

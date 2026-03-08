@@ -363,7 +363,7 @@ export function validateWorkflowTemplateScope(object: unknown): Either<Validatio
   })
 }
 
-export function validateWorkflowTemplateSummary(object: unknown): Either<ValidationError, WorkflowTemplateSummary> {
+function validateWorkflowTemplateSummary(object: unknown): Either<ValidationError, WorkflowTemplateSummary> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "id") || !isNonEmptyString(object.id)) return left("invalid_id")
