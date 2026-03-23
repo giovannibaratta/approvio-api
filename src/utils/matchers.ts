@@ -1,5 +1,5 @@
 import {MatcherFunction} from "expect"
-import {Either, isLeft, isRight} from "fp-ts/lib/Either"
+import {Either, isLeft, isRight} from "fp-ts/Either"
 import {format} from "pretty-format"
 
 declare global {
