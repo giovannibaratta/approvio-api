@@ -1,6 +1,6 @@
-import {Either, left, right, isLeft} from "fp-ts/Either"
+import {Either, left, right, isLeft, mapLeft} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
-import {validatePagination} from "./common.validators"
+import {validatePagination, validateSharedListParams} from "./common.validators"
 import {validateWorkflowTemplate} from "./workflow-templates.validators"
 import {
   WorkflowCreate,
@@ -18,6 +18,7 @@ import {
   CanVoteResponse,
   GetWorkflowVotes200Response
 } from "../../generated/openapi/model/models"
+import {pipe} from "fp-ts/function"
 
 export type WorkflowCreateValidationError =
   | "malformed_object"
@@ -190,21 +191,17 @@ export type ListWorkflowsParamsValidationError =
 export function validateListWorkflowsParams(
   object: unknown
 ): Either<ListWorkflowsParamsValidationError, ListWorkflowsParams> {
+  const sharedValidation = pipe(
+    validateSharedListParams(object),
+    // Search error should never be received because the search field is not present in the ListWorkflowsParams model
+    mapLeft(error => (error === "invalid_search" ? "malformed_object" : error))
+  )
+
+  if (isLeft(sharedValidation)) return left(sharedValidation.left)
+
+  const result: ListWorkflowsParams = sharedValidation.right
+
   if (typeof object !== "object" || object === null) return left("malformed_object")
-
-  let page: ListWorkflowsParams["page"] = undefined
-  if (hasOwnProperty(object, "page")) {
-    const val = object["page"]
-    if (typeof val !== "number") return left("invalid_page")
-    page = val
-  }
-
-  let limit: ListWorkflowsParams["limit"] = undefined
-  if (hasOwnProperty(object, "limit")) {
-    const val = object["limit"]
-    if (typeof val !== "number") return left("invalid_limit")
-    limit = val
-  }
 
   let include: ListWorkflowsParams["include"] = undefined
   if (hasOwnProperty(object, "include")) {
@@ -232,13 +229,11 @@ export function validateListWorkflowsParams(
     workflowTemplateIdentifier = val
   }
 
-  return right({
-    page,
-    limit,
-    include,
-    includeOnlyNonTerminalState,
-    workflowTemplateIdentifier
-  })
+  if (include !== undefined) result.include = include
+  if (includeOnlyNonTerminalState !== undefined) result.includeOnlyNonTerminalState = includeOnlyNonTerminalState
+  if (workflowTemplateIdentifier !== undefined) result.workflowTemplateIdentifier = workflowTemplateIdentifier
+
+  return right(result)
 }
 
 export type ListWorkflows200ResponseValidationError =

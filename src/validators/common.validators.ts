@@ -26,13 +26,27 @@ export function validateSharedListParams(object: unknown): Either<ListParamsVali
   const result: ValidatedListParams = {}
 
   if (hasOwnProperty(object, "page") && object.page !== undefined) {
-    if (typeof object.page !== "number" || object.page < 1) return left("invalid_page")
-    result.page = object.page
+    let page = object.page
+
+    if (typeof page === "string" && page.trim() !== "") {
+      const parsed = Number(page)
+      if (!isNaN(parsed)) page = parsed
+    }
+
+    if (typeof page !== "number" || !Number.isInteger(page) || page < 1) return left("invalid_page")
+    result.page = page
   }
 
   if (hasOwnProperty(object, "limit") && object.limit !== undefined) {
-    if (typeof object.limit !== "number" || object.limit < 1) return left("invalid_limit")
-    result.limit = object.limit
+    let limit = object.limit
+
+    if (typeof limit === "string" && limit.trim() !== "") {
+      const parsed = Number(limit)
+      if (!isNaN(parsed)) limit = parsed
+    }
+
+    if (typeof limit !== "number" || !Number.isInteger(limit) || limit < 1) return left("invalid_limit")
+    result.limit = limit
   }
 
   if (hasOwnProperty(object, "search") && object.search !== undefined) {

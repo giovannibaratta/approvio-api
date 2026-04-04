@@ -9,10 +9,11 @@ import {
   ListAgents200Response,
   AgentGet200Response
 } from "../../generated/openapi/model/models"
-import {Either, left, right, isLeft} from "fp-ts/Either"
+import {Either, left, right, isLeft, mapLeft} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
-import {validatePagination} from "./common.validators"
+import {validatePagination, validateSharedListParams} from "./common.validators"
 import {getStringAsEnum} from "../utils/enum"
+import {pipe} from "fp-ts/function"
 
 export type AgentSummaryValidationError =
   | "malformed_object"
@@ -141,24 +142,16 @@ export function validateAgentTokenResponse(
 export type ListAgentsParamsValidationError = "malformed_object" | "invalid_page" | "invalid_limit"
 
 export function validateListAgentsParams(object: unknown): Either<ListAgentsParamsValidationError, ListAgentsParams> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
+  const sharedValidation = pipe(
+    validateSharedListParams(object),
+    // Search error should never be received because the search field is not present in the ListAgentsParams model
+    mapLeft(error => (error === "invalid_search" ? "malformed_object" : error))
+  )
 
-  let page: ListAgentsParams["page"] = undefined
-  if (hasOwnProperty(object, "page") && object.page !== undefined) {
-    if (typeof object.page !== "number") return left("invalid_page")
-    page = object.page
-  }
+  if (isLeft(sharedValidation)) return left(sharedValidation.left)
 
-  let limit: ListAgentsParams["limit"] = undefined
-  if (hasOwnProperty(object, "limit") && object.limit !== undefined) {
-    if (typeof object.limit !== "number") return left("invalid_limit")
-    limit = object.limit
-  }
-
-  return right({
-    page,
-    limit
-  })
+  const result: ListAgentsParams = sharedValidation.right
+  return right(result)
 }
 
 export type ListAgents200ResponseValidationError =
