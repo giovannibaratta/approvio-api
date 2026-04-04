@@ -326,7 +326,7 @@ describe("Workflow Templates Validators", () => {
       const result = validateListWorkflowTemplates200Response(input)
 
       // Expect
-      expect(result).toBeLeftOf("invalid_data_element")
+      expect(result).toBeLeftOf("data_item_invalid_name")
     })
 
     it("should reject missing pagination", () => {

@@ -18,51 +18,16 @@ import {
   EmailAction,
   WebhookAction
 } from "../../generated/openapi/model/models"
-import {validatePagination, validateSharedListParams} from "./common.validators"
+import {ListParamsValidationError, validatePagination, validateSharedListParams} from "./common.validators"
+import {prefixLeft, PrefixUnion} from "../utils/types"
 
-export type ValidationError =
+type EmailActionValidationError =
   | "malformed_object"
   | "invalid_type"
   | "invalid_recipients"
   | "invalid_recipients_element"
-  | "invalid_url"
-  | "invalid_method"
-  | "invalid_headers"
-  | "invalid_headers_element"
-  | "invalid_workflow_action_type"
-  | "invalid_group_id"
-  | "invalid_min_count"
-  | "invalid_require_high_privilege"
-  | "invalid_rules"
-  | "invalid_rules_element"
-  | "invalid_approval_rule_type"
-  | "invalid_id"
-  | "invalid_name"
-  | "invalid_version"
-  | "invalid_status"
-  | "invalid_allow_voting"
-  | "missing_approval_rule"
-  | "invalid_approval_rule"
-  | "invalid_space_id"
-  | "invalid_created_at"
-  | "invalid_updated_at"
-  | "invalid_description"
-  | "invalid_metadata"
-  | "invalid_actions"
-  | "invalid_actions_element"
-  | "invalid_default_expires_in_hours"
-  | "invalid_cancel_workflows"
-  | "invalid_workflow_template_id"
-  | "invalid_data"
-  | "invalid_data_element"
-  | "missing_pagination"
-  | "invalid_pagination"
-  | "invalid_page"
-  | "invalid_limit"
-  | "invalid_space_identifier"
-  | "invalid_search"
 
-function validateEmailAction(object: unknown): Either<ValidationError, EmailAction> {
+function validateEmailAction(object: unknown): Either<EmailActionValidationError, EmailAction> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "type") || object.type !== "EMAIL") return left("invalid_type")
@@ -81,7 +46,15 @@ function validateEmailAction(object: unknown): Either<ValidationError, EmailActi
   })
 }
 
-function validateWebhookAction(object: unknown): Either<ValidationError, WebhookAction> {
+type WebhookActionValidationError =
+  | "malformed_object"
+  | "invalid_type"
+  | "invalid_url"
+  | "invalid_method"
+  | "invalid_headers"
+  | "invalid_headers_element"
+
+function validateWebhookAction(object: unknown): Either<WebhookActionValidationError, WebhookAction> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "type") || object.type !== "WEBHOOK") return left("invalid_type")
@@ -117,7 +90,13 @@ function validateWebhookAction(object: unknown): Either<ValidationError, Webhook
   return right(result)
 }
 
-function validateWorkflowAction(object: unknown): Either<ValidationError, WorkflowAction> {
+type WorkflowActionValidationError =
+  | "malformed_object"
+  | "invalid_workflow_action_type"
+  | WebhookActionValidationError
+  | EmailActionValidationError
+
+function validateWorkflowAction(object: unknown): Either<WorkflowActionValidationError, WorkflowAction> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (hasOwnProperty(object, "type")) {
@@ -128,7 +107,16 @@ function validateWorkflowAction(object: unknown): Either<ValidationError, Workfl
   return left("invalid_workflow_action_type")
 }
 
-function validateGroupRequirementRule(object: unknown): Either<ValidationError, GroupRequirementRule> {
+type GroupRequirementRuleValidationError =
+  | "malformed_object"
+  | "invalid_type"
+  | "invalid_group_id"
+  | "invalid_min_count"
+  | "invalid_require_high_privilege"
+
+function validateGroupRequirementRule(
+  object: unknown
+): Either<GroupRequirementRuleValidationError, GroupRequirementRule> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "type") || object.type !== "GROUP_REQUIREMENT") return left("invalid_type")
@@ -154,7 +142,9 @@ function validateGroupRequirementRule(object: unknown): Either<ValidationError, 
   return right(result)
 }
 
-function validateAndRule(object: unknown): Either<ValidationError, AndRule> {
+type AndRuleValidationError = "malformed_object" | "invalid_type" | "invalid_rules" | "invalid_rules_element"
+
+function validateAndRule(object: unknown): Either<AndRuleValidationError, AndRule> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "type") || object.type !== "AND") return left("invalid_type")
@@ -178,7 +168,9 @@ function validateAndRule(object: unknown): Either<ValidationError, AndRule> {
   })
 }
 
-function validateOrRule(object: unknown): Either<ValidationError, OrRule> {
+type OrRuleValidationError = "malformed_object" | "invalid_type" | "invalid_rules" | "invalid_rules_element"
+
+function validateOrRule(object: unknown): Either<OrRuleValidationError, OrRule> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "type") || object.type !== "OR") return left("invalid_type")
@@ -202,7 +194,14 @@ function validateOrRule(object: unknown): Either<ValidationError, OrRule> {
   })
 }
 
-function validateApprovalRule(object: unknown): Either<ValidationError, ApprovalRule> {
+type ApprovalRuleValidationError =
+  | "malformed_object"
+  | "invalid_approval_rule_type"
+  | GroupRequirementRuleValidationError
+  | AndRuleValidationError
+  | OrRuleValidationError
+
+function validateApprovalRule(object: unknown): Either<ApprovalRuleValidationError, ApprovalRule> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (hasOwnProperty(object, "type")) {
@@ -214,7 +213,25 @@ function validateApprovalRule(object: unknown): Either<ValidationError, Approval
   return left("invalid_approval_rule_type")
 }
 
-export function validateWorkflowTemplate(object: unknown): Either<ValidationError, WorkflowTemplate> {
+export type WorkflowTemplateValidationError =
+  | "malformed_object"
+  | "invalid_id"
+  | "invalid_name"
+  | "invalid_version"
+  | "invalid_status"
+  | "invalid_allow_voting"
+  | "missing_approval_rule"
+  | "invalid_approval_rule"
+  | "invalid_space_id"
+  | "invalid_created_at"
+  | "invalid_updated_at"
+  | "invalid_description"
+  | "invalid_metadata"
+  | "invalid_actions"
+  | "invalid_actions_element"
+  | "invalid_default_expires_in_hours"
+
+export function validateWorkflowTemplate(object: unknown): Either<WorkflowTemplateValidationError, WorkflowTemplate> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "id") || !isNonEmptyString(object.id)) return left("invalid_id")
@@ -280,7 +297,21 @@ export function validateWorkflowTemplate(object: unknown): Either<ValidationErro
   return right(result)
 }
 
-export function validateWorkflowTemplateCreate(object: unknown): Either<ValidationError, WorkflowTemplateCreate> {
+export type WorkflowTemplateCreateValidationError =
+  | "malformed_object"
+  | "invalid_name"
+  | "missing_approval_rule"
+  | "invalid_approval_rule"
+  | "invalid_space_id"
+  | "invalid_description"
+  | "invalid_metadata"
+  | "invalid_actions"
+  | "invalid_actions_element"
+  | "invalid_default_expires_in_hours"
+
+export function validateWorkflowTemplateCreate(
+  object: unknown
+): Either<WorkflowTemplateCreateValidationError, WorkflowTemplateCreate> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "name") || !isNonEmptyString(object.name)) return left("invalid_name")
@@ -327,7 +358,19 @@ export function validateWorkflowTemplateCreate(object: unknown): Either<Validati
   return right(result)
 }
 
-export function validateWorkflowTemplateUpdate(object: unknown): Either<ValidationError, WorkflowTemplateUpdate> {
+export type WorkflowTemplateUpdateValidationError =
+  | "malformed_object"
+  | "invalid_description"
+  | "invalid_metadata"
+  | "invalid_approval_rule"
+  | "invalid_actions"
+  | "invalid_actions_element"
+  | "invalid_default_expires_in_hours"
+  | "invalid_cancel_workflows"
+
+export function validateWorkflowTemplateUpdate(
+  object: unknown
+): Either<WorkflowTemplateUpdateValidationError, WorkflowTemplateUpdate> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   const result: WorkflowTemplateUpdate = {}
@@ -373,7 +416,11 @@ export function validateWorkflowTemplateUpdate(object: unknown): Either<Validati
   return right(result)
 }
 
-export function validateWorkflowTemplateDeprecate(object: unknown): Either<ValidationError, WorkflowTemplateDeprecate> {
+export type WorkflowTemplateDeprecateValidationError = "malformed_object" | "invalid_cancel_workflows"
+
+export function validateWorkflowTemplateDeprecate(
+  object: unknown
+): Either<WorkflowTemplateDeprecateValidationError, WorkflowTemplateDeprecate> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   const result: WorkflowTemplateDeprecate = {}
@@ -386,24 +433,35 @@ export function validateWorkflowTemplateDeprecate(object: unknown): Either<Valid
   return right(result)
 }
 
-export function validateWorkflowTemplateScope(object: unknown): Either<ValidationError, WorkflowTemplateScope> {
+export type WorkflowTemplateScopeValidationError = "malformed_object" | "invalid_type" | "invalid_workflow_template_id"
+
+export function validateWorkflowTemplateScope(
+  object: unknown
+): Either<WorkflowTemplateScopeValidationError, WorkflowTemplateScope> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "type") || object.type !== "workflow_template") return left("invalid_type")
   if (!hasOwnProperty(object, "workflowTemplateId") || !isNonEmptyString(object.workflowTemplateId))
     return left("invalid_workflow_template_id")
 
-  if (!hasOwnProperty(object, "type") || typeof object.type !== "string") return left("invalid_type")
-  const type = getStringAsEnum(object.type, WorkflowTemplateScope.TypeEnum)
-  if (!type) return left("invalid_type")
-
   return right({
-    type,
+    type: object.type,
     workflowTemplateId: object.workflowTemplateId
   })
 }
 
-function validateWorkflowTemplateSummary(object: unknown): Either<ValidationError, WorkflowTemplateSummary> {
+type WorkflowTemplateSummaryValidationError =
+  | "malformed_object"
+  | "invalid_id"
+  | "invalid_name"
+  | "invalid_version"
+  | "invalid_created_at"
+  | "invalid_updated_at"
+  | "invalid_description"
+
+function validateWorkflowTemplateSummary(
+  object: unknown
+): Either<WorkflowTemplateSummaryValidationError, WorkflowTemplateSummary> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "id") || !isNonEmptyString(object.id)) return left("invalid_id")
@@ -428,9 +486,16 @@ function validateWorkflowTemplateSummary(object: unknown): Either<ValidationErro
   return right(result)
 }
 
+export type ListWorkflowTemplates200ResponseValidationError =
+  | "malformed_object"
+  | "invalid_data"
+  | "invalid_pagination"
+  | "missing_pagination"
+  | PrefixUnion<"data_item", WorkflowTemplateSummaryValidationError>
+
 export function validateListWorkflowTemplates200Response(
   object: unknown
-): Either<ValidationError, ListWorkflowTemplates200Response> {
+): Either<ListWorkflowTemplates200ResponseValidationError, ListWorkflowTemplates200Response> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "data") || !Array.isArray(object.data)) return left("invalid_data")
@@ -438,7 +503,7 @@ export function validateListWorkflowTemplates200Response(
   const data: WorkflowTemplateSummary[] = []
   for (const item of object.data) {
     const validatedItem = validateWorkflowTemplateSummary(item)
-    if (isLeft(validatedItem)) return left("invalid_data_element")
+    if (isLeft(validatedItem)) return left(prefixLeft("data_item", validatedItem.left))
     data.push(validatedItem.right)
   }
 
@@ -452,9 +517,11 @@ export function validateListWorkflowTemplates200Response(
   })
 }
 
+export type ListWorkflowTemplatesParamsValidationError = ListParamsValidationError | "invalid_space_identifier"
+
 export function validateListWorkflowTemplatesParams(
   object: unknown
-): Either<ValidationError, ListWorkflowTemplatesParams> {
+): Either<ListWorkflowTemplatesParamsValidationError, ListWorkflowTemplatesParams> {
   const sharedValidation = validateSharedListParams(object)
   if (isLeft(sharedValidation)) return left(sharedValidation.left)
 
