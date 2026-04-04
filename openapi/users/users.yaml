@@ -36,24 +36,12 @@ get:
   tags:
     - Users
   parameters:
-    - name: search
+    - name: params
       in: query
-      description: Fuzzy search term for user display name or email.
-      required: false
+      style: form
+      explode: true
       schema:
-        type: string
-    - name: page
-      in: query
-      description: Page number for pagination
-      schema:
-        type: integer
-        default: 1
-    - name: limit
-      in: query
-      description: Number of results per page
-      schema:
-        type: integer
-        default: 20
+        $ref: ./schemas.yaml#/ListUsersParams
   responses:
     "200":
       description: List of users

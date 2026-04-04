@@ -6,11 +6,12 @@ import {
   RoleAssignmentRequest,
   RoleRemovalRequest,
   RoleOperationItem,
-  RoleScope
+  RoleScope,
+  ListUsersParams
 } from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft, isRight} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
-import {validatePagination} from "./common.validators"
+import {validatePagination, validateSharedListParams} from "./common.validators"
 
 export type UserValidationError =
   | "malformed_object"
@@ -227,4 +228,10 @@ export function validateRoleRemovalRequest(
   object: unknown
 ): Either<RoleOperationRequestValidationError, RoleRemovalRequest> {
   return validateRoleAssignmentRequest(object)
+}
+
+export type ListUsersParamsValidationError = "malformed_object" | "invalid_page" | "invalid_limit" | "invalid_search"
+
+export function validateListUsersParams(object: unknown): Either<ListUsersParamsValidationError, ListUsersParams> {
+  return validateSharedListParams(object)
 }

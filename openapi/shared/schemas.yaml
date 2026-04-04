@@ -168,7 +168,7 @@ Pagination:
       description: Total number of items
     page:
       type: integer
-      description: Current page number
+      description: Current page number (1-indexed)
     limit:
       type: integer
       description: Items per page
@@ -202,7 +202,7 @@ ListWorkflowsParams:
     page:
       type: integer
       default: 1
-      description: Page number for pagination
+      description: Page number for pagination (1-indexed)
     limit:
       type: integer
       default: 20
@@ -351,7 +351,7 @@ ListAgentsParams:
     page:
       type: integer
       default: 1
-      description: Page number for pagination
+      description: Page number for pagination (1-indexed)
     limit:
       type: integer
       default: 20

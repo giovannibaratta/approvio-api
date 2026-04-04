@@ -36,18 +36,12 @@ get:
   tags:
     - Spaces
   parameters:
-    - name: page
+    - name: params
       in: query
-      description: Page number for pagination
+      style: form
+      explode: true
       schema:
-        type: integer
-        default: 1
-    - name: limit
-      in: query
-      description: Number of results per page
-      schema:
-        type: integer
-        default: 20
+        $ref: ./schemas.yaml#/ListSpacesParams
   responses:
     "200":
       description: List of spaces

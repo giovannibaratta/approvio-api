@@ -10,11 +10,12 @@ import {
   RemoveGroupEntitiesRequest,
   EntityMembershipAdd,
   EntityMembershipRemove,
-  ListGroupEntities200Response
+  ListGroupEntities200Response,
+  ListGroupsParams
 } from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
-import {validatePagination} from "./common.validators"
+import {validatePagination, validateSharedListParams} from "./common.validators"
 
 export type GroupValidationError =
   | "malformed_object"
@@ -132,6 +133,12 @@ export function validateGroupScope(object: unknown): Either<GroupScopeValidation
     type: "group",
     groupId: object.groupId
   })
+}
+
+export type ListGroupsParamsValidationError = "malformed_object" | "invalid_page" | "invalid_limit" | "invalid_search"
+
+export function validateListGroupsParams(object: unknown): Either<ListGroupsParamsValidationError, ListGroupsParams> {
+  return validateSharedListParams(object)
 }
 
 export type GroupInfoValidationError =

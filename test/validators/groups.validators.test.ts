@@ -14,7 +14,8 @@ import {
   validateGroupInfo,
   validateAddGroupEntitiesRequest,
   validateRemoveGroupEntitiesRequest,
-  validateListGroupEntities200Response
+  validateListGroupEntities200Response,
+  validateListGroupsParams
 } from "../../src/validators/groups.validators"
 import "../../src/utils/matchers"
 
@@ -34,6 +35,63 @@ describe("groups validators", () => {
 
       // Expect
       expect(result).toBeRightOf(validCreate)
+    })
+  })
+
+  describe("validateListGroupsParams", () => {
+    it("should return right with empty object when no params are provided", () => {
+      // Given
+      const input = {}
+
+      // When
+      const result = validateListGroupsParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({})
+    })
+
+    it("should return right with all params", () => {
+      // Given
+      const input = {page: 2, limit: 10, search: "dev"}
+
+      // When
+      const result = validateListGroupsParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({page: 2, limit: 10, search: "dev"})
+    })
+
+    it("should return left('invalid_page') when page is less than 1", () => {
+      // Given
+      const input = {page: 0}
+
+      // When
+      const result = validateListGroupsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_page")
+    })
+
+    it("should return left('invalid_limit') when limit is less than 1", () => {
+      // Given
+      const input = {limit: 0}
+
+      // When
+      const result = validateListGroupsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_limit")
+    })
+
+    it("should return left('invalid_search') when search is not a string", () => {
+      // Given
+      const input = {search: 123}
+
+      // When
+      const result = validateListGroupsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_search")
     })
   })
 
