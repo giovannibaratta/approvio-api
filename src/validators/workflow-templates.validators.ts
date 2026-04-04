@@ -18,9 +18,49 @@ import {
   EmailAction,
   WebhookAction
 } from "../../generated/openapi/model/models"
-import {validatePagination} from "./common.validators"
+import {validatePagination, validateSharedListParams} from "./common.validators"
 
-export type ValidationError = string
+export type ValidationError =
+  | "malformed_object"
+  | "invalid_type"
+  | "invalid_recipients"
+  | "invalid_recipients_element"
+  | "invalid_url"
+  | "invalid_method"
+  | "invalid_headers"
+  | "invalid_headers_element"
+  | "invalid_workflow_action_type"
+  | "invalid_group_id"
+  | "invalid_min_count"
+  | "invalid_require_high_privilege"
+  | "invalid_rules"
+  | "invalid_rules_element"
+  | "invalid_approval_rule_type"
+  | "invalid_id"
+  | "invalid_name"
+  | "invalid_version"
+  | "invalid_status"
+  | "invalid_allow_voting"
+  | "missing_approval_rule"
+  | "invalid_approval_rule"
+  | "invalid_space_id"
+  | "invalid_created_at"
+  | "invalid_updated_at"
+  | "invalid_description"
+  | "invalid_metadata"
+  | "invalid_actions"
+  | "invalid_actions_element"
+  | "invalid_default_expires_in_hours"
+  | "invalid_cancel_workflows"
+  | "invalid_workflow_template_id"
+  | "invalid_data"
+  | "invalid_data_element"
+  | "missing_pagination"
+  | "invalid_pagination"
+  | "invalid_page"
+  | "invalid_limit"
+  | "invalid_space_identifier"
+  | "invalid_search"
 
 function validateEmailAction(object: unknown): Either<ValidationError, EmailAction> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
@@ -415,21 +455,17 @@ export function validateListWorkflowTemplates200Response(
 export function validateListWorkflowTemplatesParams(
   object: unknown
 ): Either<ValidationError, ListWorkflowTemplatesParams> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
+  const sharedValidation = validateSharedListParams(object)
+  if (isLeft(sharedValidation)) return left(sharedValidation.left)
 
-  const result: ListWorkflowTemplatesParams = {}
+  const result: ListWorkflowTemplatesParams = sharedValidation.right
 
-  if (hasOwnProperty(object, "page") && object.page !== undefined) {
-    if (typeof object.page !== "number") return left("invalid_page")
-    result.page = object.page
-  }
-
-  if (hasOwnProperty(object, "limit") && object.limit !== undefined) {
-    if (typeof object.limit !== "number") return left("invalid_limit")
-    result.limit = object.limit
-  }
-
-  if (hasOwnProperty(object, "spaceIdentifier") && object.spaceIdentifier !== undefined) {
+  if (
+    typeof object === "object" &&
+    object !== null &&
+    hasOwnProperty(object, "spaceIdentifier") &&
+    object.spaceIdentifier !== undefined
+  ) {
     if (!isNonEmptyString(object.spaceIdentifier)) return left("invalid_space_identifier")
     result.spaceIdentifier = object.spaceIdentifier
   }

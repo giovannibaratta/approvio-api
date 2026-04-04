@@ -2,7 +2,8 @@ import {SpaceCreate, ListSpaces200Response, SpaceScope} from "../../generated/op
 import {
   validateSpaceCreate,
   validateListSpaces200Response,
-  validateSpaceScope
+  validateSpaceScope,
+  validateListSpacesParams
 } from "../../src/validators/spaces.validators"
 import "../../src/utils/matchers"
 
@@ -93,6 +94,63 @@ describe("spaces validators", () => {
 
       // Expect
       expect(result).toBeLeftOf("invalid_data")
+    })
+  })
+
+  describe("validateListSpacesParams", () => {
+    it("should return right with empty object when no params are provided", () => {
+      // Given
+      const input = {}
+
+      // When
+      const result = validateListSpacesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({})
+    })
+
+    it("should return right with all params", () => {
+      // Given
+      const input = {page: 2, limit: 10, search: "dev"}
+
+      // When
+      const result = validateListSpacesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({page: 2, limit: 10, search: "dev"})
+    })
+
+    it("should return left('invalid_page') when page is less than 1", () => {
+      // Given
+      const input = {page: 0}
+
+      // When
+      const result = validateListSpacesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_page")
+    })
+
+    it("should return left('invalid_limit') when limit is less than 1", () => {
+      // Given
+      const input = {limit: 0}
+
+      // When
+      const result = validateListSpacesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_limit")
+    })
+
+    it("should return left('invalid_search') when search is not a string", () => {
+      // Given
+      const input = {search: 123}
+
+      // When
+      const result = validateListSpacesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_search")
     })
   })
 

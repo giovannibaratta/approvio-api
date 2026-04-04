@@ -12,6 +12,37 @@ export type PaginationValidationError =
   | "missing_limit"
   | "invalid_limit"
 
+export type ListParamsValidationError = "malformed_object" | "invalid_page" | "invalid_limit" | "invalid_search"
+
+export interface ValidatedListParams {
+  page?: number
+  limit?: number
+  search?: string
+}
+
+export function validateSharedListParams(object: unknown): Either<ListParamsValidationError, ValidatedListParams> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  const result: ValidatedListParams = {}
+
+  if (hasOwnProperty(object, "page") && object.page !== undefined) {
+    if (typeof object.page !== "number" || object.page < 1) return left("invalid_page")
+    result.page = object.page
+  }
+
+  if (hasOwnProperty(object, "limit") && object.limit !== undefined) {
+    if (typeof object.limit !== "number" || object.limit < 1) return left("invalid_limit")
+    result.limit = object.limit
+  }
+
+  if (hasOwnProperty(object, "search") && object.search !== undefined) {
+    if (typeof object.search !== "string" || object.search.trim() === "") return left("invalid_search")
+    result.search = object.search
+  }
+
+  return right(result)
+}
+
 export function validatePagination(object: unknown): Either<PaginationValidationError, Pagination> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 

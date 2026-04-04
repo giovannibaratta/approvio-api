@@ -59,7 +59,7 @@ get:
         example: my-org
     - name: page
       in: query
-      description: Page number for pagination
+      description: Page number for pagination (1-indexed)
       schema:
         type: integer
         default: 1

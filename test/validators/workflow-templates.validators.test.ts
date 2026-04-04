@@ -369,7 +369,8 @@ describe("Workflow Templates Validators", () => {
       const input: ListWorkflowTemplatesParams = {
         page: 2,
         limit: 50,
-        spaceIdentifier: "space-123"
+        spaceIdentifier: "space-123",
+        search: "template"
       }
 
       // When
@@ -388,6 +389,17 @@ describe("Workflow Templates Validators", () => {
 
       // Expect
       expect(result).toBeLeftOf("invalid_page")
+    })
+
+    it("should reject invalid search type", () => {
+      // Given
+      const input = {search: 123}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_search")
     })
   })
 })

@@ -1,7 +1,13 @@
-import {Space, SpaceCreate, ListSpaces200Response, SpaceScope} from "../../generated/openapi/model/models"
+import {
+  Space,
+  SpaceCreate,
+  ListSpaces200Response,
+  SpaceScope,
+  ListSpacesParams
+} from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
-import {validatePagination} from "./common.validators"
+import {validatePagination, validateSharedListParams} from "./common.validators"
 
 export type SpaceValidationError =
   | "malformed_object"
@@ -117,4 +123,10 @@ export function validateSpaceScope(object: unknown): Either<SpaceScopeValidation
     type: "space",
     spaceId: object.spaceId
   })
+}
+
+export type ListSpacesParamsValidationError = "malformed_object" | "invalid_page" | "invalid_limit" | "invalid_search"
+
+export function validateListSpacesParams(object: unknown): Either<ListSpacesParamsValidationError, ListSpacesParams> {
+  return validateSharedListParams(object)
 }
