@@ -185,7 +185,18 @@ describe("workflow validators", () => {
       })
     })
 
-    it("should return left('invalid_page') when page is not a number", () => {
+    it("should return left('invalid_page') when page is not a valid number", () => {
+      // Given
+      const input = {page: "abc"}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_page")
+    })
+
+    it("should coerce valid string to number", () => {
       // Given
       const input = {page: "1"}
 
@@ -193,7 +204,7 @@ describe("workflow validators", () => {
       const result = validateListWorkflowsParams(input)
 
       // Expect
-      expect(result).toBeLeftOf("invalid_page")
+      expect(result).toBeRightOf({page: 1})
     })
 
     it("should return left('invalid_include_only_non_terminal_state') when not a boolean", () => {

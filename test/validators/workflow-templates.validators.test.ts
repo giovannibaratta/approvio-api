@@ -380,9 +380,20 @@ describe("Workflow Templates Validators", () => {
       expect(result).toBeRight()
     })
 
-    it("should reject invalid param types", () => {
+    it("should accept valid string coercion param types", () => {
       // Given
       const input = {page: "2"}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({page: 2})
+    })
+
+    it("should reject invalid param types", () => {
+      // Given
+      const input = {page: "abc"}
 
       // When
       const result = validateListWorkflowTemplatesParams(input)
