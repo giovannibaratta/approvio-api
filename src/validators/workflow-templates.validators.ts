@@ -517,7 +517,10 @@ export function validateListWorkflowTemplates200Response(
   })
 }
 
-export type ListWorkflowTemplatesParamsValidationError = ListParamsValidationError | "invalid_space_identifier"
+export type ListWorkflowTemplatesParamsValidationError =
+  | ListParamsValidationError
+  | "invalid_space_identifier"
+  | "invalid_status"
 
 export function validateListWorkflowTemplatesParams(
   object: unknown
@@ -527,15 +530,30 @@ export function validateListWorkflowTemplatesParams(
 
   const result: ListWorkflowTemplatesParams = sharedValidation.right
 
-  if (
-    typeof object === "object" &&
-    object !== null &&
-    hasOwnProperty(object, "spaceIdentifier") &&
-    object.spaceIdentifier !== undefined
-  ) {
+  if (typeof object !== "object" || object === null) {
+    return left("malformed_object")
+  }
+
+  if (hasOwnProperty(object, "spaceIdentifier") && object.spaceIdentifier !== undefined) {
     if (!isNonEmptyString(object.spaceIdentifier)) return left("invalid_space_identifier")
     result.spaceIdentifier = object.spaceIdentifier
   }
+
+  let status: string[] = ["ACTIVE"]
+  if (hasOwnProperty(object, "status") && object.status !== undefined) {
+    const statusVal = object.status
+    if (Array.isArray(statusVal)) {
+      for (const item of statusVal) {
+        if (typeof item !== "string") return left("invalid_status")
+      }
+      status = statusVal
+    } else if (typeof statusVal === "string") {
+      status = [statusVal]
+    } else {
+      return left("invalid_status")
+    }
+  }
+  result.status = status
 
   return right(result)
 }

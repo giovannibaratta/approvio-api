@@ -218,8 +218,15 @@ export function validateListWorkflowsParams(
   let includeOnlyNonTerminalState: ListWorkflowsParams["includeOnlyNonTerminalState"] = undefined
   if (hasOwnProperty(object, "includeOnlyNonTerminalState")) {
     const val = object["includeOnlyNonTerminalState"]
-    if (typeof val !== "boolean") return left("invalid_include_only_non_terminal_state")
-    includeOnlyNonTerminalState = val
+    if (typeof val === "boolean") {
+      includeOnlyNonTerminalState = val
+    } else if (val === "true") {
+      includeOnlyNonTerminalState = true
+    } else if (val === "false") {
+      includeOnlyNonTerminalState = false
+    } else {
+      return left("invalid_include_only_non_terminal_state")
+    }
   }
 
   let workflowTemplateIdentifier: ListWorkflowsParams["workflowTemplateIdentifier"] = undefined

@@ -212,7 +212,7 @@ ListWorkflowsParams:
       items:
         $ref: ../workflows/schemas.yaml#/WorkflowInclude
       description: Comma-separated list of related objects to include in the response
-    include-only-non-terminal-state:
+    includeOnlyNonTerminalState:
       type: boolean
       default: false
       description: When set to true, only workflows that are not in terminal state will be returned.
