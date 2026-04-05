@@ -521,6 +521,8 @@ export type ListWorkflowTemplatesParamsValidationError =
   | ListParamsValidationError
   | "invalid_space_identifier"
   | "invalid_status"
+  | "invalid_search_mode"
+  | "invalid_search_length"
 
 export function validateListWorkflowTemplatesParams(
   object: unknown
@@ -532,6 +534,23 @@ export function validateListWorkflowTemplatesParams(
 
   if (typeof object !== "object" || object === null) {
     return left("malformed_object")
+  }
+
+  if (hasOwnProperty(object, "searchMode") && object.searchMode !== undefined) {
+    if (typeof object.searchMode !== "string") return left("invalid_search_mode")
+    if (object.searchMode !== "CONTAINS" && object.searchMode !== "EXACT") return left("invalid_search_mode")
+    result.searchMode = object.searchMode
+  } else {
+    result.searchMode = "CONTAINS"
+  }
+
+  if (result.search !== undefined) {
+    if (result.searchMode === "CONTAINS" && result.search.length < 3) {
+      return left("invalid_search_length")
+    }
+    if (result.searchMode === "EXACT" && result.search.length < 1) {
+      return left("invalid_search_length")
+    }
   }
 
   if (hasOwnProperty(object, "spaceIdentifier") && object.spaceIdentifier !== undefined) {
