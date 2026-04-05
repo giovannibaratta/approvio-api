@@ -353,7 +353,7 @@ describe("Workflow Templates Validators", () => {
   })
 
   describe("validateListWorkflowTemplatesParams", () => {
-    it("should validate empty params", () => {
+    it("should validate empty params and set default status", () => {
       // Given
       const input: ListWorkflowTemplatesParams = {}
 
@@ -361,7 +361,9 @@ describe("Workflow Templates Validators", () => {
       const result = validateListWorkflowTemplatesParams(input)
 
       // Expect
-      expect(result).toBeRight()
+      expect(result).toBeRightOf({
+        status: ["ACTIVE"]
+      })
     })
 
     it("should validate all params", () => {
@@ -370,25 +372,57 @@ describe("Workflow Templates Validators", () => {
         page: 2,
         limit: 50,
         spaceIdentifier: "space-123",
-        search: "template"
+        search: "template",
+        status: ["ACTIVE", "DEPRECATED"]
       }
 
       // When
       const result = validateListWorkflowTemplatesParams(input)
 
       // Expect
-      expect(result).toBeRight()
+      expect(result).toBeRightOf({
+        page: 2,
+        limit: 50,
+        spaceIdentifier: "space-123",
+        search: "template",
+        status: ["ACTIVE", "DEPRECATED"]
+      })
     })
 
     it("should accept valid string coercion param types", () => {
       // Given
-      const input = {page: "2"}
+      const input = {page: "2", status: "PENDING_DEPRECATION"}
 
       // When
       const result = validateListWorkflowTemplatesParams(input)
 
       // Expect
-      expect(result).toBeRightOf({page: 2})
+      expect(result).toBeRightOf({
+        page: 2,
+        status: ["PENDING_DEPRECATION"]
+      })
+    })
+
+    it("should reject invalid status type", () => {
+      // Given
+      const input = {status: 123}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_status")
+    })
+
+    it("should reject invalid status array item type", () => {
+      // Given
+      const input = {status: ["ACTIVE", 123]}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_status")
     })
 
     it("should reject invalid param types", () => {

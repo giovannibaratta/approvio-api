@@ -151,6 +151,16 @@ ListWorkflowTemplatesParams:
     spaceIdentifier:
       type: string
       description: Optional space identifier (UUID or name) to filter workflow templates.
+    status:
+      type: array
+      items:
+        type: string
+        x-extensible-enum:
+          - ACTIVE
+          - PENDING_DEPRECATION
+          - DEPRECATED
+      description: Filter by workflow template status. Can provide multiple values. Defaults to returning only ACTIVE templates.
+      default: ["ACTIVE"]
 WorkflowVoteRequest:
   type: object
   title: WorkflowVoteRequest

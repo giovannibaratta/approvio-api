@@ -207,9 +207,20 @@ describe("workflow validators", () => {
       expect(result).toBeRightOf({page: 1})
     })
 
-    it("should return left('invalid_include_only_non_terminal_state') when not a boolean", () => {
+    it("should coerce string boolean to boolean for includeOnlyNonTerminalState", () => {
       // Given
       const input = {includeOnlyNonTerminalState: "true"}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({includeOnlyNonTerminalState: true})
+    })
+
+    it("should return left('invalid_include_only_non_terminal_state') when not a boolean or true/false string", () => {
+      // Given
+      const input = {includeOnlyNonTerminalState: "yes"}
 
       // When
       const result = validateListWorkflowsParams(input)
