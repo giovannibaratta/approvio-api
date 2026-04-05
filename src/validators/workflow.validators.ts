@@ -165,13 +165,17 @@ export function validateGetWorkflowParams(
   let include: GetWorkflowParams["include"] = undefined
 
   if (hasOwnProperty(object, "include")) {
-    const includeVal = object["include"]
+    const includeVal = typeof object["include"] === "string" ? [object["include"]] : object["include"]
+
     if (!isArray(includeVal)) return left("invalid_include")
+
     const validatedInclude: string[] = []
+
     for (const item of includeVal) {
       if (typeof item !== "string") return left("invalid_include")
       validatedInclude.push(item)
     }
+
     include = validatedInclude
   }
 
@@ -205,13 +209,17 @@ export function validateListWorkflowsParams(
 
   let include: ListWorkflowsParams["include"] = undefined
   if (hasOwnProperty(object, "include")) {
-    const includeVal = object["include"]
+    const includeVal = typeof object["include"] === "string" ? [object["include"]] : object["include"]
+
     if (!isArray(includeVal)) return left("invalid_include")
+
     const validatedInclude: string[] = []
+
     for (const item of includeVal) {
       if (typeof item !== "string") return left("invalid_include")
       validatedInclude.push(item)
     }
+
     include = validatedInclude
   }
 

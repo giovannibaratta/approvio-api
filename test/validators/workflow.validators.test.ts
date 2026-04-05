@@ -127,15 +127,15 @@ describe("workflow validators", () => {
       expect(result).toBeRightOf({include: undefined})
     })
 
-    it("should return left('invalid_include') when include is not an array", () => {
+    it("should return right when include is a string (single item)", () => {
       // Given
-      const input = {include: "workflowTemplate"}
+      const input = {include: "a-string"}
 
       // When
       const result = validateGetWorkflowParams(input)
 
       // Expect
-      expect(result).toBeLeftOf("invalid_include")
+      expect(result).toBeRightOf({include: ["a-string"]})
     })
 
     it("should return left('invalid_include') when include contains non-strings", () => {
@@ -183,6 +183,28 @@ describe("workflow validators", () => {
         includeOnlyNonTerminalState: undefined,
         workflowTemplateIdentifier: undefined
       })
+    })
+
+    it("should return right when include is a string (single item)", () => {
+      // Given
+      const input = {include: "a-string"}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({include: ["a-string"]})
+    })
+
+    it("should return left('invalid_include') when include contains non-strings", () => {
+      // Given
+      const input = {include: ["workflowTemplate", 123]}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_include")
     })
 
     it("should return left('invalid_page') when page is not a valid number", () => {
