@@ -50,7 +50,7 @@ export function validateSharedListParams(object: unknown): Either<ListParamsVali
   }
 
   if (hasOwnProperty(object, "search") && object.search !== undefined) {
-    if (typeof object.search !== "string" || object.search.trim() === "") return left("invalid_search")
+    if (typeof object.search !== "string") return left("invalid_search")
     result.search = object.search
   }
 

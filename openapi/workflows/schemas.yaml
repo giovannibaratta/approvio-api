@@ -147,7 +147,14 @@ ListWorkflowTemplatesParams:
       description: Number of results per page
     search:
       type: string
-      description: Fuzzy search term for workflow template name.
+      description: Search term for workflow template name.
+    searchMode:
+      type: string
+      x-extensible-enum:
+        - CONTAINS
+        - EXACT
+      default: CONTAINS
+      description: Mode for the search parameter. 'CONTAINS' for partial matches, 'EXACT' for exact matches.
     spaceIdentifier:
       type: string
       description: Optional space identifier (UUID or name) to filter workflow templates.

@@ -353,7 +353,7 @@ describe("Workflow Templates Validators", () => {
   })
 
   describe("validateListWorkflowTemplatesParams", () => {
-    it("should validate empty params and set default status", () => {
+    it("should validate empty params and set default status and searchMode", () => {
       // Given
       const input: ListWorkflowTemplatesParams = {}
 
@@ -362,7 +362,8 @@ describe("Workflow Templates Validators", () => {
 
       // Expect
       expect(result).toBeRightOf({
-        status: ["ACTIVE"]
+        status: ["ACTIVE"],
+        searchMode: "CONTAINS"
       })
     })
 
@@ -373,6 +374,7 @@ describe("Workflow Templates Validators", () => {
         limit: 50,
         spaceIdentifier: "space-123",
         search: "template",
+        searchMode: "EXACT",
         status: ["ACTIVE", "DEPRECATED"]
       }
 
@@ -385,6 +387,7 @@ describe("Workflow Templates Validators", () => {
         limit: 50,
         spaceIdentifier: "space-123",
         search: "template",
+        searchMode: "EXACT",
         status: ["ACTIVE", "DEPRECATED"]
       })
     })
@@ -399,8 +402,57 @@ describe("Workflow Templates Validators", () => {
       // Expect
       expect(result).toBeRightOf({
         page: 2,
-        status: ["PENDING_DEPRECATION"]
+        status: ["PENDING_DEPRECATION"],
+        searchMode: "CONTAINS"
       })
+    })
+
+    it("should validate search string length with CONTAINS mode", () => {
+      // Given
+      const input = {search: "ab"}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_search_length")
+    })
+
+    it("should validate search string length with EXACT mode", () => {
+      // Given
+      const input = {search: "", searchMode: "EXACT"}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_search_length")
+    })
+
+    it("should validate valid search string with EXACT mode", () => {
+      // Given
+      const input = {search: "a", searchMode: "EXACT"}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({
+        search: "a",
+        searchMode: "EXACT",
+        status: ["ACTIVE"]
+      })
+    })
+
+    it("should reject invalid search mode", () => {
+      // Given
+      const input = {searchMode: "INVALID"}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_search_mode")
     })
 
     it("should reject invalid status type", () => {
