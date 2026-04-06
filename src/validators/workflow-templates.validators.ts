@@ -523,6 +523,10 @@ export type ListWorkflowTemplatesParamsValidationError =
   | "invalid_status"
   | "invalid_search_mode"
   | "invalid_search_length"
+  | "invalid_sort_by"
+  | "invalid_sort_direction"
+  | "sort_direction_without_sort_by"
+  | "sort_direction_length_mismatch"
 
 export function validateListWorkflowTemplatesParams(
   object: unknown
@@ -573,6 +577,52 @@ export function validateListWorkflowTemplatesParams(
     }
   }
   result.status = status
+
+  if (hasOwnProperty(object, "sortBy") && object.sortBy !== undefined) {
+    const sortByVal = object.sortBy
+    let sortBy: string[] = []
+    if (Array.isArray(sortByVal)) {
+      for (const item of sortByVal) {
+        if (typeof item !== "string") return left("invalid_sort_by")
+        if (item !== "VERSION" && item !== "UPDATED_AT" && item !== "CREATED_AT") return left("invalid_sort_by")
+        sortBy.push(item)
+      }
+    } else if (typeof sortByVal === "string") {
+      if (sortByVal !== "VERSION" && sortByVal !== "UPDATED_AT" && sortByVal !== "CREATED_AT")
+        return left("invalid_sort_by")
+      sortBy = [sortByVal]
+    } else {
+      return left("invalid_sort_by")
+    }
+    result.sortBy = sortBy
+  }
+
+  if (hasOwnProperty(object, "sortDirection") && object.sortDirection !== undefined) {
+    const sortDirectionVal = object.sortDirection
+    let sortDirection: string[] = []
+    if (Array.isArray(sortDirectionVal)) {
+      for (const item of sortDirectionVal) {
+        if (typeof item !== "string") return left("invalid_sort_direction")
+        if (item !== "ASC" && item !== "DESC") return left("invalid_sort_direction")
+        sortDirection.push(item)
+      }
+    } else if (typeof sortDirectionVal === "string") {
+      if (sortDirectionVal !== "ASC" && sortDirectionVal !== "DESC") return left("invalid_sort_direction")
+      sortDirection = [sortDirectionVal]
+    } else {
+      return left("invalid_sort_direction")
+    }
+
+    if (result.sortBy === undefined || result.sortBy.length === 0) {
+      return left("sort_direction_without_sort_by")
+    }
+
+    if (sortDirection.length > result.sortBy.length) {
+      return left("sort_direction_length_mismatch")
+    }
+
+    result.sortDirection = sortDirection
+  }
 
   return right(result)
 }
