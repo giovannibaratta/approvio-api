@@ -158,6 +158,23 @@ ListWorkflowTemplatesParams:
     spaceIdentifier:
       type: string
       description: Optional space identifier (UUID or name) to filter workflow templates.
+    sortBy:
+      type: array
+      items:
+        type: string
+        x-extensible-enum:
+          - VERSION
+          - UPDATED_AT
+          - CREATED_AT
+      description: Fields to sort the results by. Can be specified multiple times. For the 'VERSION' field, sorting is numerical for versions that can be coerced to a number, and alphabetical for everything else. Non-numerical versions take precedence over numbers.
+    sortDirection:
+      type: array
+      items:
+        type: string
+        x-extensible-enum:
+          - ASC
+          - DESC
+      description: The sort directions that correspond to the sortBy parameters in order. If specified, must not have more items than sortBy.
     status:
       type: array
       items:

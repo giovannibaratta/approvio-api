@@ -455,6 +455,112 @@ describe("Workflow Templates Validators", () => {
       expect(result).toBeLeftOf("invalid_search_mode")
     })
 
+    it("should validate valid sortBy array", () => {
+      // Given
+      const input = {sortBy: ["VERSION", "CREATED_AT"]}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({
+        sortBy: ["VERSION", "CREATED_AT"],
+        status: ["ACTIVE"],
+        searchMode: "CONTAINS"
+      })
+    })
+
+    it("should validate valid sortBy string", () => {
+      // Given
+      const input = {sortBy: "VERSION"}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({
+        sortBy: ["VERSION"],
+        status: ["ACTIVE"],
+        searchMode: "CONTAINS"
+      })
+    })
+
+    it("should validate valid sortBy and sortDirection combinations", () => {
+      // Given
+      const input = {sortBy: ["VERSION", "CREATED_AT"], sortDirection: ["DESC", "ASC"]}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({
+        sortBy: ["VERSION", "CREATED_AT"],
+        sortDirection: ["DESC", "ASC"],
+        status: ["ACTIVE"],
+        searchMode: "CONTAINS"
+      })
+    })
+
+    it("should allow sortDirection with fewer items than sortBy", () => {
+      // Given
+      const input = {sortBy: ["VERSION", "CREATED_AT"], sortDirection: ["DESC"]}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({
+        sortBy: ["VERSION", "CREATED_AT"],
+        sortDirection: ["DESC"],
+        status: ["ACTIVE"],
+        searchMode: "CONTAINS"
+      })
+    })
+
+    it("should reject invalid sortBy enum", () => {
+      // Given
+      const input = {sortBy: ["INVALID_FIELD"]}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_sort_by")
+    })
+
+    it("should reject invalid sortDirection enum", () => {
+      // Given
+      const input = {sortBy: ["VERSION"], sortDirection: ["INVALID"]}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_sort_direction")
+    })
+
+    it("should reject sortDirection if sortBy is missing", () => {
+      // Given
+      const input = {sortDirection: ["DESC"]}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("sort_direction_without_sort_by")
+    })
+
+    it("should reject sortDirection if it has more items than sortBy", () => {
+      // Given
+      const input = {sortBy: ["VERSION"], sortDirection: ["DESC", "ASC"]}
+
+      // When
+      const result = validateListWorkflowTemplatesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("sort_direction_length_mismatch")
+    })
+
     it("should reject invalid status type", () => {
       // Given
       const input = {status: 123}
