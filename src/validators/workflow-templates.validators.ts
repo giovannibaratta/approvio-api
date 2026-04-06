@@ -523,6 +523,21 @@ export type ListWorkflowTemplatesParamsValidationError =
   | "invalid_status"
   | "invalid_search_mode"
   | "invalid_search_length"
+  | "invalid_sort_by"
+  | "invalid_sort_direction"
+  | "sort_direction_without_sort_by"
+  | "sort_direction_length_mismatch"
+
+export enum SortBy {
+  VERSION = "VERSION",
+  UPDATED_AT = "UPDATED_AT",
+  CREATED_AT = "CREATED_AT"
+}
+
+export enum SortDirection {
+  ASC = "ASC",
+  DESC = "DESC"
+}
 
 export function validateListWorkflowTemplatesParams(
   object: unknown
@@ -532,9 +547,7 @@ export function validateListWorkflowTemplatesParams(
 
   const result: ListWorkflowTemplatesParams = sharedValidation.right
 
-  if (typeof object !== "object" || object === null) {
-    return left("malformed_object")
-  }
+  if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (hasOwnProperty(object, "searchMode") && object.searchMode !== undefined) {
     if (typeof object.searchMode !== "string") return left("invalid_search_mode")
@@ -545,12 +558,8 @@ export function validateListWorkflowTemplatesParams(
   }
 
   if (result.search !== undefined) {
-    if (result.searchMode === "CONTAINS" && result.search.length < 3) {
-      return left("invalid_search_length")
-    }
-    if (result.searchMode === "EXACT" && result.search.length < 1) {
-      return left("invalid_search_length")
-    }
+    if (result.searchMode === "CONTAINS" && result.search.length < 3) return left("invalid_search_length")
+    if (result.searchMode === "EXACT" && result.search.length < 1) return left("invalid_search_length")
   }
 
   if (hasOwnProperty(object, "spaceIdentifier") && object.spaceIdentifier !== undefined) {
@@ -559,6 +568,7 @@ export function validateListWorkflowTemplatesParams(
   }
 
   let status: string[] = ["ACTIVE"]
+
   if (hasOwnProperty(object, "status") && object.status !== undefined) {
     const statusVal = object.status
     if (Array.isArray(statusVal)) {
@@ -573,6 +583,55 @@ export function validateListWorkflowTemplatesParams(
     }
   }
   result.status = status
+
+  if (hasOwnProperty(object, "sortBy") && object.sortBy !== undefined) {
+    const sortByVal = object.sortBy
+
+    const values: string[] = []
+
+    if (Array.isArray(sortByVal)) {
+      for (const unsafeSortBy of sortByVal) {
+        if (typeof unsafeSortBy !== "string") return left("invalid_sort_by")
+        const sortBy = getStringAsEnum(unsafeSortBy, SortBy)
+        if (sortBy === undefined) return left("invalid_sort_by")
+        values.push(sortBy)
+      }
+    } else if (typeof sortByVal === "string") {
+      const sortBy = getStringAsEnum(sortByVal, SortBy)
+      if (sortBy === undefined) return left("invalid_sort_by")
+      values.push(sortBy)
+    } else {
+      return left("invalid_sort_by")
+    }
+
+    result.sortBy = values
+  }
+
+  if (hasOwnProperty(object, "sortDirection") && object.sortDirection !== undefined) {
+    const sortDirectionVal = object.sortDirection
+
+    const values: string[] = []
+
+    if (Array.isArray(sortDirectionVal)) {
+      for (const item of sortDirectionVal) {
+        if (typeof item !== "string") return left("invalid_sort_direction")
+        const sortDirection = getStringAsEnum(item, SortDirection)
+        if (sortDirection === undefined) return left("invalid_sort_direction")
+        values.push(sortDirection)
+      }
+    } else if (typeof sortDirectionVal === "string") {
+      const sortDirection = getStringAsEnum(sortDirectionVal, SortDirection)
+      if (sortDirection === undefined) return left("invalid_sort_direction")
+      values.push(sortDirection)
+    } else {
+      return left("invalid_sort_direction")
+    }
+
+    if (result.sortBy === undefined || result.sortBy.length === 0) return left("sort_direction_without_sort_by")
+    if (values.length > result.sortBy.length) return left("sort_direction_length_mismatch")
+
+    result.sortDirection = values
+  }
 
   return right(result)
 }
