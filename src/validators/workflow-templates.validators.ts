@@ -1,5 +1,5 @@
 import {Either, left, right, isLeft} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isStringBigInt} from "../utils/validation.utils"
 import {getStringAsEnum} from "../utils/enum"
 import {
   WorkflowTemplate,
@@ -8,6 +8,8 @@ import {
   WorkflowTemplateDeprecate,
   WorkflowTemplateScope,
   WorkflowTemplateSummary,
+  WorkflowTemplateStatus,
+  ConcurrencyControl,
   ListWorkflowTemplates200Response,
   ListWorkflowTemplatesParams,
   ApprovalRule,
@@ -230,6 +232,7 @@ export type WorkflowTemplateValidationError =
   | "invalid_actions"
   | "invalid_actions_element"
   | "invalid_default_expires_in_hours"
+  | "invalid_concurrency_control"
 
 export function validateWorkflowTemplate(object: unknown): Either<WorkflowTemplateValidationError, WorkflowTemplate> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
@@ -239,7 +242,7 @@ export function validateWorkflowTemplate(object: unknown): Either<WorkflowTempla
   if (!hasOwnProperty(object, "version") || !isNonEmptyString(object.version)) return left("invalid_version")
 
   if (!hasOwnProperty(object, "status") || typeof object.status !== "string") return left("invalid_status")
-  const status = getStringAsEnum(object.status, WorkflowTemplate.StatusEnum)
+  const status = getStringAsEnum(object.status, WorkflowTemplateStatus)
   if (!status) return left("invalid_status")
   if (
     !hasOwnProperty(object, "allowVotingOnDeprecatedTemplate") ||
@@ -254,6 +257,9 @@ export function validateWorkflowTemplate(object: unknown): Either<WorkflowTempla
   if (!hasOwnProperty(object, "spaceId") || !isNonEmptyString(object.spaceId)) return left("invalid_space_id")
   if (!hasOwnProperty(object, "createdAt") || !isNonEmptyString(object.createdAt)) return left("invalid_created_at")
   if (!hasOwnProperty(object, "updatedAt") || !isNonEmptyString(object.updatedAt)) return left("invalid_updated_at")
+  if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
+  const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
+  if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
 
   const result: WorkflowTemplate = {
     id: object.id,
@@ -264,7 +270,8 @@ export function validateWorkflowTemplate(object: unknown): Either<WorkflowTempla
     approvalRule: approvalRuleValidation.right,
     spaceId: object.spaceId,
     createdAt: object.createdAt,
-    updatedAt: object.updatedAt
+    updatedAt: object.updatedAt,
+    concurrencyControl: concurrencyControlValidation.right
   }
 
   if (hasOwnProperty(object, "description") && object.description !== undefined) {
@@ -367,13 +374,20 @@ export type WorkflowTemplateUpdateValidationError =
   | "invalid_actions_element"
   | "invalid_default_expires_in_hours"
   | "invalid_cancel_workflows"
+  | "invalid_concurrency_control"
 
 export function validateWorkflowTemplateUpdate(
   object: unknown
 ): Either<WorkflowTemplateUpdateValidationError, WorkflowTemplateUpdate> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
-  const result: WorkflowTemplateUpdate = {}
+  if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
+  const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
+  if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
+
+  const result: WorkflowTemplateUpdate = {
+    concurrencyControl: concurrencyControlValidation.right
+  }
 
   if (hasOwnProperty(object, "description") && object.description !== undefined) {
     if (typeof object.description !== "string") return left("invalid_description")
@@ -457,6 +471,7 @@ type WorkflowTemplateSummaryValidationError =
   | "invalid_version"
   | "invalid_created_at"
   | "invalid_updated_at"
+  | "invalid_status"
   | "invalid_description"
 
 function validateWorkflowTemplateSummary(
@@ -470,10 +485,15 @@ function validateWorkflowTemplateSummary(
   if (!hasOwnProperty(object, "createdAt") || !isNonEmptyString(object.createdAt)) return left("invalid_created_at")
   if (!hasOwnProperty(object, "updatedAt") || !isNonEmptyString(object.updatedAt)) return left("invalid_updated_at")
 
+  if (!hasOwnProperty(object, "status") || typeof object.status !== "string") return left("invalid_status")
+  const status = getStringAsEnum(object.status, WorkflowTemplateStatus)
+  if (!status) return left("invalid_status")
+
   const result: WorkflowTemplateSummary = {
     id: object.id,
     name: object.name,
     version: object.version,
+    status: status,
     createdAt: object.createdAt,
     updatedAt: object.updatedAt
   }
@@ -567,17 +587,23 @@ export function validateListWorkflowTemplatesParams(
     result.spaceIdentifier = object.spaceIdentifier
   }
 
-  let status: string[] = ["ACTIVE"]
+  let status: WorkflowTemplateStatus[] = [WorkflowTemplateStatus.Active]
 
   if (hasOwnProperty(object, "status") && object.status !== undefined) {
     const statusVal = object.status
+    const validatedStatuses: WorkflowTemplateStatus[] = []
     if (Array.isArray(statusVal)) {
       for (const item of statusVal) {
         if (typeof item !== "string") return left("invalid_status")
+        const validatedStatus = getStringAsEnum(item, WorkflowTemplateStatus)
+        if (!validatedStatus) return left("invalid_status")
+        validatedStatuses.push(validatedStatus)
       }
-      status = statusVal
+      status = validatedStatuses
     } else if (typeof statusVal === "string") {
-      status = [statusVal]
+      const validatedStatus = getStringAsEnum(statusVal, WorkflowTemplateStatus)
+      if (!validatedStatus) return left("invalid_status")
+      status = [validatedStatus]
     } else {
       return left("invalid_status")
     }
@@ -634,4 +660,10 @@ export function validateListWorkflowTemplatesParams(
   }
 
   return right(result)
+}
+
+export function validateConcurrencyControl(object: unknown): Either<"invalid_concurrency_control", ConcurrencyControl> {
+  if (typeof object !== "object" || object === null) return left("invalid_concurrency_control")
+  if (!hasOwnProperty(object, "version") || !isStringBigInt(object.version)) return left("invalid_concurrency_control")
+  return right({version: object.version})
 }

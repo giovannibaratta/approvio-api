@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.34
+  version: 0.0.35
 tags:
   - name: Authentication
     description: OIDC authentication and token management
@@ -133,6 +133,8 @@ components:
       $ref: ./openapi/groups/schemas.yaml#/GroupScope
     WorkflowTemplateScope:
       $ref: ./openapi/workflows/schemas.yaml#/WorkflowTemplateScope
+    WorkflowTemplateStatus:
+      $ref: ./openapi/workflows/schemas.yaml#/WorkflowTemplateStatus
     RoleOperationItem:
       $ref: ./openapi/roles/schemas.yaml#/RoleOperationItem
     RoleOperationRequest:
@@ -215,6 +217,8 @@ components:
       $ref: ./openapi/shared/schemas.yaml#/VoteVeto
     VoteWithdraw:
       $ref: ./openapi/shared/schemas.yaml#/VoteWithdraw
+    ConcurrencyControl:
+      $ref: ./openapi/shared/schemas.yaml#/ConcurrencyControl
     WorkflowTemplateCreate:
       $ref: ./openapi/workflows/schemas.yaml#/WorkflowTemplateCreate
     WorkflowTemplate:

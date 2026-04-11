@@ -361,3 +361,13 @@ PrivilegedOperation:
   x-extensible-enum:
     - vote
   description: The operation requiring high privilege authentication
+ConcurrencyControl:
+  type: object
+  required:
+    - version
+  properties:
+    version:
+      type: string
+      format: int64
+      description: Optimistic concurrency control version to prevent race conditions and detect updates from other users.
+      example: "1"
