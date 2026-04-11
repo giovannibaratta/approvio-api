@@ -15,6 +15,17 @@ WorkflowTemplateScope:
       format: uuid
       description: The unique identifier of the workflow template
       example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+WorkflowTemplateStatus:
+  type: string
+  enum:
+    - ACTIVE
+    - PENDING_DEPRECATION
+    - DEPRECATED
+  description: |
+    Lifecycle status of the template:
+    * ACTIVE - Template can be referenced to create new workflows
+    * PENDING_DEPRECATION - Template has been deprecated but there are still active workflows (intermediate status for async deprecation)
+    * DEPRECATED - Template cannot be referenced for new workflows, voting may still be allowed based on settings
 WorkflowTemplateSummary:
   type: object
   required:
@@ -23,6 +34,7 @@ WorkflowTemplateSummary:
     - version
     - createdAt
     - updatedAt
+    - status
   properties:
     id:
       type: string
@@ -42,6 +54,8 @@ WorkflowTemplateSummary:
       type: string
       description: Detailed description of the workflow template.
       example: This is a new workflow template
+    status:
+      $ref: "#/WorkflowTemplateStatus"
     createdAt:
       type: string
       format: date-time
@@ -178,11 +192,7 @@ ListWorkflowTemplatesParams:
     status:
       type: array
       items:
-        type: string
-        x-extensible-enum:
-          - ACTIVE
-          - PENDING_DEPRECATION
-          - DEPRECATED
+        $ref: "#/WorkflowTemplateStatus"
       description: Filter by workflow template status. Can provide multiple values. Defaults to returning only ACTIVE templates.
       default: ["ACTIVE"]
 WorkflowVoteRequest:
@@ -250,6 +260,7 @@ WorkflowTemplate:
     - spaceId
     - createdAt
     - updatedAt
+    - concurrencyControl
   properties:
     id:
       type: string
@@ -264,13 +275,7 @@ WorkflowTemplate:
       type: string
       description: Detailed description of the workflow template
     status:
-      type: string
-      enum:
-        - ACTIVE
-        - PENDING_DEPRECATION
-        - DEPRECATED
-      description: |
-        Lifecycle status of the template: * ACTIVE - Template can be referenced to create new workflows * PENDING_DEPRECATION - Template has been deprecated but there are still active workflows (intermediate status for async deprecation) * DEPRECATED - Template cannot be referenced for new workflows, voting may still be allowed based on settings
+      $ref: "#/WorkflowTemplateStatus"
     allowVotingOnDeprecatedTemplate:
       type: boolean
       description: Whether voting is allowed on workflows using this template when it's deprecated
@@ -301,8 +306,12 @@ WorkflowTemplate:
       type: string
       format: date-time
       description: Last update timestamp
+    concurrencyControl:
+      $ref: ../shared/schemas.yaml#/ConcurrencyControl
 WorkflowTemplateUpdate:
   type: object
+  required:
+    - concurrencyControl
   properties:
     description:
       type: string
@@ -327,6 +336,8 @@ WorkflowTemplateUpdate:
       description: |
         If true, all in-progress workflows associated with this template will be canceled when creating a new version. This affects the allowVotingOnDeprecatedTemplate setting: when true, voting is disabled on the deprecated template.
       default: false
+    concurrencyControl:
+      $ref: ../shared/schemas.yaml#/ConcurrencyControl
 WorkflowAction:
   description: |
     Configuration for actions to be executed when workflow is approved. Currently supports email actions.

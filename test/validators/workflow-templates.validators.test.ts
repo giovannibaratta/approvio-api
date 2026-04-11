@@ -28,6 +28,7 @@ describe("Workflow Templates Validators", () => {
       allowVotingOnDeprecatedTemplate: false,
       approvalRule: {type: "GROUP_REQUIREMENT", groupId: "g1", minCount: 1},
       spaceId: "s1",
+      concurrencyControl: {version: "1"},
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:00:00Z"
     }
@@ -154,9 +155,9 @@ describe("Workflow Templates Validators", () => {
   })
 
   describe("validateWorkflowTemplateUpdate", () => {
-    it("should validate an empty update payload", () => {
+    it("should validate a payload with only occVersion", () => {
       // Given
-      const input = {}
+      const input = {concurrencyControl: {version: "1"}}
 
       // When
       const result = validateWorkflowTemplateUpdate(input)
@@ -170,7 +171,8 @@ describe("Workflow Templates Validators", () => {
       const input: WorkflowTemplateUpdate = {
         description: "New desc",
         cancelWorkflows: true,
-        approvalRule: {type: "GROUP_REQUIREMENT", groupId: "g1", minCount: 2}
+        approvalRule: {type: "GROUP_REQUIREMENT", groupId: "g1", minCount: 2},
+        concurrencyControl: {version: "1"}
       }
 
       // When
@@ -182,7 +184,7 @@ describe("Workflow Templates Validators", () => {
 
     it("should reject invalid fields", () => {
       // Given
-      const input = {cancelWorkflows: "true"}
+      const input = {concurrencyControl: {version: "1"}, cancelWorkflows: "true"}
 
       // When
       const result = validateWorkflowTemplateUpdate(input)
@@ -275,6 +277,7 @@ describe("Workflow Templates Validators", () => {
           id: "wt1",
           name: "Template 1",
           version: "1.0",
+          status: "ACTIVE",
           createdAt: "2023-01-01T00:00:00Z",
           updatedAt: "2023-01-01T00:00:00Z"
         }
@@ -327,6 +330,25 @@ describe("Workflow Templates Validators", () => {
 
       // Expect
       expect(result).toBeLeftOf("data_item_invalid_name")
+    })
+
+    it("should reject invalid status in data item", () => {
+      // Given
+      const input = {
+        ...validResponse,
+        data: [
+          {
+            ...validResponse.data[0],
+            status: "INVALID_STATUS"
+          }
+        ]
+      }
+
+      // When
+      const result = validateListWorkflowTemplates200Response(input)
+
+      // Expect
+      expect(result).toBeLeftOf("data_item_invalid_status")
     })
 
     it("should reject missing pagination", () => {

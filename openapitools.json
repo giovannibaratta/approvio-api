@@ -2,7 +2,7 @@
   "$schema": "node_modules/@openapitools/openapi-generator-cli/config.schema.json",
   "spaces": 2,
   "generator-cli": {
-    "version": "7.8.0",
+    "version": "7.21.0",
     "generators": {
       "typescript": {
         "generatorName": "typescript-nestjs",
@@ -13,7 +13,8 @@
           "withSeparateModelsAndApi": true,
           "modelPropertyNaming": "camelCase",
           "strict": true,
-          "fileNaming": "kebab-case"
+          "fileNaming": "kebab-case",
+          "supportsES6": true
         }
       }
     }
