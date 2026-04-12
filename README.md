@@ -2,7 +2,6 @@
 
 This repository contains the OpenAPI specification for the Approvio backend, the tooling to generate the TypeScript API client, and TypeScript validators for the generated models using `fp-ts`.
 
-
 ## Project Structure
 
 - `openapi.yaml`: Main entry point for the OpenAPI 3.0 specification.
