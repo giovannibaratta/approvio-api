@@ -72,7 +72,7 @@ The project you are working on is a TypeScript package that provides OpenAPI spe
 - **Do not use type casting** (`as Type`). Always use proper runtime type checking (e.g., `typeof`, `in`, `Array.isArray`) when validating `unknown` inputs
 - Validation failures should return a descriptive error string matching the defined error type (e.g., `malformed_object`, `missing_field`)
 - Use custom Jest matchers for assertions in tests (e.g., `expect(result).toBeLeftOf("error")`, `expect(result).toBeRightOf(data)`). These are defined in `src/utils/matchers.ts`
-</validators>
+  </validators>
 
 </style_guide>
 

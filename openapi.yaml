@@ -99,6 +99,8 @@ paths:
     $ref: ./openapi/workflows/workflow-templates.yaml
   /workflow-templates/{templateIdentifier}:
     $ref: ./openapi/workflows/workflow-templates-templateIdentifier.yaml
+  /workflow-templates/{templateName}:
+    $ref: ./openapi/workflows/workflow-templates-templateName.yaml
   /workflow-templates/{templateName}/deprecate:
     $ref: ./openapi/workflows/workflow-templates-templateName-deprecate.yaml
 components:
