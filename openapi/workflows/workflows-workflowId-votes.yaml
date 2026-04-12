@@ -11,6 +11,12 @@ get:
       description: The unique identifier of the workflow
       schema:
         type: string
+    - name: params
+      in: query
+      style: form
+      explode: true
+      schema:
+        $ref: ./schemas.yaml#/ListWorkflowVotesParams
   responses:
     "200":
       description: List of votes

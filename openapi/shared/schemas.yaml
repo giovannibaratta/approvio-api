@@ -219,6 +219,23 @@ ListWorkflowsParams:
     workflowTemplateIdentifier:
       type: string
       description: Optional workflow template identifier (UUID or name) to filter workflows.
+    includeGroups:
+      type: array
+      items:
+        type: string
+        format: uuid
+      description: Filter workflows that mentions at least one of the provided group UUIDs in their approval rule.
+    orderBy:
+      type: array
+      items:
+        type: string
+        enum:
+          - "CREATED_AT:ASC"
+          - "CREATED_AT:DESC"
+          - "UPDATED_AT:ASC"
+          - "UPDATED_AT:DESC"
+      default: ["UPDATED_AT:DESC"]
+      description: Fields to order the results by, along with the order direction. Can specify multiple fields.
 GetWorkflowParams:
   type: object
   properties:

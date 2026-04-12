@@ -1,5 +1,6 @@
 import {Either, left, right, isLeft, mapLeft} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isArray, isUUIDv4} from "../utils/validation.utils"
+import {getStringAsEnum} from "../utils/enum"
 import {validatePagination, validateSharedListParams} from "./common.validators"
 import {validateWorkflowTemplate} from "./workflow-templates.validators"
 import {
@@ -16,7 +17,8 @@ import {
   VoteWithdraw,
   WorkflowVote,
   CanVoteResponse,
-  GetWorkflowVotes200Response
+  GetWorkflowVotes200Response,
+  ListWorkflowVotesParams
 } from "../../generated/openapi/model/models"
 import {pipe} from "fp-ts/function"
 
@@ -191,6 +193,10 @@ export type ListWorkflowsParamsValidationError =
   | "invalid_include"
   | "invalid_include_only_non_terminal_state"
   | "invalid_workflow_template_identifier"
+  | "invalid_include_groups"
+  | "invalid_order_by"
+  | "duplicate_order_by_fields"
+  | "too_many_order_by_items"
 
 export function validateListWorkflowsParams(
   object: unknown
@@ -244,9 +250,51 @@ export function validateListWorkflowsParams(
     workflowTemplateIdentifier = val
   }
 
+  let includeGroups: ListWorkflowsParams["includeGroups"] = undefined
+
+  if (hasOwnProperty(object, "includeGroups")) {
+    const includeGroupsVal = typeof object.includeGroups === "string" ? [object.includeGroups] : object.includeGroups
+    if (!isArray(includeGroupsVal)) return left("invalid_include_groups")
+
+    const validatedIncludeGroups: string[] = []
+    for (const item of includeGroupsVal) {
+      if (typeof item !== "string") return left("invalid_include_groups")
+      if (!isUUIDv4(item)) return left("invalid_include_groups")
+      validatedIncludeGroups.push(item)
+    }
+
+    includeGroups = validatedIncludeGroups
+  }
+
+  let orderBy: ListWorkflowsParams["orderBy"] = undefined
+
+  if (hasOwnProperty(object, "orderBy")) {
+    const orderByVal = typeof object.orderBy === "string" ? [object.orderBy] : object.orderBy
+    if (!isArray(orderByVal)) return left("invalid_order_by")
+    if (orderByVal.length > 3) return left("too_many_order_by_items")
+
+    const validatedOrderBy: ListWorkflowsParams.OrderByEnum[] = []
+    const seenFields = new Set<string>()
+
+    for (const item of orderByVal) {
+      if (typeof item !== "string") return left("invalid_order_by")
+      const enumVal = getStringAsEnum(item, ListWorkflowsParams.OrderByEnum)
+      if (enumVal === undefined) return left("invalid_order_by")
+
+      const field = enumVal.split(":")[0]
+      if (seenFields.has(field)) return left("duplicate_order_by_fields")
+      seenFields.add(field)
+
+      validatedOrderBy.push(enumVal)
+    }
+    orderBy = validatedOrderBy
+  }
+
   if (include !== undefined) result.include = include
   if (includeOnlyNonTerminalState !== undefined) result.includeOnlyNonTerminalState = includeOnlyNonTerminalState
   if (workflowTemplateIdentifier !== undefined) result.workflowTemplateIdentifier = workflowTemplateIdentifier
+  if (includeGroups !== undefined) result.includeGroups = includeGroups
+  if (orderBy !== undefined) result.orderBy = orderBy
 
   return right(result)
 }
@@ -482,4 +530,56 @@ export function validateGetWorkflowVotes200Response(
   return right({
     votes
   })
+}
+
+export type ListWorkflowVotesParamsValidationError =
+  | "malformed_object"
+  | "invalid_page"
+  | "invalid_limit"
+  | "invalid_order_by"
+  | "duplicate_order_by_fields"
+  | "too_many_order_by_items"
+
+export function validateListWorkflowVotesParams(
+  object: unknown
+): Either<ListWorkflowVotesParamsValidationError, ListWorkflowVotesParams> {
+  const sharedValidation = pipe(
+    validateSharedListParams(object),
+    mapLeft(error => (error === "invalid_search" ? "malformed_object" : error))
+  )
+
+  if (isLeft(sharedValidation)) return left(sharedValidation.left)
+
+  const result: ListWorkflowVotesParams = sharedValidation.right
+
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  let orderBy: ListWorkflowVotesParams["orderBy"] = undefined
+
+  if (hasOwnProperty(object, "orderBy")) {
+    const orderByVal = typeof object.orderBy === "string" ? [object.orderBy] : object.orderBy
+    if (!isArray(orderByVal)) return left("invalid_order_by")
+    if (orderByVal.length > 3) return left("too_many_order_by_items")
+
+    const validatedOrderBy: ListWorkflowVotesParams.OrderByEnum[] = []
+    const seenFields = new Set<string>()
+
+    for (const item of orderByVal) {
+      if (typeof item !== "string") return left("invalid_order_by")
+
+      const enumVal = getStringAsEnum(item, ListWorkflowVotesParams.OrderByEnum)
+      if (enumVal === undefined) return left("invalid_order_by")
+
+      const field = enumVal.split(":")[0]
+      if (seenFields.has(field)) return left("duplicate_order_by_fields")
+      seenFields.add(field)
+
+      validatedOrderBy.push(enumVal)
+    }
+    orderBy = validatedOrderBy
+  }
+
+  if (orderBy !== undefined) result.orderBy = orderBy
+
+  return right(result)
 }

@@ -28,3 +28,7 @@ export function isStringBigInt(value: unknown): value is string {
 
   return true
 }
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export const isUUIDv4 = (value: string): boolean => value.match(UUID_REGEX) !== null
