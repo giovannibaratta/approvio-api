@@ -5,7 +5,8 @@ import {
   ListWorkflows200Response,
   WorkflowVoteRequest,
   CanVoteResponse,
-  GetWorkflowVotes200Response
+  GetWorkflowVotes200Response,
+  ListWorkflowVotesParams
 } from "../../generated/openapi/model/models"
 import {
   validateWorkflowCreate,
@@ -14,7 +15,8 @@ import {
   validateListWorkflows200Response,
   validateWorkflowVoteRequest,
   validateCanVoteResponse,
-  validateGetWorkflowVotes200Response
+  validateGetWorkflowVotes200Response,
+  validateListWorkflowVotesParams
 } from "../../src/validators/workflow.validators"
 import "../../src/utils/matchers"
 
@@ -181,7 +183,9 @@ describe("workflow validators", () => {
         limit: undefined,
         include: undefined,
         includeOnlyNonTerminalState: undefined,
-        workflowTemplateIdentifier: undefined
+        workflowTemplateIdentifier: undefined,
+        includeGroups: undefined,
+        orderBy: undefined
       })
     })
 
@@ -249,6 +253,72 @@ describe("workflow validators", () => {
 
       // Expect
       expect(result).toBeLeftOf("invalid_include_only_non_terminal_state")
+    })
+
+    it("should return right when includeGroups is a string (single item)", () => {
+      // Given
+      const input = {includeGroups: "d11bb747-1234-4567-89ab-cdef01234567"}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({includeGroups: ["d11bb747-1234-4567-89ab-cdef01234567"]})
+    })
+
+    it("should return left('invalid_include_groups') when includeGroups contains non-uuid", () => {
+      // Given
+      const input = {includeGroups: ["d11bb747-1234-4567-89ab-cdef01234567", "not-a-uuid"]}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_include_groups")
+    })
+
+    it("should return right when orderBy is a string (single item)", () => {
+      // Given
+      const input = {orderBy: "CREATED_AT:ASC"}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({orderBy: [ListWorkflowsParams.OrderByEnum.CreatedAtAsc]})
+    })
+
+    it("should return left('invalid_order_by') when orderBy contains invalid enum", () => {
+      // Given
+      const input = {orderBy: ["CREATED_AT:ASC", "INVALID_FIELD"]}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_order_by")
+    })
+
+    it("should return left('too_many_order_by_items') when orderBy has more than 3 items", () => {
+      // Given
+      const input = {orderBy: ["CREATED_AT:ASC", "UPDATED_AT:ASC", "CREATED_AT:DESC", "UPDATED_AT:DESC"]}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("too_many_order_by_items")
+    })
+
+    it("should return left('duplicate_order_by_fields') when orderBy has same field twice", () => {
+      // Given
+      const input = {orderBy: ["CREATED_AT:ASC", "CREATED_AT:DESC"]}
+
+      // When
+      const result = validateListWorkflowsParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("duplicate_order_by_fields")
     })
   })
 
@@ -521,6 +591,71 @@ describe("workflow validators", () => {
 
       // Expect
       expect(result).toBeLeftOf("invalid_votes")
+    })
+  })
+
+  describe("validateListWorkflowVotesParams", () => {
+    it("should return right when valid", () => {
+      // Given
+      const input: ListWorkflowVotesParams = {
+        page: 1,
+        limit: 20,
+        orderBy: [ListWorkflowVotesParams.OrderByEnum.TimestampAsc]
+      }
+
+      // When
+      const result = validateListWorkflowVotesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
+    })
+
+    it("should return right when empty", () => {
+      // Given
+      const input = {}
+
+      // When
+      const result = validateListWorkflowVotesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({
+        page: undefined,
+        limit: undefined,
+        orderBy: undefined
+      })
+    })
+
+    it("should return right when orderBy is a string (single item)", () => {
+      // Given
+      const input = {orderBy: "TIMESTAMP:DESC"}
+
+      // When
+      const result = validateListWorkflowVotesParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({orderBy: [ListWorkflowVotesParams.OrderByEnum.TimestampDesc]})
+    })
+
+    it("should return left('invalid_order_by') when orderBy contains invalid enum", () => {
+      // Given
+      const input = {orderBy: ["TIMESTAMP:DESC", "INVALID_FIELD"]}
+
+      // When
+      const result = validateListWorkflowVotesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_order_by")
+    })
+
+    it("should return left('duplicate_order_by_fields') when orderBy has same field twice", () => {
+      // Given
+      const input = {orderBy: ["TIMESTAMP:DESC", "TIMESTAMP:ASC"]}
+
+      // When
+      const result = validateListWorkflowVotesParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("duplicate_order_by_fields")
     })
   })
 })
