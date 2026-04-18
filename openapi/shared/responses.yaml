@@ -10,6 +10,12 @@ Unauthorized:
     application/json:
       schema:
         $ref: ./schemas.yaml#/APIError
+Conflict:
+  description: Resource already exists or has been modified by another entity
+  content:
+    application/json:
+      schema:
+        $ref: ./schemas.yaml#/APIError
 NotFound:
   description: Resource not found
   content:

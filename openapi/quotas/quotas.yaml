@@ -1,0 +1,64 @@
+get:
+  tags:
+    - Quotas
+  summary: List quotas
+  description: Retrieve a paginated list of quotas, optionally filtered by scope, quotaType, or targetId.
+  operationId: listQuotas
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: query
+      style: form
+      explode: true
+      schema:
+        $ref: ./schemas.yaml#/ListQuotasParams
+  responses:
+    "200":
+      description: A list of quotas
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - data
+              - pagination
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ./schemas.yaml#/Quota
+              pagination:
+                $ref: ../shared/schemas.yaml#/Pagination
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+
+post:
+  tags:
+    - Quotas
+  summary: Create a quota
+  description: Create a new quota definition.
+  operationId: createQuota
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/QuotaCreate
+  responses:
+    "201":
+      description: Quota created successfully
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/Quota
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "409":
+      $ref: ../shared/responses.yaml#/Conflict
