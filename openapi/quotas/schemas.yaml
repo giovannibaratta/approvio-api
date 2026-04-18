@@ -14,7 +14,6 @@ QuotaScope:
   enum:
     - GLOBAL
     - SPACE
-    - USER
     - GROUP
     - TEMPLATE
   description: The scope at which this quota applies.
@@ -62,6 +61,10 @@ GlobalQuotaBase:
       enum:
         - MAX_GROUPS
         - MAX_SPACES
+        - MAX_ROLES_PER_USER
+        - MAX_ENTITIES_PER_GROUP
+        - MAX_TEMPLATES
+        - MAX_CONCURRENT_WORKFLOWS
 
 GroupQuotaBase:
   type: object
@@ -99,24 +102,6 @@ TemplateQuotaBase:
       format: uuid
       description: The ID of the template this quota applies to.
 
-UserQuotaBase:
-  type: object
-  required:
-    - targetId
-  properties:
-    scope:
-      type: string
-      enum:
-        - USER
-    quotaType:
-      type: string
-      enum:
-        - MAX_ROLES_PER_USER
-    targetId:
-      type: string
-      format: uuid
-      description: The ID of the user this quota applies to.
-
 SpaceQuotaBase:
   type: object
   required:
@@ -130,6 +115,7 @@ SpaceQuotaBase:
       type: string
       enum:
         - MAX_TEMPLATES
+        - MAX_CONCURRENT_WORKFLOWS
     targetId:
       type: string
       format: uuid
@@ -150,11 +136,6 @@ TemplateQuotaCreate:
     - $ref: "#/QuotaBase"
     - $ref: "#/TemplateQuotaBase"
 
-UserQuotaCreate:
-  allOf:
-    - $ref: "#/QuotaBase"
-    - $ref: "#/UserQuotaBase"
-
 SpaceQuotaCreate:
   allOf:
     - $ref: "#/QuotaBase"
@@ -165,7 +146,6 @@ QuotaCreate:
     - $ref: "#/GlobalQuotaCreate"
     - $ref: "#/GroupQuotaCreate"
     - $ref: "#/TemplateQuotaCreate"
-    - $ref: "#/UserQuotaCreate"
     - $ref: "#/SpaceQuotaCreate"
   discriminator:
     propertyName: scope
@@ -173,7 +153,6 @@ QuotaCreate:
       GLOBAL: "#/GlobalQuotaCreate"
       GROUP: "#/GroupQuotaCreate"
       TEMPLATE: "#/TemplateQuotaCreate"
-      USER: "#/UserQuotaCreate"
       SPACE: "#/SpaceQuotaCreate"
 
 QuotaUpdate:
@@ -199,11 +178,6 @@ TemplateQuota:
     - $ref: "#/QuotaBase"
     - $ref: "#/TemplateQuotaBase"
 
-UserQuota:
-  allOf:
-    - $ref: "#/QuotaBase"
-    - $ref: "#/UserQuotaBase"
-
 SpaceQuota:
   allOf:
     - $ref: "#/QuotaBase"
@@ -214,7 +188,6 @@ Quota:
     - $ref: "#/GlobalQuota"
     - $ref: "#/GroupQuota"
     - $ref: "#/TemplateQuota"
-    - $ref: "#/UserQuota"
     - $ref: "#/SpaceQuota"
   discriminator:
     propertyName: scope
@@ -222,7 +195,6 @@ Quota:
       GLOBAL: "#/GlobalQuota"
       GROUP: "#/GroupQuota"
       TEMPLATE: "#/TemplateQuota"
-      USER: "#/UserQuota"
       SPACE: "#/SpaceQuota"
 
 ListQuotasParams:
