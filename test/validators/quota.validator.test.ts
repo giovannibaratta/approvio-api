@@ -5,12 +5,42 @@ const mockUUID = "d11bb747-1234-4567-89ab-cdef01234567"
 
 describe("Quota Validators", () => {
   describe("validateQuotaCreate", () => {
-    it("should successfully validate a valid GLOBAL quota", () => {
+    it("should successfully validate a valid GLOBAL quota with MAX_GROUPS", () => {
       // Given
       const input = {
         limit: 100,
         scope: "GLOBAL",
         quotaType: "MAX_GROUPS"
+      }
+
+      // When
+      const result = validateQuotaCreate(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
+    })
+
+    it("should successfully validate a valid GLOBAL quota with MAX_ROLES_PER_USER", () => {
+      // Given
+      const input = {
+        limit: 5,
+        scope: "GLOBAL",
+        quotaType: "MAX_ROLES_PER_USER"
+      }
+
+      // When
+      const result = validateQuotaCreate(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
+    })
+
+    it("should successfully validate a valid GLOBAL quota with MAX_CONCURRENT_WORKFLOWS", () => {
+      // Given
+      const input = {
+        limit: 10,
+        scope: "GLOBAL",
+        quotaType: "MAX_CONCURRENT_WORKFLOWS"
       }
 
       // When
@@ -35,6 +65,57 @@ describe("Quota Validators", () => {
 
       // Expect
       expect(result).toBeRightOf(input)
+    })
+
+    it("should successfully validate a valid SPACE quota with MAX_CONCURRENT_WORKFLOWS", () => {
+      // Given
+      const targetId = mockUUID
+      const input = {
+        limit: 5,
+        scope: "SPACE",
+        quotaType: "MAX_CONCURRENT_WORKFLOWS",
+        targetId
+      }
+
+      // When
+      const result = validateQuotaCreate(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
+    })
+
+    it("should successfully validate a valid SPACE quota with MAX_TEMPLATES", () => {
+      // Given
+      const targetId = mockUUID
+      const input = {
+        limit: 2,
+        scope: "SPACE",
+        quotaType: "MAX_TEMPLATES",
+        targetId
+      }
+
+      // When
+      const result = validateQuotaCreate(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
+    })
+
+    it("should fail validation for USER scope as it was removed", () => {
+      // Given
+      const targetId = mockUUID
+      const input = {
+        limit: 5,
+        scope: "USER",
+        quotaType: "MAX_ROLES_PER_USER",
+        targetId
+      }
+
+      // When
+      const result = validateQuotaCreate(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_scope")
     })
 
     it("should fail validation if object is null", () => {
@@ -94,10 +175,12 @@ describe("Quota Validators", () => {
 
     it("should fail validation if scope/quotaType combination is invalid", () => {
       // Given
+      const targetId = mockUUID
       const input = {
         limit: 10,
-        scope: "GLOBAL",
-        quotaType: "MAX_ENTITIES_PER_GROUP"
+        scope: "SPACE",
+        quotaType: "MAX_GROUPS",
+        targetId
       }
 
       // When

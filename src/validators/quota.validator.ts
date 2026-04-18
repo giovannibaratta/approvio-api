@@ -41,7 +41,16 @@ export function validateQuotaCreate(object: unknown): Either<QuotaValidationErro
   if (!quotaType) return left("invalid_quotaType")
 
   if (scope === "GLOBAL") {
-    if (quotaType !== "MAX_GROUPS" && quotaType !== "MAX_SPACES") return left("invalid_scope_quotaType_combination")
+    if (
+      quotaType !== "MAX_GROUPS" &&
+      quotaType !== "MAX_SPACES" &&
+      quotaType !== "MAX_ROLES_PER_USER" &&
+      quotaType !== "MAX_ENTITIES_PER_GROUP" &&
+      quotaType !== "MAX_TEMPLATES" &&
+      quotaType !== "MAX_CONCURRENT_WORKFLOWS"
+    ) {
+      return left("invalid_scope_quotaType_combination")
+    }
     if (hasOwnProperty(object, "targetId") && object.targetId !== undefined)
       return left("invalid_scope_targetId_combination")
     return right({
@@ -74,18 +83,10 @@ export function validateQuotaCreate(object: unknown): Either<QuotaValidationErro
     })
   }
 
-  if (scope === "USER") {
-    if (quotaType !== "MAX_ROLES_PER_USER") return left("invalid_scope_quotaType_combination")
-    return right({
-      limit,
-      scope,
-      quotaType,
-      targetId: object.targetId
-    })
-  }
-
   if (scope === "SPACE") {
-    if (quotaType !== "MAX_TEMPLATES") return left("invalid_scope_quotaType_combination")
+    if (quotaType !== "MAX_TEMPLATES" && quotaType !== "MAX_CONCURRENT_WORKFLOWS") {
+      return left("invalid_scope_quotaType_combination")
+    }
     return right({
       limit,
       scope,
