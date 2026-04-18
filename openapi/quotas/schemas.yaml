@@ -1,0 +1,246 @@
+QuotaType:
+  type: string
+  enum:
+    - MAX_ENTITIES_PER_GROUP
+    - MAX_CONCURRENT_WORKFLOWS
+    - MAX_ROLES_PER_USER
+    - MAX_GROUPS
+    - MAX_SPACES
+    - MAX_TEMPLATES
+  description: The type of metric that this quota enforces.
+
+QuotaScope:
+  type: string
+  enum:
+    - GLOBAL
+    - SPACE
+    - USER
+    - GROUP
+    - TEMPLATE
+  description: The scope at which this quota applies.
+
+QuotaBase:
+  type: object
+  required:
+    - limit
+    - quotaType
+    - scope
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: The unique identifier of the quota
+      readOnly: true
+    limit:
+      type: integer
+      minimum: 0
+      description: The maximum value allowed for this quota
+    quotaType:
+      $ref: "#/QuotaType"
+    scope:
+      $ref: "#/QuotaScope"
+    createdAt:
+      type: string
+      format: date-time
+      description: When the quota was created
+      readOnly: true
+    updatedAt:
+      type: string
+      format: date-time
+      description: When the quota was last updated
+      readOnly: true
+
+GlobalQuotaBase:
+  type: object
+  properties:
+    scope:
+      type: string
+      enum:
+        - GLOBAL
+    quotaType:
+      type: string
+      enum:
+        - MAX_GROUPS
+        - MAX_SPACES
+
+GroupQuotaBase:
+  type: object
+  required:
+    - targetId
+  properties:
+    scope:
+      type: string
+      enum:
+        - GROUP
+    quotaType:
+      type: string
+      enum:
+        - MAX_ENTITIES_PER_GROUP
+    targetId:
+      type: string
+      format: uuid
+      description: The ID of the group this quota applies to.
+
+TemplateQuotaBase:
+  type: object
+  required:
+    - targetId
+  properties:
+    scope:
+      type: string
+      enum:
+        - TEMPLATE
+    quotaType:
+      type: string
+      enum:
+        - MAX_CONCURRENT_WORKFLOWS
+    targetId:
+      type: string
+      format: uuid
+      description: The ID of the template this quota applies to.
+
+UserQuotaBase:
+  type: object
+  required:
+    - targetId
+  properties:
+    scope:
+      type: string
+      enum:
+        - USER
+    quotaType:
+      type: string
+      enum:
+        - MAX_ROLES_PER_USER
+    targetId:
+      type: string
+      format: uuid
+      description: The ID of the user this quota applies to.
+
+SpaceQuotaBase:
+  type: object
+  required:
+    - targetId
+  properties:
+    scope:
+      type: string
+      enum:
+        - SPACE
+    quotaType:
+      type: string
+      enum:
+        - MAX_TEMPLATES
+    targetId:
+      type: string
+      format: uuid
+      description: The ID of the space this quota applies to.
+
+GlobalQuotaCreate:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/GlobalQuotaBase"
+
+GroupQuotaCreate:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/GroupQuotaBase"
+
+TemplateQuotaCreate:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/TemplateQuotaBase"
+
+UserQuotaCreate:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/UserQuotaBase"
+
+SpaceQuotaCreate:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/SpaceQuotaBase"
+
+QuotaCreate:
+  oneOf:
+    - $ref: "#/GlobalQuotaCreate"
+    - $ref: "#/GroupQuotaCreate"
+    - $ref: "#/TemplateQuotaCreate"
+    - $ref: "#/UserQuotaCreate"
+    - $ref: "#/SpaceQuotaCreate"
+  discriminator:
+    propertyName: scope
+    mapping:
+      GLOBAL: "#/GlobalQuotaCreate"
+      GROUP: "#/GroupQuotaCreate"
+      TEMPLATE: "#/TemplateQuotaCreate"
+      USER: "#/UserQuotaCreate"
+      SPACE: "#/SpaceQuotaCreate"
+
+QuotaUpdate:
+  type: object
+  properties:
+    limit:
+      type: integer
+      minimum: 0
+      description: The maximum value allowed for this quota
+
+GlobalQuota:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/GlobalQuotaBase"
+
+GroupQuota:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/GroupQuotaBase"
+
+TemplateQuota:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/TemplateQuotaBase"
+
+UserQuota:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/UserQuotaBase"
+
+SpaceQuota:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/SpaceQuotaBase"
+
+Quota:
+  oneOf:
+    - $ref: "#/GlobalQuota"
+    - $ref: "#/GroupQuota"
+    - $ref: "#/TemplateQuota"
+    - $ref: "#/UserQuota"
+    - $ref: "#/SpaceQuota"
+  discriminator:
+    propertyName: scope
+    mapping:
+      GLOBAL: "#/GlobalQuota"
+      GROUP: "#/GroupQuota"
+      TEMPLATE: "#/TemplateQuota"
+      USER: "#/UserQuota"
+      SPACE: "#/SpaceQuota"
+
+ListQuotasParams:
+  type: object
+  properties:
+    page:
+      type: integer
+      default: 1
+      description: Page number for pagination (1-indexed)
+    limit:
+      type: integer
+      default: 20
+      description: Number of results per page
+    scope:
+      $ref: "#/QuotaScope"
+    targetId:
+      type: string
+      format: uuid
+      description: Filter by target identifier
+    quotaType:
+      $ref: "#/QuotaType"

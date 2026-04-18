@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.36
+  version: 0.0.37
 tags:
   - name: Authentication
     description: OIDC authentication and token management
@@ -26,6 +26,8 @@ tags:
     description: Role template management and listing
   - name: Health
     description: Health check endpoints
+  - name: Quotas
+    description: System quota management
 paths:
   /health:
     $ref: ./openapi/system/health.yaml
@@ -103,6 +105,10 @@ paths:
     $ref: ./openapi/workflows/workflow-templates-templateName.yaml
   /workflow-templates/{templateName}/deprecate:
     $ref: ./openapi/workflows/workflow-templates-templateName-deprecate.yaml
+  /quotas:
+    $ref: ./openapi/quotas/quotas.yaml
+  /quotas/{quotaId}:
+    $ref: ./openapi/quotas/quotas-quotaId.yaml
 components:
   schemas:
     AgentChallengeRequest:
@@ -249,6 +255,14 @@ components:
       $ref: ./openapi/shared/schemas.yaml#/PrivilegedOperation
     PrivilegedTokenExchangeRequest:
       $ref: ./openapi/auth/schemas.yaml#/PrivilegedTokenExchangeRequest
+    Quota:
+      $ref: ./openapi/quotas/schemas.yaml#/Quota
+    QuotaCreate:
+      $ref: ./openapi/quotas/schemas.yaml#/QuotaCreate
+    QuotaUpdate:
+      $ref: ./openapi/quotas/schemas.yaml#/QuotaUpdate
+    ListQuotasParams:
+      $ref: ./openapi/quotas/schemas.yaml#/ListQuotasParams
   responses:
     BadRequest:
       $ref: ./openapi/shared/responses.yaml#/BadRequest
