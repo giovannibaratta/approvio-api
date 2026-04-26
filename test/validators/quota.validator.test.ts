@@ -1,16 +1,17 @@
-import {validateQuotaCreate, validateQuotaUpdate} from "../../src/validators/quota.validator"
+import {validateQuotaCreate, validateQuotaUpdate, validateListQuotasParams} from "../../src/validators/quota.validator"
 import "../../src/utils/matchers"
 
 const mockUUID = "d11bb747-1234-4567-89ab-cdef01234567"
 
 describe("Quota Validators", () => {
   describe("validateQuotaCreate", () => {
-    it("should successfully validate a valid GLOBAL quota with MAX_GROUPS", () => {
+    it("should successfully validate a valid Org quota with MAX_GROUPS", () => {
       // Given
       const input = {
         limit: 100,
-        scope: "GLOBAL",
-        quotaType: "MAX_GROUPS"
+        scope: "Org",
+        quotaType: "MAX_GROUPS",
+        targetId: mockUUID
       }
 
       // When
@@ -20,12 +21,13 @@ describe("Quota Validators", () => {
       expect(result).toBeRightOf(input)
     })
 
-    it("should successfully validate a valid GLOBAL quota with MAX_ROLES_PER_USER", () => {
+    it("should successfully validate a valid Org quota with MAX_ROLES_PER_USER", () => {
       // Given
       const input = {
         limit: 5,
-        scope: "GLOBAL",
-        quotaType: "MAX_ROLES_PER_USER"
+        scope: "Org",
+        quotaType: "MAX_ROLES_PER_USER",
+        targetId: mockUUID
       }
 
       // When
@@ -35,12 +37,13 @@ describe("Quota Validators", () => {
       expect(result).toBeRightOf(input)
     })
 
-    it("should successfully validate a valid GLOBAL quota with MAX_CONCURRENT_WORKFLOWS", () => {
+    it("should successfully validate a valid Org quota with MAX_CONCURRENT_WORKFLOWS", () => {
       // Given
       const input = {
         limit: 10,
-        scope: "GLOBAL",
-        quotaType: "MAX_CONCURRENT_WORKFLOWS"
+        scope: "Org",
+        quotaType: "MAX_CONCURRENT_WORKFLOWS",
+        targetId: mockUUID
       }
 
       // When
@@ -50,12 +53,12 @@ describe("Quota Validators", () => {
       expect(result).toBeRightOf(input)
     })
 
-    it("should successfully validate a valid GROUP quota", () => {
+    it("should successfully validate a valid Group quota", () => {
       // Given
       const targetId = mockUUID
       const input = {
         limit: 50,
-        scope: "GROUP",
+        scope: "Group",
         quotaType: "MAX_ENTITIES_PER_GROUP",
         targetId
       }
@@ -67,12 +70,12 @@ describe("Quota Validators", () => {
       expect(result).toBeRightOf(input)
     })
 
-    it("should successfully validate a valid SPACE quota with MAX_CONCURRENT_WORKFLOWS", () => {
+    it("should successfully validate a valid Space quota with MAX_CONCURRENT_WORKFLOWS", () => {
       // Given
       const targetId = mockUUID
       const input = {
         limit: 5,
-        scope: "SPACE",
+        scope: "Space",
         quotaType: "MAX_CONCURRENT_WORKFLOWS",
         targetId
       }
@@ -84,13 +87,13 @@ describe("Quota Validators", () => {
       expect(result).toBeRightOf(input)
     })
 
-    it("should successfully validate a valid SPACE quota with MAX_TEMPLATES", () => {
+    it("should successfully validate a valid Space quota with MAX_WORKFLOW_TEMPLATES_PER_SPACE", () => {
       // Given
       const targetId = mockUUID
       const input = {
         limit: 2,
-        scope: "SPACE",
-        quotaType: "MAX_TEMPLATES",
+        scope: "Space",
+        quotaType: "MAX_WORKFLOW_TEMPLATES_PER_SPACE",
         targetId
       }
 
@@ -101,12 +104,12 @@ describe("Quota Validators", () => {
       expect(result).toBeRightOf(input)
     })
 
-    it("should fail validation for USER scope as it was removed", () => {
+    it("should successfully validate a valid User quota", () => {
       // Given
       const targetId = mockUUID
       const input = {
         limit: 5,
-        scope: "USER",
+        scope: "User",
         quotaType: "MAX_ROLES_PER_USER",
         targetId
       }
@@ -115,7 +118,24 @@ describe("Quota Validators", () => {
       const result = validateQuotaCreate(input)
 
       // Expect
-      expect(result).toBeLeftOf("invalid_scope")
+      expect(result).toBeRightOf(input)
+    })
+
+    it("should successfully validate a valid Workflow quota", () => {
+      // Given
+      const targetId = mockUUID
+      const input = {
+        limit: 10,
+        scope: "Workflow",
+        quotaType: "MAX_VOTES_PER_WORKFLOW",
+        targetId
+      }
+
+      // When
+      const result = validateQuotaCreate(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
     })
 
     it("should fail validation if object is null", () => {
@@ -132,8 +152,9 @@ describe("Quota Validators", () => {
     it("should fail validation if limit is missing", () => {
       // Given
       const input = {
-        scope: "GLOBAL",
-        quotaType: "MAX_GROUPS"
+        scope: "Org",
+        quotaType: "MAX_GROUPS",
+        targetId: mockUUID
       }
 
       // When
@@ -147,8 +168,9 @@ describe("Quota Validators", () => {
       // Given
       const input = {
         limit: -10,
-        scope: "GLOBAL",
-        quotaType: "MAX_GROUPS"
+        scope: "Org",
+        quotaType: "MAX_GROUPS",
+        targetId: mockUUID
       }
 
       // When
@@ -178,7 +200,7 @@ describe("Quota Validators", () => {
       const targetId = mockUUID
       const input = {
         limit: 10,
-        scope: "SPACE",
+        scope: "Space",
         quotaType: "MAX_GROUPS",
         targetId
       }
@@ -190,27 +212,11 @@ describe("Quota Validators", () => {
       expect(result).toBeLeftOf("invalid_scope_quotaType_combination")
     })
 
-    it("should fail validation if GLOBAL scope provides targetId", () => {
+    it("should fail validation if Group scope misses targetId", () => {
       // Given
       const input = {
         limit: 10,
-        scope: "GLOBAL",
-        quotaType: "MAX_GROUPS",
-        targetId: mockUUID
-      }
-
-      // When
-      const result = validateQuotaCreate(input)
-
-      // Expect
-      expect(result).toBeLeftOf("invalid_scope_targetId_combination")
-    })
-
-    it("should fail validation if GROUP scope misses targetId", () => {
-      // Given
-      const input = {
-        limit: 10,
-        scope: "GROUP",
+        scope: "Group",
         quotaType: "MAX_ENTITIES_PER_GROUP"
       }
 
@@ -221,11 +227,11 @@ describe("Quota Validators", () => {
       expect(result).toBeLeftOf("missing_targetId")
     })
 
-    it("should fail validation if GROUP scope targetId is not UUID", () => {
+    it("should fail validation if Group scope targetId is not UUID", () => {
       // Given
       const input = {
         limit: 10,
-        scope: "GROUP",
+        scope: "Group",
         quotaType: "MAX_ENTITIES_PER_GROUP",
         targetId: "not-a-uuid"
       }
@@ -285,6 +291,130 @@ describe("Quota Validators", () => {
 
       // Expect
       expect(result).toBeLeftOf("malformed_object")
+    })
+  })
+
+  describe("validateListQuotasParams", () => {
+    it("should successfully validate empty params", () => {
+      // Given
+      const input = {}
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({})
+    })
+
+    it("should successfully validate pagination params", () => {
+      // Given
+      const input = {
+        page: 2,
+        limit: 50
+      }
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
+    })
+
+    it("should successfully validate string pagination params", () => {
+      // Given
+      const input = {
+        page: "2",
+        limit: "50"
+      }
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeRightOf({
+        page: 2,
+        limit: 50
+      })
+    })
+
+    it("should successfully validate filter params", () => {
+      // Given
+      const input = {
+        scope: "Space",
+        targetId: mockUUID,
+        quotaType: "MAX_WORKFLOW_TEMPLATES_PER_SPACE"
+      }
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
+    })
+
+    it("should fail validation if page is invalid", () => {
+      // Given
+      const input = {
+        page: 0
+      }
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_page")
+    })
+
+    it("should fail validation if limit is invalid", () => {
+      // Given
+      const input = {
+        limit: "invalid"
+      }
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_limit")
+    })
+
+    it("should fail validation if scope is invalid", () => {
+      // Given
+      const input = {
+        scope: "INVALID"
+      }
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_scope")
+    })
+
+    it("should fail validation if targetId is invalid", () => {
+      // Given
+      const input = {
+        targetId: "not-a-uuid"
+      }
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_targetId")
+    })
+
+    it("should fail validation if quotaType is invalid", () => {
+      // Given
+      const input = {
+        quotaType: "INVALID"
+      }
+
+      // When
+      const result = validateListQuotasParams(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_quotaType")
     })
   })
 })

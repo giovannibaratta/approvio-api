@@ -6,30 +6,37 @@ QuotaType:
     - MAX_ROLES_PER_USER
     - MAX_GROUPS
     - MAX_SPACES
-    - MAX_TEMPLATES
-  description: The type of metric that this quota enforces.
+    - MAX_WORKFLOW_TEMPLATES_PER_SPACE
+    - MAX_VOTES_PER_WORKFLOW
+  description: >
+    The type of metric that this quota enforces.
+    * `MAX_ENTITIES_PER_GROUP`: The maximum number of entities (users, agents) allowed in a group.
+    * `MAX_CONCURRENT_WORKFLOWS`: The maximum number of workflow instances that can be in a non terminal status at the same for a workflow template.
+    * `MAX_ROLES_PER_USER`: The maximum number of roles a user can have.
+    * `MAX_GROUPS`: The maximum number of groups allowed in an organization.
+    * `MAX_SPACES`: The maximum number of spaces allowed in an organization.
+    * `MAX_WORKFLOW_TEMPLATES_PER_SPACE`: The maximum number of workflow templates allowed in a space.
+    * `MAX_VOTES_PER_WORKFLOW`: The maximum number of votes allowed per workflow instance.
 
 QuotaScope:
   type: string
   enum:
-    - GLOBAL
-    - SPACE
-    - GROUP
-    - TEMPLATE
+    - Org
+    - Group
+    - Space
+    - WorkflowTemplate
+    - Workflow
+    - User
   description: The scope at which this quota applies.
 
-QuotaBase:
+QuotaBaseNew:
   type: object
   required:
     - limit
     - quotaType
     - scope
+    - targetId
   properties:
-    id:
-      type: string
-      format: uuid
-      description: The unique identifier of the quota
-      readOnly: true
     limit:
       type: integer
       minimum: 0
@@ -38,24 +45,39 @@ QuotaBase:
       $ref: "#/QuotaType"
     scope:
       $ref: "#/QuotaScope"
-    createdAt:
+    targetId:
       type: string
-      format: date-time
-      description: When the quota was created
-      readOnly: true
-    updatedAt:
-      type: string
-      format: date-time
-      description: When the quota was last updated
-      readOnly: true
+      format: uuid
+      description: The ID of the target this quota applies to.
 
-GlobalQuotaBase:
+QuotaBase:
+  allOf:
+    - $ref: "#/QuotaBaseNew"
+    - type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique identifier of the quota
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          description: When the quota was created
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the quota was last updated
+          readOnly: true
+
+OrgQuotaBase:
   type: object
   properties:
     scope:
       type: string
       enum:
-        - GLOBAL
+        - Org
     quotaType:
       type: string
       enum:
@@ -63,97 +85,118 @@ GlobalQuotaBase:
         - MAX_SPACES
         - MAX_ROLES_PER_USER
         - MAX_ENTITIES_PER_GROUP
-        - MAX_TEMPLATES
+        - MAX_WORKFLOW_TEMPLATES_PER_SPACE
         - MAX_CONCURRENT_WORKFLOWS
+        - MAX_VOTES_PER_WORKFLOW
 
 GroupQuotaBase:
   type: object
-  required:
-    - targetId
   properties:
     scope:
       type: string
       enum:
-        - GROUP
+        - Group
     quotaType:
       type: string
       enum:
         - MAX_ENTITIES_PER_GROUP
-    targetId:
-      type: string
-      format: uuid
-      description: The ID of the group this quota applies to.
-
-TemplateQuotaBase:
-  type: object
-  required:
-    - targetId
-  properties:
-    scope:
-      type: string
-      enum:
-        - TEMPLATE
-    quotaType:
-      type: string
-      enum:
-        - MAX_CONCURRENT_WORKFLOWS
-    targetId:
-      type: string
-      format: uuid
-      description: The ID of the template this quota applies to.
 
 SpaceQuotaBase:
   type: object
-  required:
-    - targetId
   properties:
     scope:
       type: string
       enum:
-        - SPACE
+        - Space
     quotaType:
       type: string
       enum:
-        - MAX_TEMPLATES
+        - MAX_WORKFLOW_TEMPLATES_PER_SPACE
         - MAX_CONCURRENT_WORKFLOWS
-    targetId:
-      type: string
-      format: uuid
-      description: The ID of the space this quota applies to.
 
-GlobalQuotaCreate:
+WorkflowTemplateQuotaBase:
+  type: object
+  properties:
+    scope:
+      type: string
+      enum:
+        - WorkflowTemplate
+    quotaType:
+      type: string
+      enum:
+        - MAX_CONCURRENT_WORKFLOWS
+
+WorkflowQuotaBase:
+  type: object
+  properties:
+    scope:
+      type: string
+      enum:
+        - Workflow
+    quotaType:
+      type: string
+      enum:
+        - MAX_VOTES_PER_WORKFLOW
+
+UserQuotaBase:
+  type: object
+  properties:
+    scope:
+      type: string
+      enum:
+        - User
+    quotaType:
+      type: string
+      enum:
+        - MAX_ROLES_PER_USER
+
+OrgQuotaCreate:
   allOf:
-    - $ref: "#/QuotaBase"
-    - $ref: "#/GlobalQuotaBase"
+    - $ref: "#/QuotaBaseNew"
+    - $ref: "#/OrgQuotaBase"
 
 GroupQuotaCreate:
   allOf:
-    - $ref: "#/QuotaBase"
+    - $ref: "#/QuotaBaseNew"
     - $ref: "#/GroupQuotaBase"
-
-TemplateQuotaCreate:
-  allOf:
-    - $ref: "#/QuotaBase"
-    - $ref: "#/TemplateQuotaBase"
 
 SpaceQuotaCreate:
   allOf:
-    - $ref: "#/QuotaBase"
+    - $ref: "#/QuotaBaseNew"
     - $ref: "#/SpaceQuotaBase"
+
+WorkflowTemplateQuotaCreate:
+  allOf:
+    - $ref: "#/QuotaBaseNew"
+    - $ref: "#/WorkflowTemplateQuotaBase"
+
+WorkflowQuotaCreate:
+  allOf:
+    - $ref: "#/QuotaBaseNew"
+    - $ref: "#/WorkflowQuotaBase"
+
+UserQuotaCreate:
+  allOf:
+    - $ref: "#/QuotaBaseNew"
+    - $ref: "#/UserQuotaBase"
 
 QuotaCreate:
   oneOf:
-    - $ref: "#/GlobalQuotaCreate"
+    - $ref: "#/OrgQuotaCreate"
     - $ref: "#/GroupQuotaCreate"
-    - $ref: "#/TemplateQuotaCreate"
     - $ref: "#/SpaceQuotaCreate"
+    - $ref: "#/WorkflowTemplateQuotaCreate"
+    - $ref: "#/WorkflowQuotaCreate"
+    - $ref: "#/UserQuotaCreate"
   discriminator:
     propertyName: scope
     mapping:
-      GLOBAL: "#/GlobalQuotaCreate"
-      GROUP: "#/GroupQuotaCreate"
-      TEMPLATE: "#/TemplateQuotaCreate"
-      SPACE: "#/SpaceQuotaCreate"
+      Org: "#/OrgQuotaCreate"
+      Group: "#/GroupQuotaCreate"
+      Space: "#/SpaceQuotaCreate"
+      WorkflowTemplate: "#/WorkflowTemplateQuotaCreate"
+      Workflow: "#/WorkflowQuotaCreate"
+      User: "#/UserQuotaCreate"
 
 QuotaUpdate:
   type: object
@@ -163,39 +206,53 @@ QuotaUpdate:
       minimum: 0
       description: The maximum value allowed for this quota
 
-GlobalQuota:
+OrgQuota:
   allOf:
     - $ref: "#/QuotaBase"
-    - $ref: "#/GlobalQuotaBase"
+    - $ref: "#/OrgQuotaBase"
 
 GroupQuota:
   allOf:
     - $ref: "#/QuotaBase"
     - $ref: "#/GroupQuotaBase"
 
-TemplateQuota:
-  allOf:
-    - $ref: "#/QuotaBase"
-    - $ref: "#/TemplateQuotaBase"
-
 SpaceQuota:
   allOf:
     - $ref: "#/QuotaBase"
     - $ref: "#/SpaceQuotaBase"
 
+WorkflowTemplateQuota:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/WorkflowTemplateQuotaBase"
+
+WorkflowQuota:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/WorkflowQuotaBase"
+
+UserQuota:
+  allOf:
+    - $ref: "#/QuotaBase"
+    - $ref: "#/UserQuotaBase"
+
 Quota:
   oneOf:
-    - $ref: "#/GlobalQuota"
+    - $ref: "#/OrgQuota"
     - $ref: "#/GroupQuota"
-    - $ref: "#/TemplateQuota"
     - $ref: "#/SpaceQuota"
+    - $ref: "#/WorkflowTemplateQuota"
+    - $ref: "#/WorkflowQuota"
+    - $ref: "#/UserQuota"
   discriminator:
     propertyName: scope
     mapping:
-      GLOBAL: "#/GlobalQuota"
-      GROUP: "#/GroupQuota"
-      TEMPLATE: "#/TemplateQuota"
-      SPACE: "#/SpaceQuota"
+      Org: "#/OrgQuota"
+      Group: "#/GroupQuota"
+      Space: "#/SpaceQuota"
+      WorkflowTemplate: "#/WorkflowTemplateQuota"
+      Workflow: "#/WorkflowQuota"
+      User: "#/UserQuota"
 
 ListQuotasParams:
   type: object
