@@ -2,7 +2,7 @@
   "name": "@approvio/api",
   "author": "Giovanni Baratta",
   "license": "MIT",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "private": false,
   "type": "module",
   "main": "./dist/src/index.cjs",

@@ -5,10 +5,10 @@ post:
   tags:
     - Workflow Templates
   parameters:
-    - name: templateName
+    - name: templateIdentifier
       in: path
       required: true
-      description: The name of the workflow template to deprecate
+      description: The name or ID of the workflow template to deprecate
       schema:
         type: string
   requestBody:
