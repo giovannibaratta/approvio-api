@@ -18,12 +18,8 @@ post:
         schema:
           $ref: ./schemas.yaml#/WorkflowVoteRequest
   responses:
-    "200":
-      description: Vote cast successfully. Returns updated workflow details.
-      content:
-        application/json:
-          schema:
-            type: object
+    "202":
+      description: Vote received. The workflow status will be updated asynchronously.
     "400":
       description: Invalid request (e.g., voter not authorized, invalid vote type/mode).
       content:

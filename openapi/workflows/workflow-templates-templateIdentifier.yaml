@@ -32,7 +32,7 @@ put:
     - name: templateIdentifier
       in: path
       required: true
-      description: The name of the workflow template to update
+      description: The name or the ID of the workflow template to update
       schema:
         type: string
   requestBody:
@@ -54,3 +54,21 @@ put:
       $ref: ../shared/responses.yaml#/Unauthorized
     "404":
       $ref: ../shared/responses.yaml#/NotFound
+delete:
+  summary: Delete a workflow template
+  description: Deletes a workflow template by its name or ID. It will delete all the revisions, all the associated workflows, and stop all the ongoing actions gracefully.
+  operationId: deleteWorkflowTemplate
+  tags:
+    - Workflow Templates
+  parameters:
+    - name: templateIdentifier
+      in: path
+      required: true
+      description: The name or ID of the workflow template to delete
+      schema:
+        type: string
+  responses:
+    "204":
+      description: Workflow template deleted successfully or did not exist.
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
