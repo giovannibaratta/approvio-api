@@ -1,5 +1,5 @@
 import {Either, isLeft, left, right} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString, isNumber, isUUIDv4} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isNumber, isValidUUID} from "../utils/validation.utils"
 import {
   GroupQuotaBase,
   ListQuotasParams,
@@ -64,7 +64,7 @@ export function validateQuotaCreate(object: unknown): Either<QuotaValidationErro
   if (!scope) return left("invalid_scope")
 
   if (!hasOwnProperty(object, "targetId")) return left("missing_targetId")
-  if (!isNonEmptyString(object.targetId) || !isUUIDv4(object.targetId)) return left("invalid_targetId")
+  if (!isNonEmptyString(object.targetId) || !isValidUUID(object.targetId)) return left("invalid_targetId")
 
   const targetId = object.targetId
   const quotaType = getStringAsEnum(quotaTypeStr, QUOTA_TYPE_ENUM_BY_SCOPE[scope])
@@ -111,7 +111,7 @@ export function validateListQuotasParams(object: unknown): Either<ListQuotasPara
   }
 
   if (hasOwnProperty(object, "targetId") && object.targetId !== undefined) {
-    if (!isNonEmptyString(object.targetId) || !isUUIDv4(object.targetId)) return left("invalid_targetId")
+    if (!isNonEmptyString(object.targetId) || !isValidUUID(object.targetId)) return left("invalid_targetId")
     result.targetId = object.targetId
   }
 

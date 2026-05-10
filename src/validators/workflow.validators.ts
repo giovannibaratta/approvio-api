@@ -1,5 +1,5 @@
 import {Either, left, right, isLeft, mapLeft} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString, isArray, isUUIDv4} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isArray, isValidUUID} from "../utils/validation.utils"
 import {getStringAsEnum} from "../utils/enum"
 import {validatePagination, validateSharedListParams} from "./common.validators"
 import {validateWorkflowTemplate} from "./workflow-templates.validators"
@@ -259,7 +259,7 @@ export function validateListWorkflowsParams(
     const validatedIncludeGroups: string[] = []
     for (const item of includeGroupsVal) {
       if (typeof item !== "string") return left("invalid_include_groups")
-      if (!isUUIDv4(item)) return left("invalid_include_groups")
+      if (!isValidUUID(item)) return left("invalid_include_groups")
       validatedIncludeGroups.push(item)
     }
 
