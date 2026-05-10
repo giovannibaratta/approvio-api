@@ -62,18 +62,19 @@ Now, your consuming project will use the locally linked version of `@approvio/ap
 
 ### Publishing to NPM
 
-To publish this package to an NPM registry:
+This package is automatically published to NPM when the version in `package.json` is incremented and merged into the `main` branch.
 
-1.  Ensure you are logged in to the correct NPM registry:
+#### Automatic Publishing
 
-    ```bash
-    yarn login
-    ```
+The [GitHub Workflow](.github/workflows/publish.yml) performs the following steps:
 
-1.  Run `yarn publish`:
+1. Detects changes in the `main` branch.
+2. Compares the version in `package.json` with the latest version published on NPM.
+3. If the version is newer, it builds the project and publishes it automatically.
 
-    ```bash
-    yarn publish --access public
-    ```
+#### Manual Publishing
 
-> If you get an error like `error Couldn't publish package: "https://registry.yarnpkg.com/@approvio%2fapi: Not found"`, try running `npm login` first.
+If you need to publish manually:
+
+1.  Ensure you are logged in to NPM: `npm login`
+2.  Run the publish command: `npm publish --access public`
