@@ -1,5 +1,5 @@
 import {Either, left, right, isLeft} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString, isStringBigInt} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString} from "../utils/validation.utils"
 import {getStringAsEnum} from "../utils/enum"
 import {
   WorkflowTemplate,
@@ -9,7 +9,6 @@ import {
   WorkflowTemplateScope,
   WorkflowTemplateSummary,
   WorkflowTemplateStatus,
-  ConcurrencyControl,
   ListWorkflowTemplates200Response,
   ListWorkflowTemplatesParams,
   ApprovalRule,
@@ -22,6 +21,7 @@ import {
 } from "../../generated/openapi/model/models"
 import {ListParamsValidationError, validatePagination, validateSharedListParams} from "./common.validators"
 import {prefixLeft, PrefixUnion} from "../utils/types"
+import {validateConcurrencyControl} from "./concurrency-control"
 
 type EmailActionValidationError =
   | "malformed_object"
@@ -660,10 +660,4 @@ export function validateListWorkflowTemplatesParams(
   }
 
   return right(result)
-}
-
-export function validateConcurrencyControl(object: unknown): Either<"invalid_concurrency_control", ConcurrencyControl> {
-  if (typeof object !== "object" || object === null) return left("invalid_concurrency_control")
-  if (!hasOwnProperty(object, "version") || !isStringBigInt(object.version)) return left("invalid_concurrency_control")
-  return right({version: object.version})
 }
