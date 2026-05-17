@@ -1,7 +1,14 @@
 import {Either, left, right, isLeft} from "fp-ts/Either"
-import {hasOwnProperty, isNumber, isNonEmptyString, isArray} from "../utils/validation.utils"
-import {Pagination, HealthResponse, GetEntityInfo200Response, GroupInfo} from "../../generated/openapi/model/models"
+import {hasOwnProperty, isNumber, isNonEmptyString, isArray, isUUIDv4} from "../utils/validation.utils"
+import {
+  Pagination,
+  HealthResponse,
+  GetEntityInfo200Response,
+  GroupInfo,
+  RoleOperationItem
+} from "../../generated/openapi/model/models"
 import {validateGroupInfo} from "./groups.validators"
+import {validateRoleOperationItem} from "./users.validators"
 
 export type PaginationValidationError =
   | "malformed_object"
@@ -104,6 +111,12 @@ export type GetEntityInfo200ResponseValidationError =
   | "invalid_entity_type"
   | "missing_groups"
   | "invalid_groups"
+  | "missing_id"
+  | "invalid_id"
+  | "missing_roles"
+  | "invalid_roles"
+  | "missing_org_role"
+  | "invalid_org_role"
 
 export function validateGetEntityInfo200Response(
   object: unknown
@@ -112,6 +125,9 @@ export function validateGetEntityInfo200Response(
 
   if (!hasOwnProperty(object, "entityType") || !isNonEmptyString(object.entityType))
     return left(hasOwnProperty(object, "entityType") ? "invalid_entity_type" : "missing_entity_type")
+
+  if (!hasOwnProperty(object, "id")) return left("missing_id")
+  if (!isNonEmptyString(object.id) || !isUUIDv4(object.id)) return left("invalid_id")
 
   if (!hasOwnProperty(object, "groups") || !isArray(object.groups))
     return left(hasOwnProperty(object, "groups") ? "invalid_groups" : "missing_groups")
@@ -123,8 +139,35 @@ export function validateGetEntityInfo200Response(
     groups.push(validatedItem.right)
   }
 
-  return right({
-    entityType: object.entityType,
-    groups
-  })
+  if (!hasOwnProperty(object, "roles")) return left("missing_roles")
+  if (!isArray(object.roles)) return left("invalid_roles")
+
+  const roles: RoleOperationItem[] = []
+  for (const role of object.roles) {
+    const validatedRole = validateRoleOperationItem(role)
+    if (isLeft(validatedRole)) return left("invalid_roles")
+    roles.push(validatedRole.right)
+  }
+
+  if (object.entityType === "user") {
+    if (!hasOwnProperty(object, "orgRole")) return left("missing_org_role")
+    if (object.orgRole !== "admin" && object.orgRole !== "member") return left("invalid_org_role")
+
+    return right({
+      entityType: "user" as const,
+      id: object.id,
+      groups,
+      roles,
+      orgRole: object.orgRole
+    })
+  } else if (object.entityType === "agent") {
+    return right({
+      entityType: "agent" as const,
+      id: object.id,
+      groups,
+      roles
+    })
+  }
+
+  return left("invalid_entity_type")
 }

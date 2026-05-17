@@ -3,7 +3,7 @@ import {validateUser} from "../../src/validators/users.validators"
 import {validatePagination} from "../../src/validators/common.validators"
 import {validateTokenResponse} from "../../src/validators/auth.validators"
 import {tokenResponse} from "../../mocks/auth.fixtures"
-import {memberUserResponse, adminUserResponse} from "../../mocks/user.fixtures"
+import {memberUserResponse, adminUserResponse, userWithGroupsAndRolesResponse} from "../../mocks/user.fixtures"
 import {singleItemPaginationResponse} from "../../mocks/pagination.fixture"
 
 describe("Mock Fixtures Validation", () => {
@@ -13,6 +13,9 @@ describe("Mock Fixtures Validation", () => {
     })
     it("should validate adminUserResponse", () => {
       expect(isRight(validateUser(adminUserResponse))).toBe(true)
+    })
+    it("should validate userWithGroupsAndRolesResponse", () => {
+      expect(isRight(validateUser(userWithGroupsAndRolesResponse))).toBe(true)
     })
   })
 

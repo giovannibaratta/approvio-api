@@ -10,18 +10,6 @@ get:
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - entityType
-              - groups
-            properties:
-              entityType:
-                type: string
-                description: Type of the authenticated entity
-                example: user
-              groups:
-                type: array
-                items:
-                  $ref: ../groups/schemas.yaml#/GroupInfo
+            $ref: ./schemas.yaml#/GetEntityInfo200Response
     "401":
       $ref: ../shared/responses.yaml#/Unauthorized

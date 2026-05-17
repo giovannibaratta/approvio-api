@@ -22,7 +22,10 @@ describe("user validators", () => {
       displayName: "Test User",
       email: "test@example.com",
       orgRole: "admin",
-      createdAt: "2024-03-07T12:00:00Z"
+      createdAt: "2024-03-07T12:00:00Z",
+      groups: [],
+      roles: [],
+      concurrencyControl: {version: "1"}
     }
 
     it("should return right when the user is valid", () => {
@@ -52,7 +55,9 @@ describe("user validators", () => {
       {field: "displayName", error: "missing_display_name"},
       {field: "email", error: "missing_email"},
       {field: "orgRole", error: "missing_org_role"},
-      {field: "createdAt", error: "missing_created_at"}
+      {field: "createdAt", error: "missing_created_at"},
+      {field: "groups", error: "missing_groups"},
+      {field: "roles", error: "missing_roles"}
     ]
 
     errorCases.forEach(({field, error}) => {
@@ -79,6 +84,46 @@ describe("user validators", () => {
         // Expect
         expect(result).toBeLeftOf(invalidError)
       })
+    })
+
+    it("should return left('invalid_groups') when groups contains an invalid group", () => {
+      // Given
+      const input = {
+        ...validUser,
+        groups: [{groupId: "group-123"}] // missing groupName
+      }
+
+      // When
+      const result = validateUser(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_groups")
+    })
+
+    it("should return left('invalid_concurrency_control') when concurrencyControl is missing", () => {
+      // Given
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {concurrencyControl, ...input} = validUser
+
+      // When
+      const result = validateUser(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_concurrency_control")
+    })
+
+    it("should return left('invalid_concurrency_control') when concurrencyControl is invalid", () => {
+      // Given
+      const input = {
+        ...validUser,
+        concurrencyControl: {version: "invalid"}
+      }
+
+      // When
+      const result = validateUser(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_concurrency_control")
     })
   })
 
@@ -310,7 +355,8 @@ describe("user validators", () => {
           roleName: "admin",
           scope: {type: "org"}
         }
-      ]
+      ],
+      concurrencyControl: {version: "1"}
     }
 
     it("should return right when valid", () => {
@@ -367,6 +413,32 @@ describe("user validators", () => {
       // Expect
       expect(result).toBeLeftOf("invalid_roles")
     })
+
+    it("should return left('invalid_concurrency_control') when concurrencyControl is missing", () => {
+      // Given
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {concurrencyControl, ...input} = validRequest
+
+      // When
+      const result = validateRoleAssignmentRequest(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_concurrency_control")
+    })
+
+    it("should return left('invalid_concurrency_control') when concurrencyControl is invalid", () => {
+      // Given
+      const input = {
+        ...validRequest,
+        concurrencyControl: {version: "invalid"}
+      }
+
+      // When
+      const result = validateRoleAssignmentRequest(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_concurrency_control")
+    })
   })
 
   describe("validateRoleRemovalRequest", () => {
@@ -376,7 +448,8 @@ describe("user validators", () => {
           roleName: "admin",
           scope: {type: "org"}
         }
-      ]
+      ],
+      concurrencyControl: {version: "1"}
     }
 
     it("should return right when valid", () => {

@@ -51,6 +51,9 @@ User:
     - email
     - orgRole
     - createdAt
+    - groups
+    - roles
+    - concurrencyControl
   properties:
     id:
       type: string
@@ -74,12 +77,22 @@ User:
         - member
       description: Role assigned to the user within the organization.
       example: member
+    groups:
+      type: array
+      items:
+        $ref: ../groups/schemas.yaml#/GroupInfo
+    roles:
+      type: array
+      items:
+        $ref: ../roles/schemas.yaml#/RoleOperationItem
     createdAt:
       type: string
       format: date-time
       description: Timestamp when the user was created.
       readOnly: true
       example: "2025-04-15T12:05:00Z"
+    concurrencyControl:
+      $ref: ../shared/schemas.yaml#/ConcurrencyControl
 ListUsersParams:
   type: object
   properties:
