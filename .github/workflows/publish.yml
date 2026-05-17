@@ -20,7 +20,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          registry-url: "https://registry.npmjs.org"
 
       - name: Enable Corepack
         run: corepack enable
@@ -46,7 +45,7 @@ jobs:
           if [ "$IS_NEWER" = "true" ]; then
             echo "New version detected: $CURRENT_VERSION (Registry: $PUBLISHED_VERSION)"
             echo "Publishing to NPM..."
-            npm publish --access public
+            npm publish --access public --provenance
           else
             echo "Version $CURRENT_VERSION is not newer than registry ($PUBLISHED_VERSION). Skipping."
           fi
