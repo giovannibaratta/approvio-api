@@ -7,11 +7,14 @@ import {
   RoleRemovalRequest,
   RoleOperationItem,
   RoleScope,
-  ListUsersParams
+  ListUsersParams,
+  GroupInfo
 } from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft, isRight} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
 import {validatePagination, validateSharedListParams} from "./common.validators"
+import {validateGroupInfo} from "./groups.validators"
+import {validateConcurrencyControl} from "./workflow-templates.validators"
 
 export type UserValidationError =
   | "malformed_object"
@@ -25,6 +28,11 @@ export type UserValidationError =
   | "invalid_org_role"
   | "missing_created_at"
   | "invalid_created_at"
+  | "missing_groups"
+  | "invalid_groups"
+  | "missing_roles"
+  | "invalid_roles"
+  | "invalid_concurrency_control"
 
 export type UserCreateValidationError =
   | "malformed_object"
@@ -69,7 +77,11 @@ export type RoleOperationItemValidationError =
   | "missing_scope"
   | "invalid_scope"
 
-export type RoleOperationRequestValidationError = "malformed_object" | "missing_roles" | "invalid_roles"
+export type RoleOperationRequestValidationError =
+  | "malformed_object"
+  | "missing_roles"
+  | "invalid_roles"
+  | "invalid_concurrency_control"
 
 export function validateUser(object: unknown): Either<UserValidationError, User> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
@@ -89,12 +101,39 @@ export function validateUser(object: unknown): Either<UserValidationError, User>
   if (!hasOwnProperty(object, "createdAt")) return left("missing_created_at")
   if (!isNonEmptyString(object.createdAt)) return left("invalid_created_at")
 
+  if (!hasOwnProperty(object, "groups")) return left("missing_groups")
+  if (!isArray(object.groups)) return left("invalid_groups")
+
+  const groups: GroupInfo[] = []
+  for (const group of object.groups) {
+    const validatedGroup = validateGroupInfo(group)
+    if (isLeft(validatedGroup)) return left("invalid_groups")
+    groups.push(validatedGroup.right)
+  }
+
+  if (!hasOwnProperty(object, "roles")) return left("missing_roles")
+  if (!isArray(object.roles)) return left("invalid_roles")
+
+  const roles: RoleOperationItem[] = []
+  for (const role of object.roles) {
+    const validatedRole = validateRoleOperationItem(role)
+    if (isLeft(validatedRole)) return left("invalid_roles")
+    roles.push(validatedRole.right)
+  }
+
+  if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
+  const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
+  if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
+
   return right({
     id: object.id,
     displayName: object.displayName,
     email: object.email,
     orgRole: object.orgRole,
-    createdAt: object.createdAt
+    createdAt: object.createdAt,
+    groups,
+    roles,
+    concurrencyControl: concurrencyControlValidation.right
   })
 }
 
@@ -164,7 +203,7 @@ export function validateListUsers200Response(
   })
 }
 
-function validateRoleScope(object: unknown): Either<RoleScopeValidationError, RoleScope> {
+export function validateRoleScope(object: unknown): Either<RoleScopeValidationError, RoleScope> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "type")) return left("missing_type")
@@ -188,7 +227,9 @@ function validateRoleScope(object: unknown): Either<RoleScopeValidationError, Ro
   return left("invalid_type")
 }
 
-function validateRoleOperationItem(object: unknown): Either<RoleOperationItemValidationError, RoleOperationItem> {
+export function validateRoleOperationItem(
+  object: unknown
+): Either<RoleOperationItemValidationError, RoleOperationItem> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "roleName")) return left("missing_role_name")
@@ -219,8 +260,13 @@ export function validateRoleAssignmentRequest(
     roles.push(roleValidation.right)
   }
 
+  if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
+  const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
+  if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
+
   return right({
-    roles
+    roles,
+    concurrencyControl: concurrencyControlValidation.right
   })
 }
 

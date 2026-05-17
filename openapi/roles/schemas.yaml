@@ -60,6 +60,7 @@ RoleOperationRequest: &ref_0
   description: Request to assign or remove roles from a user or agent
   required:
     - roles
+    - concurrencyControl
   properties:
     roles:
       type: array
@@ -71,5 +72,7 @@ RoleOperationRequest: &ref_0
           scope:
             type: group
             groupId: a1b2c3d4-e5f6-7890-1234-567890abcdef
+    concurrencyControl:
+      $ref: ../shared/schemas.yaml#/ConcurrencyControl
 RoleAssignmentRequest: *ref_0
 RoleRemovalRequest: *ref_0

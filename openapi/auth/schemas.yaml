@@ -70,3 +70,75 @@ PrivilegedTokenExchangeRequest:
       description: The identifier of the resource being accessed
     operation:
       $ref: ../shared/schemas.yaml#/PrivilegedOperation
+
+GetEntityInfo200Response:
+  description: Entity information response based on the authenticated entity type.
+  oneOf:
+    - $ref: "#/GetEntityInfoUserResponse"
+    - $ref: "#/GetEntityInfoAgentResponse"
+  discriminator:
+    propertyName: entityType
+    mapping:
+      user: "#/GetEntityInfoUserResponse"
+      agent: "#/GetEntityInfoAgentResponse"
+
+GetEntityInfoUserResponse:
+  type: object
+  required:
+    - id
+    - entityType
+    - groups
+    - roles
+    - orgRole
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Internal unique identifier for the user.
+    entityType:
+      type: string
+      enum:
+        - user
+      description: Type of the authenticated entity
+      example: user
+    groups:
+      type: array
+      items:
+        $ref: ../groups/schemas.yaml#/GroupInfo
+    roles:
+      type: array
+      items:
+        $ref: ../roles/schemas.yaml#/RoleOperationItem
+    orgRole:
+      type: string
+      enum:
+        - admin
+        - member
+      description: Role assigned to the user within the organization.
+
+GetEntityInfoAgentResponse:
+  type: object
+  required:
+    - id
+    - entityType
+    - groups
+    - roles
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Internal unique identifier for the agent.
+    entityType:
+      type: string
+      enum:
+        - agent
+      description: Type of the authenticated entity
+      example: agent
+    groups:
+      type: array
+      items:
+        $ref: ../groups/schemas.yaml#/GroupInfo
+    roles:
+      type: array
+      items:
+        $ref: ../roles/schemas.yaml#/RoleOperationItem
