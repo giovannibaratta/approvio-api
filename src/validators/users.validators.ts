@@ -11,10 +11,10 @@ import {
   GroupInfo
 } from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft, isRight} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isArray, isValidUUID} from "../utils/validation.utils"
 import {validatePagination, validateSharedListParams} from "./common.validators"
 import {validateGroupInfo} from "./groups.validators"
-import {validateConcurrencyControl} from "./workflow-templates.validators"
+import {validateConcurrencyControl} from "./concurrency-control"
 
 export type UserValidationError =
   | "malformed_object"
@@ -212,15 +212,21 @@ export function validateRoleScope(object: unknown): Either<RoleScopeValidationEr
     return right({type: "org"})
   } else if (object.type === "space") {
     if (!hasOwnProperty(object, "spaceId")) return left("missing_space_id")
-    if (!isNonEmptyString(object.spaceId)) return left("invalid_space_id")
+    if (!isNonEmptyString(object.spaceId) || !isValidUUID(object.spaceId)) {
+      return left("invalid_space_id")
+    }
     return right({type: "space", spaceId: object.spaceId})
   } else if (object.type === "group") {
     if (!hasOwnProperty(object, "groupId")) return left("missing_group_id")
-    if (!isNonEmptyString(object.groupId)) return left("invalid_group_id")
+    if (!isNonEmptyString(object.groupId) || !isValidUUID(object.groupId)) {
+      return left("invalid_group_id")
+    }
     return right({type: "group", groupId: object.groupId})
   } else if (object.type === "workflow_template") {
     if (!hasOwnProperty(object, "workflowTemplateId")) return left("missing_workflow_template_id")
-    if (!isNonEmptyString(object.workflowTemplateId)) return left("invalid_workflow_template_id")
+    if (!isNonEmptyString(object.workflowTemplateId) || !isValidUUID(object.workflowTemplateId)) {
+      return left("invalid_workflow_template_id")
+    }
     return right({type: "workflow_template", workflowTemplateId: object.workflowTemplateId})
   }
 
@@ -252,6 +258,7 @@ export function validateRoleAssignmentRequest(
 
   if (!hasOwnProperty(object, "roles")) return left("missing_roles")
   if (!isArray(object.roles)) return left("invalid_roles")
+  if (object.roles.length === 0) return left("invalid_roles")
 
   const roles: RoleOperationItem[] = []
   for (const role of object.roles) {

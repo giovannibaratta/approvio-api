@@ -90,6 +90,7 @@ GetEntityInfoUserResponse:
     - groups
     - roles
     - orgRole
+    - concurrencyControl
   properties:
     id:
       type: string
@@ -115,6 +116,8 @@ GetEntityInfoUserResponse:
         - admin
         - member
       description: Role assigned to the user within the organization.
+    concurrencyControl:
+      $ref: ../shared/schemas.yaml#/ConcurrencyControl
 
 GetEntityInfoAgentResponse:
   type: object

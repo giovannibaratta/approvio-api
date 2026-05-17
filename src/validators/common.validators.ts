@@ -9,6 +9,7 @@ import {
 } from "../../generated/openapi/model/models"
 import {validateGroupInfo} from "./groups.validators"
 import {validateRoleOperationItem} from "./users.validators"
+import {validateConcurrencyControl} from "./concurrency-control"
 
 export type PaginationValidationError =
   | "malformed_object"
@@ -117,6 +118,7 @@ export type GetEntityInfo200ResponseValidationError =
   | "invalid_roles"
   | "missing_org_role"
   | "invalid_org_role"
+  | "invalid_concurrency_control"
 
 export function validateGetEntityInfo200Response(
   object: unknown
@@ -153,12 +155,17 @@ export function validateGetEntityInfo200Response(
     if (!hasOwnProperty(object, "orgRole")) return left("missing_org_role")
     if (object.orgRole !== "admin" && object.orgRole !== "member") return left("invalid_org_role")
 
+    if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
+    const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
+    if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
+
     return right({
       entityType: "user" as const,
       id: object.id,
       groups,
       roles,
-      orgRole: object.orgRole
+      orgRole: object.orgRole,
+      concurrencyControl: concurrencyControlValidation.right
     })
   } else if (object.entityType === "agent") {
     return right({

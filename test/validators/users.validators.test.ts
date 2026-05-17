@@ -394,7 +394,18 @@ describe("user validators", () => {
 
     it("should return left('invalid_roles') when roles is not an array", () => {
       // Given
-      const input = {roles: "admin"}
+      const input = {roles: "admin", concurrencyControl: {version: "1"}}
+
+      // When
+      const result = validateRoleAssignmentRequest(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_roles")
+    })
+
+    it("should return left('invalid_roles') when roles is empty array", () => {
+      // Given
+      const input = {roles: [], concurrencyControl: {version: "1"}}
 
       // When
       const result = validateRoleAssignmentRequest(input)
@@ -405,13 +416,51 @@ describe("user validators", () => {
 
     it("should return left('invalid_roles') when roles contains invalid item", () => {
       // Given
-      const input = {roles: [{roleName: "admin"}]}
+      const input = {roles: [{roleName: "admin"}], concurrencyControl: {version: "1"}}
 
       // When
       const result = validateRoleAssignmentRequest(input)
 
       // Expect
       expect(result).toBeLeftOf("invalid_roles")
+    })
+
+    it("should return left('invalid_roles') when spaceId is not a valid UUID", () => {
+      // Given
+      const input = {
+        roles: [
+          {
+            roleName: "admin",
+            scope: {type: "space", spaceId: "not-a-uuid"}
+          }
+        ],
+        concurrencyControl: {version: "1"}
+      }
+
+      // When
+      const result = validateRoleAssignmentRequest(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_roles")
+    })
+
+    it("should return right when spaceId is a valid UUID", () => {
+      // Given
+      const input = {
+        roles: [
+          {
+            roleName: "admin",
+            scope: {type: "space", spaceId: "018f1c8f-2878-7c8a-9f4a-9b5a1a1f3c3a"}
+          }
+        ],
+        concurrencyControl: {version: "1"}
+      }
+
+      // When
+      const result = validateRoleAssignmentRequest(input)
+
+      // Expect
+      expect(result).toBeRightOf(input)
     })
 
     it("should return left('invalid_concurrency_control') when concurrencyControl is missing", () => {
