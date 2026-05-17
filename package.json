@@ -28,7 +28,7 @@
     "url": "git+https://github.com/giovannibaratta/approvio-api.git"
   },
   "engines": {
-    "node": "22"
+    "node": ">=22"
   },
   "scripts": {
     "clean": "rm -rf dist generated/openapi/model generated/openapi/.openapi-generator generated/openapi.yaml",
