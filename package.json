@@ -48,7 +48,7 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@openapitools/openapi-generator-cli": "^2.31.0",
-    "@redocly/cli": "2.28.1",
+    "@redocly/cli": "2.30.6",
     "@stoplight/spectral-cli": "6.15.0",
     "@types/jest": "30.0.0",
     "@typescript-eslint/eslint-plugin": "8.58.2",
