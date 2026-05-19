@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.42
+  version: 0.0.43
 tags:
   - name: Authentication
     description: OIDC authentication and token management
@@ -39,6 +39,8 @@ paths:
     $ref: ./openapi/auth/auth-web-callback.yaml
   /auth/web/refresh:
     $ref: ./openapi/auth/auth-web-refresh.yaml
+  /auth/web/logout:
+    $ref: ./openapi/auth/auth-web-logout.yaml
   /auth/web/initiatePrivilegedTokenExchange:
     $ref: ./openapi/auth/auth-web-initiatePrivilegedTokenExchange.yaml
   /auth/web/exchangePrivilegedToken:
