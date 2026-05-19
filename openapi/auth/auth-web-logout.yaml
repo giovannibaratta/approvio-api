@@ -1,0 +1,10 @@
+post:
+  summary: Log out web user
+  description: Clears access_token and refresh_token HttpOnly cookies to terminate the session
+  operationId: logoutUserWeb
+  tags:
+    - Authentication
+  security: []
+  responses:
+    "204":
+      description: Session logged out successfully, cookies cleared
