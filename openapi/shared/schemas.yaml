@@ -263,16 +263,21 @@ CanVoteResponse:
         Indicates the voting status for the user on this workflow.
       example: VOTE_PENDING
     cantVoteReason:
-      type: string
-      description: Reason why the entity cannot vote on the workflow. The value is only set if 'canVote' is false.
-      x-extensible-enum:
-        - WORKFLOW_EXPIRED
-        - WORKFLOW_APPROVED
-        - WORKFLOW_CANCELED
-        - NOT_ELIGIBLE_TO_VOTE
+      $ref: ./schemas.yaml#/CantVoteReason
     requireHighPrivilege:
       type: boolean
       description: Indicates whether a high-privilege token is required to cast a vote for the entity.
+CantVoteReason:
+  type: string
+  enum:
+    - WORKFLOW_EXPIRED
+    - WORKFLOW_APPROVED
+    - WORKFLOW_CANCELED
+    - ENTITY_NOT_IN_GROUP
+    - WORKFLOW_TEMPLATE_NOT_ACTIVE
+    - NO_PERMISSIONS
+  description: Reason why the entity cannot vote on the workflow.
+
 VoteApprove:
   type: object
   required:

@@ -474,7 +474,7 @@ describe("workflow validators", () => {
     const validResponse: CanVoteResponse = {
       canVote: true,
       voteStatus: "PENDING",
-      cantVoteReason: "Some reason",
+      cantVoteReason: "WORKFLOW_CANCELED",
       requireHighPrivilege: false
     }
 

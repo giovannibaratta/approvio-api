@@ -17,6 +17,7 @@ import {
   VoteWithdraw,
   WorkflowVote,
   CanVoteResponse,
+  CantVoteReason,
   GetWorkflowVotes200Response,
   ListWorkflowVotesParams
 } from "../../generated/openapi/model/models"
@@ -494,7 +495,9 @@ export function validateCanVoteResponse(object: unknown): Either<CanVoteResponse
   let cantVoteReason: CanVoteResponse["cantVoteReason"] = undefined
   if (hasOwnProperty(object, "cantVoteReason")) {
     if (typeof object["cantVoteReason"] !== "string") return left("invalid_cant_vote_reason")
-    cantVoteReason = object["cantVoteReason"]
+    const validatedReason = getStringAsEnum(object["cantVoteReason"], CantVoteReason)
+    if (validatedReason === undefined) return left("invalid_cant_vote_reason")
+    cantVoteReason = validatedReason
   }
 
   let requireHighPrivilege: CanVoteResponse["requireHighPrivilege"] = undefined
