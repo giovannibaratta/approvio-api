@@ -8,7 +8,7 @@ get:
     - name: templateIdentifier
       in: path
       required: true
-      description: The unique identifier of the workflow template (UUID)
+      description: The name or ID of the workflow template to retrieve. If a name is provided, it returns the active revision, falling back to the latest available version if no active revision exists.
       schema:
         type: string
   responses:
