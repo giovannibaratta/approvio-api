@@ -367,7 +367,7 @@ describe("audit-log validators", () => {
                   roleName: "workflow_operator",
                   scope: {
                     type: "workflow_template",
-                    workflowTemplateId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+                    templateName: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
                   }
                 }
               ]

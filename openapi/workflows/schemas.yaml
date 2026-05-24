@@ -3,18 +3,17 @@ WorkflowTemplateScope:
   description: Workflow template-specific scope - applies to a specific workflow template
   required:
     - type
-    - workflowTemplateId
+    - templateName
   properties:
     type:
       type: string
       enum:
         - workflow_template
       description: Scope type (workflow_template)
-    workflowTemplateId:
+    templateName:
       type: string
-      format: uuid
-      description: The unique identifier of the workflow template
-      example: a1b2c3d4-e5f6-7890-1234-567890abcdef
+      description: The name of the workflow template
+      example: New Workflow Template
 WorkflowTemplateStatus:
   type: string
   enum:

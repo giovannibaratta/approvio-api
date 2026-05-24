@@ -6,7 +6,6 @@ import {
   WorkflowTemplateCreate,
   WorkflowTemplateUpdate,
   WorkflowTemplateDeprecate,
-  WorkflowTemplateScope,
   WorkflowTemplateSummary,
   WorkflowTemplateStatus,
   ListWorkflowTemplates200Response,
@@ -445,23 +444,6 @@ export function validateWorkflowTemplateDeprecate(
   }
 
   return right(result)
-}
-
-export type WorkflowTemplateScopeValidationError = "malformed_object" | "invalid_type" | "invalid_workflow_template_id"
-
-export function validateWorkflowTemplateScope(
-  object: unknown
-): Either<WorkflowTemplateScopeValidationError, WorkflowTemplateScope> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
-
-  if (!hasOwnProperty(object, "type") || object.type !== "workflow_template") return left("invalid_type")
-  if (!hasOwnProperty(object, "workflowTemplateId") || !isNonEmptyString(object.workflowTemplateId))
-    return left("invalid_workflow_template_id")
-
-  return right({
-    type: object.type,
-    workflowTemplateId: object.workflowTemplateId
-  })
 }
 
 type WorkflowTemplateSummaryValidationError =
