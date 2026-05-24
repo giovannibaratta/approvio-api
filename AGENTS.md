@@ -52,7 +52,7 @@ The project you are working on is a TypeScript package that provides OpenAPI spe
 - Use appropriate data types (string, integer, uuid, etc.)
 - Provide meaningful error responses with proper status codes
 - Include pagination for list endpoints
-- Use extendible enum values for constrained fields
+- Use standard enum values for constrained fields to ensure proper TypeScript enum generation
 - Apply minLength/maxLength constraints appropriately
   </validation>
 

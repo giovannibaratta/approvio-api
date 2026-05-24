@@ -14,8 +14,8 @@ import {
   validateGroupInfo,
   validateAddGroupEntitiesRequest,
   validateRemoveGroupEntitiesRequest,
-  validateListGroupEntities200Response,
-  validateListGroupsParams
+  validateListGroupsParams,
+  validateListGroupEntities200Response
 } from "../../src/validators/groups.validators"
 import "../../src/utils/matchers"
 
@@ -163,7 +163,7 @@ describe("groups validators", () => {
         {
           entity: {
             entityType: "USER",
-            entityId: "user-123"
+            entityId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
           }
         }
       ]
@@ -187,7 +187,7 @@ describe("groups validators", () => {
         {
           entity: {
             entityType: "USER",
-            entityId: "user-123"
+            entityId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
           }
         }
       ]
@@ -211,7 +211,7 @@ describe("groups validators", () => {
         {
           entity: {
             entityType: "USER",
-            entityId: "user-123"
+            entityId: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
           },
           addedAt: "2024-03-07T12:00:00Z"
         }

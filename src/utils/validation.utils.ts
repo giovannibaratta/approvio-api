@@ -1,3 +1,7 @@
+export function isObject(val: unknown): val is Record<string, unknown> {
+  return typeof val === "object" && val !== null && !Array.isArray(val)
+}
+
 export function hasOwnProperty<T extends object, K extends PropertyKey>(
   obj: T,
   prop: K

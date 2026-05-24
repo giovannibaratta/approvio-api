@@ -8,7 +8,7 @@ import {
   RoleOperationItem
 } from "../../generated/openapi/model/models"
 import {validateGroupInfo} from "./groups.validators"
-import {validateRoleOperationItem} from "./users.validators"
+import {validateRoleOperationItem} from "./roles.validators"
 import {validateConcurrencyControl} from "./concurrency-control"
 
 export type PaginationValidationError =
