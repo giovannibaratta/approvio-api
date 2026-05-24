@@ -3,7 +3,6 @@ import {
   validateWorkflowTemplateCreate,
   validateWorkflowTemplateUpdate,
   validateWorkflowTemplateDeprecate,
-  validateWorkflowTemplateScope,
   validateListWorkflowTemplates200Response,
   validateListWorkflowTemplatesParams
 } from "../../src/validators/workflow-templates.validators"
@@ -13,7 +12,6 @@ import {
   WorkflowTemplateCreate,
   WorkflowTemplateUpdate,
   WorkflowTemplateDeprecate,
-  WorkflowTemplateScope,
   ListWorkflowTemplates200Response,
   ListWorkflowTemplatesParams
 } from "../../generated/openapi/model/models"
@@ -226,47 +224,6 @@ describe("Workflow Templates Validators", () => {
 
       // Expect
       expect(result).toBeLeftOf("invalid_cancel_workflows")
-    })
-  })
-
-  describe("validateWorkflowTemplateScope", () => {
-    it("should validate a valid scope", () => {
-      // Given
-      const input: WorkflowTemplateScope = {
-        type: "workflow_template",
-        workflowTemplateId: "wt1"
-      }
-
-      // When
-      const result = validateWorkflowTemplateScope(input)
-
-      // Expect
-      expect(result).toBeRight()
-    })
-
-    it("should reject invalid type", () => {
-      // Given
-      const input = {
-        type: "other_type",
-        workflowTemplateId: "wt1"
-      }
-
-      // When
-      const result = validateWorkflowTemplateScope(input)
-
-      // Expect
-      expect(result).toBeLeftOf("invalid_type")
-    })
-
-    it("should reject missing id", () => {
-      // Given
-      const input = {type: "workflow_template"}
-
-      // When
-      const result = validateWorkflowTemplateScope(input)
-
-      // Expect
-      expect(result).toBeLeftOf("invalid_workflow_template_id")
     })
   })
 

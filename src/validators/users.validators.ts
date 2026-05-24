@@ -66,8 +66,8 @@ export type RoleScopeValidationError =
   | "invalid_space_id"
   | "missing_group_id"
   | "invalid_group_id"
-  | "missing_workflow_template_id"
-  | "invalid_workflow_template_id"
+  | "missing_template_name"
+  | "invalid_template_name"
 
 export type RoleOperationRequestValidationError =
   | "malformed_object"
