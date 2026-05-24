@@ -1,0 +1,24 @@
+get:
+  summary: List my audit logs
+  description: Returns a list of audit logs where the actor is the caller
+  operationId: listMyAuditLogs
+  tags:
+    - Audit Logs
+  parameters:
+    - name: params
+      in: query
+      style: form
+      explode: true
+      schema:
+        $ref: ./schemas.yaml#/ListMyAuditLogsParams
+  responses:
+    "200":
+      description: List of audit logs
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/ListAuditLogs200Response
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized

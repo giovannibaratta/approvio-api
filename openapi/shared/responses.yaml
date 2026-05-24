@@ -22,3 +22,15 @@ NotFound:
     application/json:
       schema:
         $ref: ./schemas.yaml#/APIError
+Forbidden:
+  description: Access forbidden
+  content:
+    application/json:
+      schema:
+        $ref: ./schemas.yaml#/APIError
+InternalServerError:
+  description: Internal server error occurred
+  content:
+    application/json:
+      schema:
+        $ref: ./schemas.yaml#/APIError

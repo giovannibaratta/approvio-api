@@ -1,0 +1,348 @@
+AuditLogActor:
+  type: object
+  required:
+    - id
+    - type
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: The unique identifier of the actor
+    type:
+      type: string
+      enum:
+        - user
+        - agent
+      description: The type of the actor
+
+AuditLogTarget:
+  type: object
+  required:
+    - type
+    - id
+  properties:
+    type:
+      type: string
+      enum:
+        - SPACE
+        - GROUP
+        - USER
+        - AGENT
+      description: The type of target entity
+    id:
+      type: string
+      format: uuid
+      description: The unique identifier of the target entity
+
+AuditLogType:
+  type: string
+  enum:
+    - SPACE_CREATED
+    - SPACE_DELETED
+    - GROUP_CREATED
+    - MEMBERSHIPS_ADDED
+    - MEMBERSHIPS_REMOVED
+    - USER_ROLES_ASSIGNED
+    - USER_ROLES_REMOVED
+    - AGENT_ROLES_ASSIGNED
+    - AGENT_ROLES_REMOVED
+  description: The type of operation recorded in the audit log
+
+BaseAuditLog:
+  type: object
+  required:
+    - id
+    - auditType
+    - target
+    - actor
+    - createdAt
+    - payload
+  properties:
+    id:
+      type: string
+      format: uuid
+    auditType:
+      $ref: "#/AuditLogType"
+    target:
+      $ref: "#/AuditLogTarget"
+    actor:
+      $ref: "#/AuditLogActor"
+    createdAt:
+      type: string
+      format: date-time
+    payload:
+      type: object
+
+SpaceCreatedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - SPACE_CREATED
+        payload:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+              nullable: true
+
+SpaceDeletedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - SPACE_DELETED
+
+GroupCreatedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - GROUP_CREATED
+        payload:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+              nullable: true
+
+MembershipsAddedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - MEMBERSHIPS_ADDED
+        payload:
+          type: object
+          required:
+            - members
+          properties:
+            members:
+              type: array
+              items:
+                $ref: "../shared/schemas.yaml#/EntityReference"
+
+MembershipsRemovedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - MEMBERSHIPS_REMOVED
+        payload:
+          type: object
+          required:
+            - members
+          properties:
+            members:
+              type: array
+              items:
+                $ref: "../shared/schemas.yaml#/EntityReference"
+
+UserRolesAssignedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - USER_ROLES_ASSIGNED
+        payload:
+          type: object
+          required:
+            - roles
+          properties:
+            roles:
+              type: array
+              items:
+                type: object
+                required:
+                  - roleName
+                  - scope
+                properties:
+                  roleName:
+                    type: string
+                  scope:
+                    $ref: "../roles/schemas.yaml#/RoleScope"
+
+UserRolesRemovedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - USER_ROLES_REMOVED
+        payload:
+          type: object
+          required:
+            - roles
+          properties:
+            roles:
+              type: array
+              items:
+                type: object
+                required:
+                  - roleName
+                  - scope
+                properties:
+                  roleName:
+                    type: string
+                  scope:
+                    $ref: "../roles/schemas.yaml#/RoleScope"
+
+AgentRolesAssignedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - AGENT_ROLES_ASSIGNED
+        payload:
+          type: object
+          required:
+            - roles
+          properties:
+            roles:
+              type: array
+              items:
+                type: object
+                required:
+                  - roleName
+                  - scope
+                properties:
+                  roleName:
+                    type: string
+                  scope:
+                    $ref: "../roles/schemas.yaml#/RoleScope"
+
+AgentRolesRemovedAuditLog:
+  allOf:
+    - $ref: "#/BaseAuditLog"
+    - type: object
+      properties:
+        auditType:
+          type: string
+          enum:
+            - AGENT_ROLES_REMOVED
+        payload:
+          type: object
+          required:
+            - roles
+          properties:
+            roles:
+              type: array
+              items:
+                type: object
+                required:
+                  - roleName
+                  - scope
+                properties:
+                  roleName:
+                    type: string
+                  scope:
+                    $ref: "../roles/schemas.yaml#/RoleScope"
+
+AuditLog:
+  oneOf:
+    - $ref: "#/SpaceCreatedAuditLog"
+    - $ref: "#/SpaceDeletedAuditLog"
+    - $ref: "#/GroupCreatedAuditLog"
+    - $ref: "#/MembershipsAddedAuditLog"
+    - $ref: "#/MembershipsRemovedAuditLog"
+    - $ref: "#/UserRolesAssignedAuditLog"
+    - $ref: "#/UserRolesRemovedAuditLog"
+    - $ref: "#/AgentRolesAssignedAuditLog"
+    - $ref: "#/AgentRolesRemovedAuditLog"
+  discriminator:
+    propertyName: auditType
+
+ListAuditLogsParams:
+  type: object
+  properties:
+    page:
+      type: integer
+      default: 1
+      description: Page number for pagination (1-indexed)
+    limit:
+      type: integer
+      default: 20
+      description: Number of results per page
+      maximum: 100
+    targets:
+      type: array
+      items:
+        type: string
+      description: Optional list of target entities to filter by, formatted as 'TYPE:UUID' (e.g., 'SPACE:a1b2c3d4-e5f6-7890-1234-567890abcdef').
+    actors:
+      type: array
+      items:
+        type: string
+      description: Optional list of actors to filter by, formatted as 'TYPE:UUID' (e.g., 'user:a1b2c3d4-e5f6-7890-1234-567890abcdef').
+    auditTypes:
+      type: array
+      items:
+        $ref: "#/AuditLogType"
+      description: Optional list of audit types to filter audit logs.
+
+ListMyAuditLogsParams:
+  type: object
+  properties:
+    page:
+      type: integer
+      default: 1
+      description: Page number for pagination (1-indexed)
+    limit:
+      type: integer
+      default: 20
+      description: Number of results per page
+      maximum: 100
+    targets:
+      type: array
+      items:
+        type: string
+      description: Optional list of target entities to filter by, formatted as 'TYPE:UUID' (e.g., 'SPACE:a1b2c3d4-e5f6-7890-1234-567890abcdef').
+    auditTypes:
+      type: array
+      items:
+        $ref: "#/AuditLogType"
+      description: Optional list of audit types to filter audit logs.
+
+ListAuditLogs200Response:
+  type: object
+  required:
+    - auditLogs
+    - pagination
+  properties:
+    auditLogs:
+      type: array
+      items:
+        $ref: "#/AuditLog"
+    pagination:
+      $ref: "../shared/schemas.yaml#/Pagination"

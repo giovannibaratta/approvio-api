@@ -1,8 +1,9 @@
 openapi: 3.0.0
 info:
   title: Workflow Approval System API
-  description: API for a SaaS platform that allows customers to manage approvals for generic workflows, users, and groups.
-  version: 0.0.44
+  description: API for a SaaS platform that allows customers to manage approvals for
+    generic workflows, users, and groups.
+  version: 0.0.45
 tags:
   - name: Authentication
     description: OIDC authentication and token management
@@ -28,6 +29,8 @@ tags:
     description: Health check endpoints
   - name: Quotas
     description: System quota management
+  - name: Audit Logs
+    description: Endpoints related to audit logs
 paths:
   /health:
     $ref: ./openapi/system/health.yaml
@@ -109,6 +112,10 @@ paths:
     $ref: ./openapi/quotas/quotas.yaml
   /quotas/{quotaId}:
     $ref: ./openapi/quotas/quotas-quotaId.yaml
+  /audit-logs:
+    $ref: ./openapi/audit-logs/audit-logs.yaml
+  /audit-logs/me:
+    $ref: ./openapi/audit-logs/audit-logs-me.yaml
 components:
   schemas:
     AgentChallengeRequest:
@@ -263,6 +270,36 @@ components:
       $ref: ./openapi/quotas/schemas.yaml#/QuotaUpdate
     ListQuotasParams:
       $ref: ./openapi/quotas/schemas.yaml#/ListQuotasParams
+    AuditLogActor:
+      $ref: ./openapi/audit-logs/schemas.yaml#/AuditLogActor
+    BaseAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/BaseAuditLog
+    SpaceCreatedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/SpaceCreatedAuditLog
+    SpaceDeletedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/SpaceDeletedAuditLog
+    GroupCreatedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/GroupCreatedAuditLog
+    MembershipsAddedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/MembershipsAddedAuditLog
+    MembershipsRemovedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/MembershipsRemovedAuditLog
+    UserRolesAssignedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/UserRolesAssignedAuditLog
+    UserRolesRemovedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/UserRolesRemovedAuditLog
+    AgentRolesAssignedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/AgentRolesAssignedAuditLog
+    AgentRolesRemovedAuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/AgentRolesRemovedAuditLog
+    AuditLog:
+      $ref: ./openapi/audit-logs/schemas.yaml#/AuditLog
+    ListAuditLogsParams:
+      $ref: ./openapi/audit-logs/schemas.yaml#/ListAuditLogsParams
+    ListMyAuditLogsParams:
+      $ref: ./openapi/audit-logs/schemas.yaml#/ListMyAuditLogsParams
+    ListAuditLogs200Response:
+      $ref: ./openapi/audit-logs/schemas.yaml#/ListAuditLogs200Response
   responses:
     BadRequest:
       $ref: ./openapi/shared/responses.yaml#/BadRequest
@@ -270,6 +307,10 @@ components:
       $ref: ./openapi/shared/responses.yaml#/Unauthorized
     NotFound:
       $ref: ./openapi/shared/responses.yaml#/NotFound
+    Forbidden:
+      $ref: ./openapi/shared/responses.yaml#/Forbidden
+    InternalServerError:
+      $ref: ./openapi/shared/responses.yaml#/InternalServerError
   securitySchemes:
     bearerAuth:
       type: http

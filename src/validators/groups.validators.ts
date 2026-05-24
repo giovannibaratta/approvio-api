@@ -4,18 +4,22 @@ import {
   ListGroups200Response,
   GroupScope,
   GroupInfo,
-  EntityReference,
+  ListGroupsParams,
+  ListGroupEntities200Response,
   GroupMembership,
-  AddGroupEntitiesRequest,
+  EntityMembershipRemove,
   RemoveGroupEntitiesRequest,
   EntityMembershipAdd,
-  EntityMembershipRemove,
-  ListGroupEntities200Response,
-  ListGroupsParams
+  AddGroupEntitiesRequest
 } from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
 import {validatePagination, validateSharedListParams} from "./common.validators"
+import {
+  validateEntityMembershipAdd,
+  validateEntityMembershipRemove,
+  validateEntityReference
+} from "./membership.validators"
 
 export type GroupValidationError =
   | "malformed_object"
@@ -163,28 +167,6 @@ export function validateGroupInfo(object: unknown): Either<GroupInfoValidationEr
   })
 }
 
-export type EntityReferenceValidationError =
-  | "malformed_object"
-  | "missing_entity_type"
-  | "invalid_entity_type"
-  | "missing_entity_id"
-  | "invalid_entity_id"
-
-function validateEntityReference(object: unknown): Either<EntityReferenceValidationError, EntityReference> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
-
-  if (!hasOwnProperty(object, "entityType") || !isNonEmptyString(object.entityType))
-    return left(hasOwnProperty(object, "entityType") ? "invalid_entity_type" : "missing_entity_type")
-
-  if (!hasOwnProperty(object, "entityId") || !isNonEmptyString(object.entityId))
-    return left(hasOwnProperty(object, "entityId") ? "invalid_entity_id" : "missing_entity_id")
-
-  return right({
-    entityType: object.entityType,
-    entityId: object.entityId
-  })
-}
-
 export type GroupMembershipValidationError =
   | "malformed_object"
   | "missing_entity"
@@ -205,36 +187,6 @@ function validateGroupMembership(object: unknown): Either<GroupMembershipValidat
   return right({
     entity: entityValidation.right,
     addedAt: object.addedAt
-  })
-}
-
-export type EntityMembershipAddValidationError = "malformed_object" | "missing_entity" | "invalid_entity"
-
-function validateEntityMembershipAdd(object: unknown): Either<EntityMembershipAddValidationError, EntityMembershipAdd> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
-
-  if (!hasOwnProperty(object, "entity")) return left("missing_entity")
-  const entityValidation = validateEntityReference(object.entity)
-  if (isLeft(entityValidation)) return left("invalid_entity")
-
-  return right({
-    entity: entityValidation.right
-  })
-}
-
-export type EntityMembershipRemoveValidationError = "malformed_object" | "missing_entity" | "invalid_entity"
-
-function validateEntityMembershipRemove(
-  object: unknown
-): Either<EntityMembershipRemoveValidationError, EntityMembershipRemove> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
-
-  if (!hasOwnProperty(object, "entity")) return left("missing_entity")
-  const entityValidation = validateEntityReference(object.entity)
-  if (isLeft(entityValidation)) return left("invalid_entity")
-
-  return right({
-    entity: entityValidation.right
   })
 }
 
