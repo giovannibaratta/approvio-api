@@ -5,7 +5,8 @@ import {
   HealthResponse,
   GetEntityInfo200Response,
   GroupInfo,
-  RoleOperationItem
+  RoleOperationItem,
+  CursorPagination
 } from "../../generated/openapi/model/models"
 import {validateGroupInfo} from "./groups.validators"
 import {validateRoleOperationItem} from "./roles.validators"
@@ -19,6 +20,12 @@ export type PaginationValidationError =
   | "invalid_page"
   | "missing_limit"
   | "invalid_limit"
+
+export type CursorPaginationValidationError =
+  | "malformed_object"
+  | "missing_has_more"
+  | "invalid_has_more"
+  | "invalid_next_cursor"
 
 export type ListParamsValidationError = "malformed_object" | "invalid_page" | "invalid_limit" | "invalid_search"
 
@@ -82,6 +89,27 @@ export function validatePagination(object: unknown): Either<PaginationValidation
     page: object.page,
     limit: object.limit
   })
+}
+
+export function validateCursorPagination(object: unknown): Either<CursorPaginationValidationError, CursorPagination> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  if (!hasOwnProperty(object, "hasMore")) return left("missing_has_more")
+  if (typeof object.hasMore !== "boolean") return left("invalid_has_more")
+
+  if (
+    object.hasMore === false &&
+    hasOwnProperty(object, "nextCursor") &&
+    object.nextCursor !== undefined &&
+    object.nextCursor !== null
+  )
+    return left("invalid_next_cursor")
+
+  if (object.hasMore === false) return right({hasMore: object.hasMore})
+
+  if (!hasOwnProperty(object, "nextCursor") || object.nextCursor === undefined) return left("invalid_next_cursor")
+
+  return right({hasMore: object.hasMore, nextCursor: object.nextCursor})
 }
 
 export type APIErrorDetailsInnerValidationError = "malformed_object" | "invalid_field" | "invalid_message"

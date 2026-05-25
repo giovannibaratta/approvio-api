@@ -10,7 +10,7 @@ describe("audit-log validators", () => {
     it("should return right when valid parameters", () => {
       // Given
       const input = {
-        page: 2,
+        cursor: "some_base64_string",
         limit: 10,
         targets: ["SPACE:a1b2c3d4-e5f6-7890-1234-567890abcdef"],
         actors: ["user:a1b2c3d4-e5f6-7890-1234-567890abcdef"],
@@ -75,7 +75,7 @@ describe("audit-log validators", () => {
     it("should return right when valid parameters", () => {
       // Given
       const input = {
-        page: 2,
+        cursor: "some_base64_string",
         limit: 10,
         targets: ["SPACE:a1b2c3d4-e5f6-7890-1234-567890abcdef"],
         auditTypes: ["SPACE_CREATED"]
@@ -119,9 +119,7 @@ describe("audit-log validators", () => {
         }
       ],
       pagination: {
-        page: 1,
-        limit: 20,
-        total: 1
+        hasMore: false
       }
     }
 
