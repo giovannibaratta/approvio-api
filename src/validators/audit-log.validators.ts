@@ -1,5 +1,5 @@
 import {Either, left, right, isLeft} from "fp-ts/Either"
-import {isNonEmptyString, isArray, isValidUUID, isObject} from "../utils/validation.utils"
+import {isNonEmptyString, isArray, isValidUUID, isObject, hasOwnProperty} from "../utils/validation.utils"
 import {
   AuditLogActor,
   AuditLogTarget,
@@ -20,7 +20,7 @@ import {
   AgentRolesRemovedAuditLog,
   EntityReference
 } from "../../generated/openapi/model/models"
-import {ListParamsValidationError, validatePagination, validateSharedListParams} from "./common.validators"
+import {ListParamsValidationError, validateSharedListParams, validateCursorPagination} from "./common.validators"
 import {getStringAsEnum} from "../utils/enum"
 import {validateRolesArray} from "./roles.validators"
 import {validateEntityReference} from "./membership.validators"
@@ -443,6 +443,7 @@ function validateAuditLog(object: unknown): Either<AuditLogValidationError, Audi
 export type ListAuditLogsParamsValidationError =
   | "malformed_object"
   | ListParamsValidationError
+  | "invalid_cursor"
   | "invalid_targets"
   | "invalid_actors"
   | "invalid_audit_types"
@@ -457,8 +458,12 @@ export function validateListAuditLogsParams(
   const sharedParamsValidation = validateSharedListParams(object)
   if (isLeft(sharedParamsValidation)) return sharedParamsValidation
 
-  if (sharedParamsValidation.right.page !== undefined) result.page = sharedParamsValidation.right.page
   if (sharedParamsValidation.right.limit !== undefined) result.limit = sharedParamsValidation.right.limit
+
+  if (hasOwnProperty(object, "cursor") && object.cursor !== undefined) {
+    if (typeof object.cursor !== "string") return left("invalid_cursor")
+    result.cursor = object.cursor
+  }
 
   if (object.targets !== undefined) {
     if (!isArray(object.targets)) return left("invalid_targets")
@@ -510,6 +515,7 @@ export function validateListAuditLogsParams(
 export type ListMyAuditLogsParamsValidationError =
   | "malformed_object"
   | ListParamsValidationError
+  | "invalid_cursor"
   | "invalid_targets"
   | "invalid_audit_types"
 
@@ -523,8 +529,12 @@ export function validateListMyAuditLogsParams(
   const sharedParamsValidation = validateSharedListParams(object)
   if (isLeft(sharedParamsValidation)) return sharedParamsValidation
 
-  if (sharedParamsValidation.right.page !== undefined) result.page = sharedParamsValidation.right.page
   if (sharedParamsValidation.right.limit !== undefined) result.limit = sharedParamsValidation.right.limit
+
+  if (hasOwnProperty(object, "cursor") && object.cursor !== undefined) {
+    if (typeof object.cursor !== "string") return left("invalid_cursor")
+    result.cursor = object.cursor
+  }
 
   if (object.targets !== undefined) {
     if (!isArray(object.targets)) return left("invalid_targets")
@@ -583,7 +593,7 @@ export function validateListAuditLogs200Response(
   }
 
   if (object.pagination === undefined) return left("missing_pagination")
-  const paginationValidation = validatePagination(object.pagination)
+  const paginationValidation = validateCursorPagination(object.pagination)
   if (isLeft(paginationValidation)) return left("invalid_pagination")
 
   return right({

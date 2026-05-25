@@ -172,6 +172,36 @@ Pagination:
     limit:
       type: integer
       description: Items per page
+
+CursorPagination:
+  oneOf:
+    - $ref: './schemas.yaml#/HasMoreTruePagination'
+    - $ref: './schemas.yaml#/HasMoreFalsePagination'
+
+HasMoreTruePagination:
+  type: object
+  required:
+    - hasMore
+    - nextCursor
+  properties:
+    hasMore:
+      type: boolean
+      enum: [true]
+      description: True if there are more items to retrieve
+    nextCursor:
+      type: string
+      description: Base64 encoded cursor for the next page of results
+
+HasMoreFalsePagination:
+  type: object
+  required:
+    - hasMore
+  properties:
+    hasMore:
+      type: boolean
+      enum: [false]
+      description: False if there are no more items to retrieve
+
 APIError:
   type: object
   required:
