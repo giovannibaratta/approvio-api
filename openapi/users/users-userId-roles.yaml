@@ -1,7 +1,7 @@
 put:
   summary: Assign roles to a user
   description: |
-    Assigns standard roles to a user by replacing all existing role assignments. Roles are specified by their system-defined names and scopes. The user must be authenticated as a human (not an agent) to use this endpoint.
+    Assigns standard roles to a user. Roles are specified by their system-defined names and scopes. The user must be authenticated as a human (not an agent) to use this endpoint.
   operationId: assignUserRoles
   tags:
     - Users
