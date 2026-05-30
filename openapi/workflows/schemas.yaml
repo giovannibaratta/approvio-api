@@ -359,15 +359,17 @@ WorkflowTemplateUpdate:
       $ref: ../shared/schemas.yaml#/ConcurrencyControl
 WorkflowAction:
   description: |
-    Configuration for actions to be executed when workflow is approved. Currently supports email actions.
+    Configuration for actions to be executed when workflow is approved. Currently supports email, webhook, and Slack actions.
   oneOf:
     - $ref: ../shared/schemas.yaml#/EmailAction
     - $ref: ../shared/schemas.yaml#/WebhookAction
+    - $ref: ../shared/schemas.yaml#/SlackAction
   discriminator:
     propertyName: type
     mapping:
       EMAIL: "../shared/schemas.yaml#/EmailAction"
       WEBHOOK: "../shared/schemas.yaml#/WebhookAction"
+      SLACK: "../shared/schemas.yaml#/SlackAction"
 WorkflowTemplateDeprecate:
   type: object
   properties:

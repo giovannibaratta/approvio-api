@@ -397,6 +397,22 @@ EmailAction:
       description: List of email addresses to send the notification to
       minItems: 1
       maxItems: 5
+SlackAction:
+  type: object
+  description: Sends a Slack notification when workflow is approved
+  required:
+    - type
+    - webhookUrl
+  properties:
+    type:
+      type: string
+      enum:
+        - SLACK
+      description: Action type (SLACK)
+    webhookUrl:
+      type: string
+      format: uri
+      description: The Slack webhook URL to post to
 ListAgentsParams:
   type: object
   properties:
