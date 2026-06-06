@@ -54,6 +54,7 @@ type WebhookActionValidationError =
   | "invalid_method"
   | "invalid_headers"
   | "invalid_headers_element"
+  | "invalid_redact"
 
 function validateWebhookAction(object: unknown): Either<WebhookActionValidationError, WebhookAction> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
@@ -86,6 +87,13 @@ function validateWebhookAction(object: unknown): Either<WebhookActionValidationE
       headers[key] = value
     }
     result.headers = headers
+  }
+
+  if (hasOwnProperty(object, "redact") && object.redact !== undefined) {
+    if (typeof object.redact !== "string") return left("invalid_redact")
+    const redact = getStringAsEnum(object.redact, WebhookAction.RedactEnum)
+    if (!redact) return left("invalid_redact")
+    result.redact = redact
   }
 
   return right(result)
