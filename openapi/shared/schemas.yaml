@@ -175,8 +175,8 @@ Pagination:
 
 CursorPagination:
   oneOf:
-    - $ref: './schemas.yaml#/HasMoreTruePagination'
-    - $ref: './schemas.yaml#/HasMoreFalsePagination'
+    - $ref: "./schemas.yaml#/HasMoreTruePagination"
+    - $ref: "./schemas.yaml#/HasMoreFalsePagination"
 
 HasMoreTruePagination:
   type: object
@@ -377,6 +377,13 @@ WebhookAction:
       additionalProperties:
         type: string
       description: Optional headers to send with the request
+    redact:
+      type: string
+      enum:
+        - HEADERS
+        - URL
+        - ALL
+      description: Specifies which parts of the webhook action payload should be fully redacted in API responses. If HEADERS, all headers are fully redacted while URL is smart-redacted. If URL, URL query parameters/credentials are fully redacted while headers are smart-redacted. If ALL, both headers and URL query parameters/credentials are fully redacted. If not specified, smart redaction is applied to both. Smart redcation is a best-effort process.
 EmailAction:
   type: object
   description: Sends an email when workflow is approved

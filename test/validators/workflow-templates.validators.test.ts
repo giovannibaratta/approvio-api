@@ -103,6 +103,37 @@ describe("Workflow Templates Validators", () => {
       // Expect
       expect(result).toBeLeftOf("invalid_description")
     })
+
+    it("should reject invalid redact in actions", () => {
+      // Given
+      const input = {
+        ...validTemplate,
+        actions: [{type: "WEBHOOK", url: "https://example.com", method: "POST", redact: "INVALID_REDACT"}]
+      }
+
+      // When
+      const result = validateWorkflowTemplate(input)
+
+      // Expect
+      expect(result).toBeLeftOf("invalid_actions_element")
+    })
+
+    it("should accept valid redact scopes", () => {
+      // Given
+      const scopes: Array<"HEADERS" | "URL" | "ALL"> = ["HEADERS", "URL", "ALL"]
+      for (const redact of scopes) {
+        const input = {
+          ...validTemplate,
+          actions: [{type: "WEBHOOK", url: "https://example.com", method: "POST", redact}]
+        }
+
+        // When
+        const result = validateWorkflowTemplate(input)
+
+        // Expect
+        expect(result).toBeRight()
+      }
+    })
   })
 
   describe("validateWorkflowTemplateCreate", () => {
