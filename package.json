@@ -61,7 +61,7 @@
     "fp-ts": "2.16.11",
     "jest": "30.2.0",
     "prettier": "3.8.1",
-    "semver": "^7.8.0",
+    "semver": "^7.8.4",
     "ts-jest": "29.4.6",
     "tsdown": "0.21.4",
     "typescript": "5.7.3",
