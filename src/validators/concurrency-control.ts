@@ -1,4 +1,4 @@
-import {Either, left, right} from "fp-ts/lib/Either"
+import {Either, left, right} from "fp-ts/Either"
 import {hasOwnProperty, isStringBigInt} from "../utils/validation.utils"
 import {ConcurrencyControl} from "../../generated/openapi/model/concurrency-control"
 

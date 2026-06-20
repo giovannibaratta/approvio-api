@@ -1,0 +1,25 @@
+post:
+  summary: Resolve resource names by ID
+  description: Resolves the names of a batch of resources (e.g. spaces or groups) given their IDs. Returns successfully resolved resources and details of denied/unresolved ones. Limit is 50 resources per request.
+  operationId: resolveResources
+  tags:
+    - Resources
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/ResourceResolveRequest
+  responses:
+    '200':
+      description: Batch resolve results
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/ResourceResolveResponse
+    '400':
+      $ref: ../shared/responses.yaml#/BadRequest
+    '401':
+      $ref: ../shared/responses.yaml#/Unauthorized
+    '500':
+      $ref: ../shared/responses.yaml#/InternalServerError
