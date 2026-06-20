@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["jest", "node"]
+  },
+  "include": ["generated/openapi/model/**/*.ts", "src/**/*.ts", "mocks/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

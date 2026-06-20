@@ -1,4 +1,4 @@
-import {MatcherFunction} from "expect"
+import {expect, MatcherContext, ExpectationResult, MatcherFunction} from "expect"
 import {Either, isLeft, isRight} from "fp-ts/Either"
 import {format} from "pretty-format"
 
@@ -39,7 +39,7 @@ function isEither(received: unknown): received is Either<unknown, unknown> {
   return false
 }
 
-export function toBeLeft(received: unknown): jest.CustomMatcherResult {
+export function toBeLeft(received: unknown): ExpectationResult {
   if (!isEither(received))
     return {
       pass: false,
@@ -52,7 +52,7 @@ export function toBeLeft(received: unknown): jest.CustomMatcherResult {
   }
 }
 
-export function toBeLeftOf(received: unknown, expected: unknown): jest.CustomMatcherResult {
+export function toBeLeftOf(received: unknown, expected: unknown): ExpectationResult {
   if (!isEither(received))
     return {
       pass: false,
@@ -73,7 +73,7 @@ export function toBeLeftOf(received: unknown, expected: unknown): jest.CustomMat
   }
 }
 
-export function toBeRight(received: unknown): jest.CustomMatcherResult {
+export function toBeRight(received: unknown): ExpectationResult {
   if (!isEither(received))
     return {
       pass: false,
@@ -92,7 +92,7 @@ export function toBeRight(received: unknown): jest.CustomMatcherResult {
   }
 }
 
-export function toBeRightOf(this: jest.MatcherContext, received: unknown, expected: unknown): jest.CustomMatcherResult {
+export function toBeRightOf(this: MatcherContext, received: unknown, expected: unknown): ExpectationResult {
   if (!isEither(received))
     return {
       pass: false,
