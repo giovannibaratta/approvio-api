@@ -3,7 +3,7 @@ info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for
     generic workflows, users, and groups.
-  version: 0.0.49
+  version: 0.0.50
 tags:
   - name: Authentication
     description: OIDC authentication and token management
@@ -31,6 +31,8 @@ tags:
     description: System quota management
   - name: Audit Logs
     description: Endpoints related to audit logs
+  - name: Resources
+    description: Resolving generic resource information
 paths:
   /health:
     $ref: ./openapi/system/health.yaml
@@ -116,6 +118,8 @@ paths:
     $ref: ./openapi/audit-logs/audit-logs.yaml
   /audit-logs/me:
     $ref: ./openapi/audit-logs/audit-logs-me.yaml
+  /resources/resolve:
+    $ref: ./openapi/resources/resources-resolve.yaml
 components:
   schemas:
     AgentChallengeRequest:
@@ -300,6 +304,10 @@ components:
       $ref: ./openapi/audit-logs/schemas.yaml#/ListMyAuditLogsParams
     ListAuditLogs200Response:
       $ref: ./openapi/audit-logs/schemas.yaml#/ListAuditLogs200Response
+    ResourceResolveRequest:
+      $ref: ./openapi/resources/schemas.yaml#/ResourceResolveRequest
+    ResourceResolveResponse:
+      $ref: ./openapi/resources/schemas.yaml#/ResourceResolveResponse
   responses:
     BadRequest:
       $ref: ./openapi/shared/responses.yaml#/BadRequest

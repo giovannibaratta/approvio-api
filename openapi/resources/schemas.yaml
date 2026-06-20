@@ -1,0 +1,79 @@
+ResourceResolveRequest:
+  type: object
+  required:
+    - resources
+  properties:
+    resources:
+      type: array
+      maxItems: 50
+      items:
+        type: object
+        required:
+          - type
+          - id
+        properties:
+          type:
+            type: string
+            enum:
+              - space
+              - group
+            description: The type of resource to resolve
+          id:
+            type: string
+            format: uuid
+            description: The unique identifier of the resource
+
+ResourceResolvedItem:
+  type: object
+  required:
+    - type
+    - id
+    - name
+  properties:
+    type:
+      type: string
+      enum:
+        - space
+        - group
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+
+ResourceDeniedItem:
+  type: object
+  required:
+    - type
+    - id
+    - reason
+  properties:
+    type:
+      type: string
+      enum:
+        - space
+        - group
+    id:
+      type: string
+      format: uuid
+    reason:
+      type: string
+      enum:
+        - NOT_FOUND
+        - NOT_AUTHORIZED
+      description: The reason why the resource could not be resolved
+
+ResourceResolveResponse:
+  type: object
+  required:
+    - resolved
+    - denied
+  properties:
+    resolved:
+      type: array
+      items:
+        $ref: '#/ResourceResolvedItem'
+    denied:
+      type: array
+      items:
+        $ref: '#/ResourceDeniedItem'
