@@ -1,7 +1,12 @@
 const mainSettings = {
   testEnvironment: "node",
   transform: {
-    "^.+\\.(t|j)sx?$": ["ts-jest", {}]
+    "^.+\\.(t|j)sx?$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.test.json"
+      }
+    ]
   },
   moduleNameMapper: {}
 }

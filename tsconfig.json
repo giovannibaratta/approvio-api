@@ -10,3 +10,5 @@
   "include": ["generated/openapi/model/**/*.ts", "src/**/*.ts", "mocks/**/*.ts"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }
+
+
