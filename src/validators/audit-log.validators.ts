@@ -129,9 +129,7 @@ function validateBaseAuditLog(object: unknown): Either<BaseAuditLogValidationErr
   if (!isObject(object.payload)) return left(object.payload !== undefined ? "invalid_payload" : "missing_payload")
 
   const payload: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(object.payload)) {
-    payload[k] = v
-  }
+  for (const [k, v] of Object.entries(object.payload)) payload[k] = v
 
   return right({
     id,

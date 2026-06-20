@@ -40,12 +40,11 @@ function isEither(received: unknown): received is Either<unknown, unknown> {
 }
 
 export function toBeLeft(received: unknown): jest.CustomMatcherResult {
-  if (!isEither(received)) {
+  if (!isEither(received))
     return {
       pass: false,
       message: () => `Expected ${format(received)} to be an Either`
     }
-  }
 
   return {
     pass: isLeft(received),
@@ -54,19 +53,17 @@ export function toBeLeft(received: unknown): jest.CustomMatcherResult {
 }
 
 export function toBeLeftOf(received: unknown, expected: unknown): jest.CustomMatcherResult {
-  if (!isEither(received)) {
+  if (!isEither(received))
     return {
       pass: false,
       message: () => `Expected ${format(received)} to be an Either`
     }
-  }
 
-  if (!isLeft(received)) {
+  if (!isLeft(received))
     return {
       pass: false,
       message: () => `Expected ${format(received)} to be left`
     }
-  }
 
   const pass = received.left === expected
 
@@ -77,19 +74,17 @@ export function toBeLeftOf(received: unknown, expected: unknown): jest.CustomMat
 }
 
 export function toBeRight(received: unknown): jest.CustomMatcherResult {
-  if (!isEither(received)) {
+  if (!isEither(received))
     return {
       pass: false,
       message: () => `Expected ${format(received)} to be an Either`
     }
-  }
 
-  if (!isRight(received)) {
+  if (!isRight(received))
     return {
       pass: false,
       message: () => `Expected ${format(received)} to be right`
     }
-  }
 
   return {
     pass: true,
@@ -98,19 +93,17 @@ export function toBeRight(received: unknown): jest.CustomMatcherResult {
 }
 
 export function toBeRightOf(this: jest.MatcherContext, received: unknown, expected: unknown): jest.CustomMatcherResult {
-  if (!isEither(received)) {
+  if (!isEither(received))
     return {
       pass: false,
       message: () => `Expected ${format(received)} to be an Either`
     }
-  }
 
-  if (!isRight(received)) {
+  if (!isRight(received))
     return {
       pass: false,
       message: () => `Expected ${format(received)} to be right`
     }
-  }
 
   const pass = this.equals(received.right, expected)
 
