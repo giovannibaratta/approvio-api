@@ -195,14 +195,13 @@ export function validateGetEntityInfo200Response(
       orgRole: object.orgRole,
       concurrencyControl: concurrencyControlValidation.right
     })
-  } else if (object.entityType === "agent") {
+  } else if (object.entityType === "agent")
     return right({
       entityType: "agent" as const,
       id: object.id,
       groups,
       roles
     })
-  }
 
   return left("invalid_entity_type")
 }

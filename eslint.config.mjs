@@ -38,7 +38,8 @@ export default tseslint.config(
           object: "it",
           property: "only"
         }
-      ]
+      ],
+      curly: ["error", "multi"]
     }
   },
   {

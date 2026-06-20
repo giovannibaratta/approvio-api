@@ -104,19 +104,16 @@ function validateRoleScope(object: unknown): Either<RoleScopeValidationError, Ro
 
   if (!hasOwnProperty(object, "type")) return left("missing_type")
 
-  if (object.type === "org") {
-    return right({type: "org"})
-  } else if (object.type === "space") {
+  if (object.type === "org") return right({type: "org"})
+  else if (object.type === "space") {
     if (!hasOwnProperty(object, "spaceId")) return left("missing_space_id")
-    if (!isNonEmptyString(object.spaceId) || !isValidUUID(object.spaceId)) {
-      return left("invalid_space_id")
-    }
+    if (!isNonEmptyString(object.spaceId) || !isValidUUID(object.spaceId)) return left("invalid_space_id")
+
     return right({type: "space", spaceId: object.spaceId})
   } else if (object.type === "group") {
     if (!hasOwnProperty(object, "groupId")) return left("missing_group_id")
-    if (!isNonEmptyString(object.groupId) || !isValidUUID(object.groupId)) {
-      return left("invalid_group_id")
-    }
+    if (!isNonEmptyString(object.groupId) || !isValidUUID(object.groupId)) return left("invalid_group_id")
+
     return right({type: "group", groupId: object.groupId})
   } else if (object.type === "workflow_template") {
     if (!hasOwnProperty(object, "templateName")) return left("missing_template_name")

@@ -34,9 +34,7 @@ function validateEmailAction(object: unknown): Either<EmailActionValidationError
   if (!hasOwnProperty(object, "type") || object.type !== "EMAIL") return left("invalid_type")
 
   if (!hasOwnProperty(object, "recipients") || !Array.isArray(object.recipients)) return left("invalid_recipients")
-  for (const recipient of object.recipients) {
-    if (!isNonEmptyString(recipient)) return left("invalid_recipients_element")
-  }
+  for (const recipient of object.recipients) if (!isNonEmptyString(recipient)) return left("invalid_recipients_element")
 
   const type = getStringAsEnum(object.type, EmailAction.TypeEnum)
   if (!type) return left("invalid_type")
@@ -563,9 +561,7 @@ export function validateListWorkflowTemplatesParams(
     if (typeof object.searchMode !== "string") return left("invalid_search_mode")
     if (object.searchMode !== "CONTAINS" && object.searchMode !== "EXACT") return left("invalid_search_mode")
     result.searchMode = object.searchMode
-  } else {
-    result.searchMode = "CONTAINS"
-  }
+  } else result.searchMode = "CONTAINS"
 
   if (result.search !== undefined) {
     if (result.searchMode === "CONTAINS" && result.search.length < 3) return left("invalid_search_length")
@@ -594,9 +590,7 @@ export function validateListWorkflowTemplatesParams(
       const validatedStatus = getStringAsEnum(statusVal, WorkflowTemplateStatus)
       if (!validatedStatus) return left("invalid_status")
       status = [validatedStatus]
-    } else {
-      return left("invalid_status")
-    }
+    } else return left("invalid_status")
   }
   result.status = status
 
@@ -605,20 +599,18 @@ export function validateListWorkflowTemplatesParams(
 
     const values: string[] = []
 
-    if (Array.isArray(sortByVal)) {
+    if (Array.isArray(sortByVal))
       for (const unsafeSortBy of sortByVal) {
         if (typeof unsafeSortBy !== "string") return left("invalid_sort_by")
         const sortBy = getStringAsEnum(unsafeSortBy, SortBy)
         if (sortBy === undefined) return left("invalid_sort_by")
         values.push(sortBy)
       }
-    } else if (typeof sortByVal === "string") {
+    else if (typeof sortByVal === "string") {
       const sortBy = getStringAsEnum(sortByVal, SortBy)
       if (sortBy === undefined) return left("invalid_sort_by")
       values.push(sortBy)
-    } else {
-      return left("invalid_sort_by")
-    }
+    } else return left("invalid_sort_by")
 
     result.sortBy = values
   }
@@ -628,20 +620,18 @@ export function validateListWorkflowTemplatesParams(
 
     const values: string[] = []
 
-    if (Array.isArray(sortDirectionVal)) {
+    if (Array.isArray(sortDirectionVal))
       for (const item of sortDirectionVal) {
         if (typeof item !== "string") return left("invalid_sort_direction")
         const sortDirection = getStringAsEnum(item, SortDirection)
         if (sortDirection === undefined) return left("invalid_sort_direction")
         values.push(sortDirection)
       }
-    } else if (typeof sortDirectionVal === "string") {
+    else if (typeof sortDirectionVal === "string") {
       const sortDirection = getStringAsEnum(sortDirectionVal, SortDirection)
       if (sortDirection === undefined) return left("invalid_sort_direction")
       values.push(sortDirection)
-    } else {
-      return left("invalid_sort_direction")
-    }
+    } else return left("invalid_sort_direction")
 
     if (result.sortBy === undefined || result.sortBy.length === 0) return left("sort_direction_without_sort_by")
     if (values.length > result.sortBy.length) return left("sort_direction_length_mismatch")
