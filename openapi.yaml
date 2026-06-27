@@ -3,7 +3,7 @@ info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for
     generic workflows, users, and groups.
-  version: 0.0.50
+  version: 0.0.51
 tags:
   - name: Authentication
     description: OIDC authentication and token management
@@ -36,6 +36,8 @@ tags:
 paths:
   /health:
     $ref: ./openapi/system/health.yaml
+  /auth/providers:
+    $ref: ./openapi/auth/auth-providers.yaml
   /auth/web/login:
     $ref: ./openapi/auth/auth-web-login.yaml
   /auth/cli/initiate:
@@ -266,6 +268,12 @@ components:
       $ref: ./openapi/shared/schemas.yaml#/PrivilegedOperation
     PrivilegedTokenExchangeRequest:
       $ref: ./openapi/auth/schemas.yaml#/PrivilegedTokenExchangeRequest
+    AuthProvider:
+      $ref: ./openapi/auth/schemas.yaml#/AuthProvider
+    InitiateCliLoginRequest:
+      $ref: ./openapi/auth/schemas.yaml#/InitiateCliLoginRequest
+    InitiateCliLogin200Response:
+      $ref: ./openapi/auth/schemas.yaml#/InitiateCliLogin200Response
     Quota:
       $ref: ./openapi/quotas/schemas.yaml#/Quota
     QuotaCreate:

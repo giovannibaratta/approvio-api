@@ -10,24 +10,13 @@ post:
     content:
       application/json:
         schema:
-          type: object
-          required:
-            - redirectUri
-          properties:
-            redirectUri:
-              type: string
-              description: The local loopback URL to redirect the user to after authentication
+          $ref: ./schemas.yaml#/InitiateCliLoginRequest
   responses:
     "200":
       description: Authorization URL generated
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - authorizationUrl
-            properties:
-              authorizationUrl:
-                type: string
+            $ref: ./schemas.yaml#/InitiateCliLogin200Response
     "400":
       $ref: ../shared/responses.yaml#/BadRequest

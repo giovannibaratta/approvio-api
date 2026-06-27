@@ -1,4 +1,5 @@
 import {
+  AuthProvider,
   AgentRegistrationResponse,
   TokenResponse,
   TokenRequest,
@@ -173,6 +174,7 @@ export type InitiateCliLoginRequestValidationError =
   | "malformed_object"
   | "missing_redirect_uri"
   | "invalid_redirect_uri"
+  | "invalid_provider"
 
 export function validateInitiateCliLoginRequest(
   object: unknown
@@ -182,9 +184,16 @@ export function validateInitiateCliLoginRequest(
   if (!hasOwnProperty(object, "redirectUri") || !isNonEmptyString(object.redirectUri))
     return left(hasOwnProperty(object, "redirectUri") ? "invalid_redirect_uri" : "missing_redirect_uri")
 
-  return right({
+  const result: InitiateCliLoginRequest = {
     redirectUri: object.redirectUri
-  })
+  }
+
+  if (hasOwnProperty(object, "provider") && object.provider !== undefined) {
+    if (!isNonEmptyString(object.provider)) return left("invalid_provider")
+    result.provider = object.provider
+  }
+
+  return right(result)
 }
 
 export type InitiateCliLogin200ResponseValidationError =
@@ -227,4 +236,42 @@ export function validateOidcCallbackRequest(
     code: object.code,
     state: object.state
   })
+}
+
+export type AuthProvidersResponseValidationError =
+  | "malformed_object"
+  | "invalid_array"
+  | "missing_id"
+  | "invalid_id"
+  | "missing_display_name"
+  | "invalid_display_name"
+  | "missing_login_url"
+  | "invalid_login_url"
+
+export function validateAuthProvidersResponse(
+  object: unknown
+): Either<AuthProvidersResponseValidationError, AuthProvider[]> {
+  if (!Array.isArray(object)) return left("invalid_array")
+
+  const result: AuthProvider[] = []
+  for (const item of object) {
+    if (typeof item !== "object" || item === null) return left("malformed_object")
+
+    if (!hasOwnProperty(item, "id")) return left("missing_id")
+    if (!isNonEmptyString(item.id)) return left("invalid_id")
+
+    if (!hasOwnProperty(item, "displayName")) return left("missing_display_name")
+    if (!isNonEmptyString(item.displayName)) return left("invalid_display_name")
+
+    if (!hasOwnProperty(item, "loginUrl")) return left("missing_login_url")
+    if (!isNonEmptyString(item.loginUrl)) return left("invalid_login_url")
+
+    result.push({
+      id: item.id,
+      displayName: item.displayName,
+      loginUrl: item.loginUrl
+    })
+  }
+
+  return right(result)
 }
