@@ -1,0 +1,16 @@
+get:
+  summary: Get authentication providers
+  description: Returns a list of available authentication providers
+  operationId: getAuthProviders
+  tags:
+    - Authentication
+  security: []
+  responses:
+    "200":
+      description: List of available authentication providers
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: ./schemas.yaml#/AuthProvider

@@ -145,3 +145,45 @@ GetEntityInfoAgentResponse:
       type: array
       items:
         $ref: ../roles/schemas.yaml#/RoleOperationItem
+
+AuthProvider:
+  type: object
+  required:
+    - id
+    - displayName
+    - loginUrl
+  properties:
+    id:
+      type: string
+      description: The unique identifier for the authentication provider
+      example: google
+    displayName:
+      type: string
+      description: The human-readable name of the authentication provider
+      example: Google
+    loginUrl:
+      type: string
+      description: The relative URL to initiate login with this provider
+      example: /auth/web/login?provider=google
+
+InitiateCliLoginRequest:
+  type: object
+  required:
+    - redirectUri
+  properties:
+    redirectUri:
+      type: string
+      description: The local loopback URL to redirect the user to after authentication
+    provider:
+      type: string
+      description: The optional provider identifier to use for authentication
+      example: google
+
+InitiateCliLogin200Response:
+  type: object
+  required:
+    - authorizationUrl
+  properties:
+    authorizationUrl:
+      type: string
+      description: The authorization URL to redirect to

@@ -5,6 +5,13 @@ get:
   tags:
     - Authentication
   security: []
+  parameters:
+    - name: provider
+      in: query
+      description: The optional provider identifier to use for authentication
+      required: false
+      schema:
+        type: string
   responses:
     "302":
       description: Redirect to OIDC provider for authentication

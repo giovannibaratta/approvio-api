@@ -18,8 +18,12 @@ import {
 } from "../../src/validators/auth.validators"
 import "../../src/utils/matchers"
 
-import {AgentRegistrationResponse, TokenResponse} from "../../generated/openapi/model/models"
-import {validateAgentRegistrationResponse, validateTokenResponse} from "../../src/validators/auth.validators"
+import {AuthProvider, AgentRegistrationResponse, TokenResponse} from "../../generated/openapi/model/models"
+import {
+  validateAuthProvidersResponse,
+  validateAgentRegistrationResponse,
+  validateTokenResponse
+} from "../../src/validators/auth.validators"
 
 describe("auth validators", () => {
   describe("validateTokenResponse", () => {
@@ -150,6 +154,70 @@ describe("auth validators", () => {
     })
   })
 
+  describe("validateAuthProvidersResponse", () => {
+    const validProvider: AuthProvider = {
+      id: "google",
+      displayName: "Google",
+      loginUrl: "/auth/web/login?provider=google"
+    }
+
+    it("should return right when the auth providers response is valid", () => {
+      // Given
+      const input = [validProvider]
+      // When
+      const result = validateAuthProvidersResponse(input)
+      // Expect
+      expect(result).toBeRightOf([validProvider])
+    })
+
+    it("should return left('invalid_array') when input is not an array", () => {
+      // Given
+      const input = validProvider
+      // When
+      const result = validateAuthProvidersResponse(input)
+      // Expect
+      expect(result).toBeLeftOf("invalid_array")
+    })
+
+    it("should return left('malformed_object') when an item is not an object", () => {
+      // Given
+      const input = ["string"]
+      // When
+      const result = validateAuthProvidersResponse(input)
+      // Expect
+      expect(result).toBeLeftOf("malformed_object")
+    })
+
+    const errorCases: {field: keyof AuthProvider; error: string}[] = [
+      {field: "id", error: "missing_id"},
+      {field: "displayName", error: "missing_display_name"},
+      {field: "loginUrl", error: "missing_login_url"}
+    ]
+
+    errorCases.forEach(({field, error}) => {
+      it(`should return left('${error}') when ${field} is missing`, () => {
+        // Given
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const {[field]: _, ...rest} = validProvider
+        const input = [rest]
+        // When
+        const result = validateAuthProvidersResponse(input)
+        // Expect
+        expect(result).toBeLeftOf(error)
+      })
+
+      const invalidError = error.replace("missing", "invalid")
+      it(`should return left('${invalidError}') when ${field} is empty string`, () => {
+        // Given
+        const input = [{...validProvider, [field]: ""}]
+        // When
+        const result = validateAuthProvidersResponse(input)
+        // Expect
+        expect(result).toBeLeftOf(invalidError)
+      })
+    })
+  })
+
   describe("validateTokenRequest", () => {
     it("should return right when valid", () => {
       // Given
@@ -204,13 +272,40 @@ describe("auth validators", () => {
   })
 
   describe("validateInitiateCliLoginRequest", () => {
-    it("should return right when valid", () => {
+    it("should return right when valid without provider", () => {
       // Given
       const validReq: InitiateCliLoginRequest = {redirectUri: "http://localhost:8080"}
       // When
       const result = validateInitiateCliLoginRequest(validReq)
       // Expect
       expect(result).toBeRightOf(validReq)
+    })
+
+    it("should return right when valid with provider", () => {
+      // Given
+      const validReq: InitiateCliLoginRequest = {redirectUri: "http://localhost:8080", provider: "google"}
+      // When
+      const result = validateInitiateCliLoginRequest(validReq)
+      // Expect
+      expect(result).toBeRightOf(validReq)
+    })
+
+    it("should return left('invalid_provider') when provider is empty string", () => {
+      // Given
+      const invalidReq = {redirectUri: "http://localhost:8080", provider: ""}
+      // When
+      const result = validateInitiateCliLoginRequest(invalidReq)
+      // Expect
+      expect(result).toBeLeftOf("invalid_provider")
+    })
+
+    it("should return left('invalid_provider') when provider is not a string", () => {
+      // Given
+      const invalidReq = {redirectUri: "http://localhost:8080", provider: 123}
+      // When
+      const result = validateInitiateCliLoginRequest(invalidReq)
+      // Expect
+      expect(result).toBeLeftOf("invalid_provider")
     })
   })
 
