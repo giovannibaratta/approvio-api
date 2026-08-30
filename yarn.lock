@@ -1418,6 +1418,11 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
+"@scarf/scarf@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@scarf/scarf/-/scarf-1.4.0.tgz#3bbb984085dbd6d982494538b523be1ce6562972"
+  integrity sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ==
+
 "@sinclair/typebox@^0.34.0":
   version "0.34.48"
   resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.34.48.tgz#75b0ead87e59e1adbd6dccdc42bad4fddee73b59"
@@ -1491,11 +1496,12 @@
   resolved "https://registry.yarnpkg.com/@stoplight/path/-/path-1.3.2.tgz#96e591496b72fde0f0cdae01a61d64f065bd9ede"
   integrity sha512-lyIc6JUlUA8Ve5ELywPC8I2Sdnh1zc1zmbYgVarhXIp9YeAB0ReeqmGEOWNtlHkbP2DAA1AL65Wfn2ncjK/jtQ==
 
-"@stoplight/spectral-cli@6.16.0":
-  version "6.16.0"
-  resolved "https://registry.yarnpkg.com/@stoplight/spectral-cli/-/spectral-cli-6.16.0.tgz#b4a377e6434200084a4484268df53043983562d8"
-  integrity sha512-P1acHIV/hDiO3w0YNUc3pD7/0q68SMAMyWVxAPUGzsAeq50lLpl0obN5j3QITMgJPhPByvBIjBV4ftkBd8nwMg==
+"@stoplight/spectral-cli@6.16.1":
+  version "6.16.1"
+  resolved "https://registry.yarnpkg.com/@stoplight/spectral-cli/-/spectral-cli-6.16.1.tgz#8ebfe46fc73904b6b1aa0cd9945a1b6cac6b0100"
+  integrity sha512-6DdYx94d+BNVTdgJRkb1KJIcqYQsOxstAZtH7Kh63SDUsXFRkdfsBKsL7l6csxLRYYh5Qm6CSBF7AUFYBFJ23w==
   dependencies:
+    "@scarf/scarf" "^1.4.0"
     "@stoplight/json" "~3.21.0"
     "@stoplight/path" "1.3.2"
     "@stoplight/spectral-core" "^1.19.5"
@@ -4792,15 +4798,15 @@ lodash.topath@^4.5.2:
   resolved "https://registry.yarnpkg.com/lodash.topath/-/lodash.topath-4.5.2.tgz#3616351f3bba61994a0931989660bd03254fd009"
   integrity sha512-1/W4dM+35DwvE/iEd1M9ekewOSTlpFekhw9mhAtrwjVqUr83/ilQiyAvmg4tVX7Unkcfl1KC+i9WdaT4B6aQcg==
 
-lodash@^4.17.21, lodash@~4.17.21:
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
-  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
-
-lodash@^4.18.1:
+lodash@^4.17.21, lodash@^4.18.1:
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
+
+lodash@~4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 long@^5.3.2:
   version "5.3.2"
