@@ -3,7 +3,7 @@ info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for
     generic workflows, users, and groups.
-  version: 0.0.51
+  version: 0.0.52
 tags:
   - name: Authentication
     description: OIDC authentication and token management
@@ -19,6 +19,8 @@ tags:
     description: Space management
   - name: Organization Admins
     description: Organization administrator management
+  - name: Organizations
+    description: Organization entitlements and metered usage management
   - name: Workflow Actions
     description: Workflow actions and voting
   - name: Agents
@@ -122,6 +124,10 @@ paths:
     $ref: ./openapi/audit-logs/audit-logs-me.yaml
   /resources/resolve:
     $ref: ./openapi/resources/resources-resolve.yaml
+  /organizations/{orgId}/entitlements:
+    $ref: ./openapi/organizations/organizations-orgId-entitlements.yaml
+  /organizations/{orgId}/usage:
+    $ref: ./openapi/organizations/organizations-orgId-usage.yaml
 components:
   schemas:
     AgentChallengeRequest:
@@ -316,6 +322,16 @@ components:
       $ref: ./openapi/resources/schemas.yaml#/ResourceResolveRequest
     ResourceResolveResponse:
       $ref: ./openapi/resources/schemas.yaml#/ResourceResolveResponse
+    PlanTier:
+      $ref: ./openapi/organizations/schemas.yaml#/PlanTier
+    TierFeatures:
+      $ref: ./openapi/organizations/schemas.yaml#/TierFeatures
+    OrganizationEntitlementsResponse:
+      $ref: ./openapi/organizations/schemas.yaml#/OrganizationEntitlementsResponse
+    MetricUsageItem:
+      $ref: ./openapi/organizations/schemas.yaml#/MetricUsageItem
+    OrganizationUsageResponse:
+      $ref: ./openapi/organizations/schemas.yaml#/OrganizationUsageResponse
   responses:
     BadRequest:
       $ref: ./openapi/shared/responses.yaml#/BadRequest

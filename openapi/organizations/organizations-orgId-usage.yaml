@@ -1,0 +1,36 @@
+get:
+  summary: Get active billing period metered usage and consumption counters.
+  description: Returns active billing period metered usage and consumption counters for the specified organization.
+  operationId: getOrganizationUsage
+  tags:
+    - Organizations
+  parameters:
+    - name: orgId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    - name: period
+      in: query
+      required: false
+      schema:
+        type: string
+    - name: metric
+      in: query
+      required: false
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Organization usage retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/OrganizationUsageResponse
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "403":
+      $ref: ../shared/responses.yaml#/Forbidden
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound

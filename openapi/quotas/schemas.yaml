@@ -8,6 +8,9 @@ QuotaType:
     - MAX_SPACES
     - MAX_WORKFLOW_TEMPLATES_PER_SPACE
     - MAX_VOTES_PER_WORKFLOW
+    - MAX_LLM_TOKENS_PER_MONTH
+    - MAX_EVALUATIONS_PER_MONTH
+    - MAX_CREDITS_PER_MONTH
   description: >
     The type of metric that this quota enforces.
     * `MAX_ENTITIES_PER_GROUP`: The maximum number of entities (users, agents) allowed in a group.
@@ -17,6 +20,9 @@ QuotaType:
     * `MAX_SPACES`: The maximum number of spaces allowed in an organization.
     * `MAX_WORKFLOW_TEMPLATES_PER_SPACE`: The maximum number of workflow templates allowed in a space.
     * `MAX_VOTES_PER_WORKFLOW`: The maximum number of votes allowed per workflow instance.
+    * `MAX_LLM_TOKENS_PER_MONTH`: Maximum LLM tokens consumed per billing cycle
+    * `MAX_EVALUATIONS_PER_MONTH`: Maximum evaluator invocations per billing cycle
+    * `MAX_CREDITS_PER_MONTH`: Maximum model-weighted proxy credits per billing cycle
 
 QuotaScope:
   type: string
@@ -88,6 +94,9 @@ OrgQuotaBase:
         - MAX_WORKFLOW_TEMPLATES_PER_SPACE
         - MAX_CONCURRENT_WORKFLOWS
         - MAX_VOTES_PER_WORKFLOW
+        - MAX_LLM_TOKENS_PER_MONTH
+        - MAX_EVALUATIONS_PER_MONTH
+        - MAX_CREDITS_PER_MONTH
 
 GroupQuotaBase:
   type: object
