@@ -1,0 +1,102 @@
+PlanTier:
+  type: string
+  enum:
+    - FREE
+    - SELF_HOSTED_UNLIMITED
+  description: Subscription plan tier of the organization
+
+TierFeatures:
+  type: object
+  required:
+    - platformLlmEvaluators
+  properties:
+    platformLlmEvaluators:
+      type: boolean
+      description: Controls access to platform-managed AI Evaluators (incurs direct compute cost)
+
+OrganizationEntitlementsResponse:
+  type: object
+  required:
+    - orgId
+    - planTier
+    - edition
+    - features
+    - quotas
+  properties:
+    orgId:
+      type: string
+      format: uuid
+    planTier:
+      $ref: "#/PlanTier"
+    edition:
+      type: string
+      enum: [self_hosted, saas_cloud]
+    features:
+      $ref: "#/TierFeatures"
+    quotas:
+      type: object
+      additionalProperties:
+        type: integer
+        nullable: true
+      description: Effective resolved quota limits (null indicates unlimited)
+
+MetricUsageItem:
+  type: object
+  required:
+    - metric
+    - limit
+    - consumed
+    - reserved
+    - remaining
+    - unit
+  properties:
+    metric:
+      type: string
+    limit:
+      type: integer
+      nullable: true
+      description: Total limit for the period (null indicates unlimited)
+    consumed:
+      type: integer
+      description: Settled usage consumed so far in the period
+    reserved:
+      type: integer
+      description: Inflight reserved capacity currently held
+    remaining:
+      type: integer
+      nullable: true
+      description: Available capacity remaining (null if unlimited)
+    unit:
+      type: string
+      enum: [tokens, evaluations, credits, count]
+
+OrganizationUsageResponse:
+  type: object
+  required:
+    - orgId
+    - period
+    - periodStartsAt
+    - periodEndsAt
+    - metrics
+  properties:
+    orgId:
+      type: string
+      format: uuid
+    period:
+      type: string
+      example: "2026-08"
+      description: Calendar month (YYYY-MM) or active billing cycle identifier
+    periodStartsAt:
+      type: string
+      format: date-time
+      example: "2026-08-01T00:00:00Z"
+      description: Start timestamp of the active billing cycle
+    periodEndsAt:
+      type: string
+      format: date-time
+      example: "2026-08-31T23:59:59Z"
+      description: End timestamp of the active billing cycle
+    metrics:
+      type: array
+      items:
+        $ref: "#/MetricUsageItem"

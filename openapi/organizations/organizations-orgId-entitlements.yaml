@@ -1,0 +1,26 @@
+get:
+  summary: Get effective feature flags and quota limits for an organization.
+  description: Returns effective feature flags and quota limits for the specified organization.
+  operationId: getOrganizationEntitlements
+  tags:
+    - Organizations
+  parameters:
+    - name: orgId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "200":
+      description: Organization entitlements retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/OrganizationEntitlementsResponse
+    "401":
+      $ref: ../shared/responses.yaml#/Unauthorized
+    "403":
+      $ref: ../shared/responses.yaml#/Forbidden
+    "404":
+      $ref: ../shared/responses.yaml#/NotFound
