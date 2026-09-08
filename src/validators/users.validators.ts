@@ -1,6 +1,5 @@
 import {
   User,
-  UserCreate,
   UserSummary,
   ListUsers200Response,
   RoleAssignmentRequest,
@@ -9,20 +8,21 @@ import {
   GroupInfo
 } from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft, isRight} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isArray, isValidUUID} from "../utils/validation.utils"
 import {validatePagination, validateSharedListParams} from "./common.validators"
 import {validateGroupInfo} from "./groups.validators"
-import {validateConcurrencyControl} from "./concurrency-control"
 import {validateRolesArray} from "./roles.validators"
 
 export type UserValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
+  | "missing_account_id"
+  | "invalid_account_id"
   | "malformed_object"
   | "missing_id"
   | "invalid_id"
   | "missing_display_name"
   | "invalid_display_name"
-  | "missing_email"
-  | "invalid_email"
   | "missing_org_role"
   | "invalid_org_role"
   | "missing_created_at"
@@ -33,23 +33,18 @@ export type UserValidationError =
   | "invalid_roles"
   | "invalid_concurrency_control"
 
-export type UserCreateValidationError =
-  | "malformed_object"
-  | "missing_display_name"
-  | "invalid_display_name"
-  | "missing_email"
-  | "invalid_email"
+export type UserSummaryValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
+  | "missing_account_id"
+  | "invalid_account_id"
   | "missing_org_role"
   | "invalid_org_role"
-
-export type UserSummaryValidationError =
   | "malformed_object"
   | "missing_id"
   | "invalid_id"
   | "missing_display_name"
   | "invalid_display_name"
-  | "missing_email"
-  | "invalid_email"
 
 export type ListUsers200ResponseValidationError =
   | "malformed_object"
@@ -84,8 +79,8 @@ export function validateUser(object: unknown): Either<UserValidationError, User>
   if (!hasOwnProperty(object, "displayName")) return left("missing_display_name")
   if (!isNonEmptyString(object.displayName)) return left("invalid_display_name")
 
-  if (!hasOwnProperty(object, "email")) return left("missing_email")
-  if (!isNonEmptyString(object.email)) return left("invalid_email")
+  if (!hasOwnProperty(object, "accountId")) return left("missing_account_id")
+  if (!isNonEmptyString(object.accountId)) return left("invalid_account_id")
 
   if (!hasOwnProperty(object, "orgRole")) return left("missing_org_role")
   if (!isNonEmptyString(object.orgRole)) return left("invalid_org_role")
@@ -107,38 +102,23 @@ export function validateUser(object: unknown): Either<UserValidationError, User>
   if (isLeft(rolesValidation)) return left(rolesValidation.left)
   const roles = rolesValidation.right
 
-  if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
-  const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
-  if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+  if (object.orgRole !== "owner" && object.orgRole !== "admin" && object.orgRole !== "member")
+    return left("invalid_org_role")
+  if (!isValidUUID(object.accountId)) return left("invalid_account_id")
 
   return right({
+    organizationId: object.organizationId,
+
     id: object.id,
     displayName: object.displayName,
-    email: object.email,
+    accountId: object.accountId,
     orgRole: object.orgRole,
     createdAt: object.createdAt,
     groups,
-    roles,
-    concurrencyControl: concurrencyControlValidation.right
-  })
-}
-
-export function validateUserCreate(object: unknown): Either<UserCreateValidationError, UserCreate> {
-  if (typeof object !== "object" || object === null) return left("malformed_object")
-
-  if (!hasOwnProperty(object, "displayName")) return left("missing_display_name")
-  if (!isNonEmptyString(object.displayName)) return left("invalid_display_name")
-
-  if (!hasOwnProperty(object, "email")) return left("missing_email")
-  if (!isNonEmptyString(object.email)) return left("invalid_email")
-
-  if (!hasOwnProperty(object, "orgRole")) return left("missing_org_role")
-  if (!isNonEmptyString(object.orgRole)) return left("invalid_org_role")
-
-  return right({
-    displayName: object.displayName,
-    email: object.email,
-    orgRole: object.orgRole
+    roles
   })
 }
 
@@ -151,13 +131,23 @@ function validateUserSummary(object: unknown): Either<UserSummaryValidationError
   if (!hasOwnProperty(object, "displayName")) return left("missing_display_name")
   if (!isNonEmptyString(object.displayName)) return left("invalid_display_name")
 
-  if (!hasOwnProperty(object, "email")) return left("missing_email")
-  if (!isNonEmptyString(object.email)) return left("invalid_email")
+  if (!hasOwnProperty(object, "accountId")) return left("missing_account_id")
+  if (!isNonEmptyString(object.accountId)) return left("invalid_account_id")
+
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+  if (!hasOwnProperty(object, "orgRole")) return left("missing_org_role")
+  if (object.orgRole !== "owner" && object.orgRole !== "admin" && object.orgRole !== "member")
+    return left("invalid_org_role")
+  if (!isValidUUID(object.accountId)) return left("invalid_account_id")
 
   return right({
+    organizationId: object.organizationId,
+    orgRole: object.orgRole,
     id: object.id,
     displayName: object.displayName,
-    email: object.email
+    accountId: object.accountId
   })
 }
 
@@ -199,13 +189,8 @@ export function validateRoleAssignmentRequest(
   const roles = rolesValidation.right
   if (roles.length === 0) return left("invalid_roles")
 
-  if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
-  const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
-  if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
-
   return right({
-    roles,
-    concurrencyControl: concurrencyControlValidation.right
+    roles
   })
 }
 

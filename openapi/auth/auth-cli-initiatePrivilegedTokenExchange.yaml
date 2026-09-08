@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Initiate CLI privilege token generation (step-up)
   description: |
@@ -9,6 +11,10 @@ get:
   tags:
     - Authentication
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "302":
       description: Redirect to IDP for step-up authentication
     "500":

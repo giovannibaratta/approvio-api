@@ -1,3 +1,4 @@
+import {isValidUUID} from "../utils/validation.utils"
 import {
   AgentSummary,
   AgentRegistrationRequest,
@@ -11,11 +12,12 @@ import {
 } from "../../generated/openapi/model/models"
 import {Either, left, right, isLeft, mapLeft} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.utils"
-import {validatePagination, validateSharedListParams} from "./common.validators"
+import {validatePagination, validateSharedListParams, OrganizationIdValidationError} from "./common.validators"
 import {getStringAsEnum} from "../utils/enum"
 import {pipe} from "fp-ts/function"
 
 export type AgentSummaryValidationError =
+  | OrganizationIdValidationError
   | "malformed_object"
   | "missing_id"
   | "invalid_id"
@@ -30,7 +32,13 @@ function validateAgentSummary(object: unknown): Either<AgentSummaryValidationErr
   if (!hasOwnProperty(object, "name") || !isNonEmptyString(object.name))
     return left(hasOwnProperty(object, "name") ? "invalid_name" : "missing_name")
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   return right({
+    organizationId: object.organizationId,
+
     id: object.id,
     name: object.name
   })
@@ -187,6 +195,7 @@ export function validateListAgents200Response(
 }
 
 export type AgentGet200ResponseValidationError =
+  | OrganizationIdValidationError
   | "malformed_object"
   | "missing_id"
   | "invalid_id"
@@ -211,7 +220,13 @@ export function validateAgentGet200Response(
   if (!hasOwnProperty(object, "createdAt") || !isNonEmptyString(object.createdAt))
     return left(hasOwnProperty(object, "createdAt") ? "invalid_created_at" : "missing_created_at")
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   return right({
+    organizationId: object.organizationId,
+
     id: object.id,
     agentName: object.agentName,
     publicKey: object.publicKey,

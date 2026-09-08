@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Resolve resource names by ID
   description: Resolves the names of a batch of resources (e.g. spaces or groups) given their IDs. Returns successfully resolved resources and details of denied/unresolved ones. Limit is 50 resources per request.
@@ -11,6 +13,10 @@ post:
         schema:
           $ref: ./schemas.yaml#/ResourceResolveRequest
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     '200':
       description: Batch resolve results
       content:

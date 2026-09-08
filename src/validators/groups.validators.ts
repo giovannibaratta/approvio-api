@@ -1,3 +1,4 @@
+import {isValidUUID} from "../utils/validation.utils"
 import {
   Group,
   GroupCreate,
@@ -22,6 +23,8 @@ import {
 } from "./membership.validators"
 
 export type GroupValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "malformed_object"
   | "missing_id"
   | "invalid_id"
@@ -49,7 +52,13 @@ function validateGroup(object: unknown): Either<GroupValidationError, Group> {
   if (!hasOwnProperty(object, "updatedAt") || !isNonEmptyString(object.updatedAt))
     return left(hasOwnProperty(object, "updatedAt") ? "invalid_updated_at" : "missing_updated_at")
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   const result: Group = {
+    organizationId: object.organizationId,
+
     id: object.id,
     name: object.name,
     entitiesCount: object.entitiesCount,

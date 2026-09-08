@@ -1,5 +1,5 @@
 import {Either, isLeft, left, right} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString, isNumber, isValidUUID} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isValidUUID, isUsageQuantityString} from "../utils/validation.utils"
 import {
   GroupQuotaBase,
   ListQuotasParams,
@@ -48,7 +48,7 @@ export function validateQuotaCreate(object: unknown): Either<QuotaValidationErro
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "limit")) return left("missing_limit")
-  if (!isNumber(object.limit) || !Number.isInteger(object.limit) || object.limit < 0) return left("invalid_limit")
+  if (!isUsageQuantityString(object.limit)) return left("invalid_limit")
 
   if (!hasOwnProperty(object, "scope")) return left("missing_scope")
   if (!isNonEmptyString(object.scope)) return left("invalid_scope")
@@ -87,7 +87,7 @@ export function validateQuotaUpdate(object: unknown): Either<QuotaValidationErro
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
   if (!hasOwnProperty(object, "limit") || object.limit === undefined) return right({})
-  if (!isNumber(object.limit) || !Number.isInteger(object.limit) || object.limit < 0) return left("invalid_limit")
+  if (!isUsageQuantityString(object.limit)) return left("invalid_limit")
 
   return right({
     limit: object.limit

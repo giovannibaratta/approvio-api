@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Create a new approver group
   description: Create a new group for organizing approvers
@@ -11,6 +13,10 @@ post:
         schema:
           $ref: ./schemas.yaml#/GroupCreate
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "201":
       description: Group created successfully
       headers:
@@ -37,6 +43,10 @@ get:
       schema:
         $ref: ./schemas.yaml#/ListGroupsParams
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: List of groups
       content:

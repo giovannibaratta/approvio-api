@@ -1,5 +1,5 @@
-import {APIError} from "../../generated/openapi/model/models"
-import {validateAPIError} from "../../src/validators/api-error.validators"
+import {APIError, OrganizationBoundaryError} from "../../generated/openapi/model/models"
+import {validateAPIError, validateOrganizationBoundaryError} from "../../src/validators/api-error.validators"
 import "../../src/utils/matchers"
 
 describe("validateAPIError", () => {
@@ -49,5 +49,22 @@ describe("validateAPIError", () => {
 
     // Expect
     expect(result).toBeLeftOf("invalid_message")
+  })
+})
+
+describe("validateOrganizationBoundaryError", () => {
+  it("validates a stable organization boundary error code", () => {
+    const error: OrganizationBoundaryError = {
+      code: "ORGANIZATION_CONTEXT_CHANGED",
+      message: "The selected organization changed"
+    }
+    expect(validateOrganizationBoundaryError(error)).toBeRightOf(error)
+  })
+
+  it("accepts the stable fallback for an unclassified boundary error", () => {
+    expect(validateOrganizationBoundaryError({code: "UNKNOWN", message: "Unknown"})).toBeRightOf({
+      code: "UNKNOWN",
+      message: "Unknown"
+    })
   })
 })

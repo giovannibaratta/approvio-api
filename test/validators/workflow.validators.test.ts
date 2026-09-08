@@ -326,6 +326,7 @@ describe("workflow validators", () => {
     const validResponse: ListWorkflows200Response = {
       data: [
         {
+          organizationId: "00000000-0000-4000-8000-000000000001",
           id: "wf-123",
           name: "Release",
           status: "PENDING",
@@ -552,6 +553,7 @@ describe("workflow validators", () => {
     const validResponse: GetWorkflowVotes200Response = {
       votes: [
         {
+          organizationId: "00000000-0000-4000-8000-000000000001",
           voterId: "voter-123",
           voterType: "USER",
           voteType: "APPROVE",

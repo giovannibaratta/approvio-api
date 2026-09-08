@@ -41,12 +41,16 @@ AgentRegistrationRequest:
 AgentRegistrationResponse:
   type: object
   required:
+    - organizationId
     - agentId
     - agentName
     - publicKey
     - privateKey
     - createdAt
   properties:
+    organizationId:
+      type: string
+      format: uuid
     agentId:
       type: string
       format: uuid
@@ -73,11 +77,15 @@ AgentRegistrationResponse:
 AgentGet200Response:
   type: object
   required:
+    - organizationId
     - id
     - agentName
     - publicKey
     - createdAt
   properties:
+    organizationId:
+      type: string
+      format: uuid
     id:
       type: string
       format: uuid
@@ -164,9 +172,13 @@ AgentTokenResponse:
 AgentSummary:
   type: object
   required:
+    - organizationId
     - id
     - name
   properties:
+    organizationId:
+      type: string
+      format: uuid
     id:
       type: string
       format: uuid

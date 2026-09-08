@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Check if the current entity can vote on a workflow
   description: Determines if the authenticated entity is eligible to cast a vote on the specified workflow.
@@ -12,6 +14,10 @@ get:
       schema:
         type: string
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Eligibility to vote confirmed.
       content:

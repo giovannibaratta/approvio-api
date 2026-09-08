@@ -104,6 +104,7 @@ describe("audit-log validators", () => {
     const validResponse = {
       auditLogs: [
         {
+          organizationId: "00000000-0000-4000-8000-000000000001",
           id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
           auditType: "SPACE_DELETED",
           target: {
@@ -138,6 +139,7 @@ describe("audit-log validators", () => {
       const input = {
         auditLogs: [
           {
+            organizationId: "00000000-0000-4000-8000-000000000001",
             id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             auditType: "SPACE_CREATED",
             target: {
@@ -164,6 +166,7 @@ describe("audit-log validators", () => {
       const input = {
         auditLogs: [
           {
+            organizationId: "00000000-0000-4000-8000-000000000001",
             id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             auditType: "GROUP_CREATED",
             target: {
@@ -190,6 +193,7 @@ describe("audit-log validators", () => {
       const input = {
         auditLogs: [
           {
+            organizationId: "00000000-0000-4000-8000-000000000001",
             id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             auditType: "MEMBERSHIPS_ADDED",
             target: {
@@ -220,6 +224,7 @@ describe("audit-log validators", () => {
       const input = {
         auditLogs: [
           {
+            organizationId: "00000000-0000-4000-8000-000000000001",
             id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             auditType: "MEMBERSHIPS_REMOVED",
             target: {
@@ -250,6 +255,7 @@ describe("audit-log validators", () => {
       const input = {
         auditLogs: [
           {
+            organizationId: "00000000-0000-4000-8000-000000000001",
             id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             auditType: "USER_ROLES_ASSIGNED",
             target: {
@@ -283,6 +289,7 @@ describe("audit-log validators", () => {
       const input = {
         auditLogs: [
           {
+            organizationId: "00000000-0000-4000-8000-000000000001",
             id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             auditType: "USER_ROLES_REMOVED",
             target: {
@@ -315,6 +322,7 @@ describe("audit-log validators", () => {
       const input = {
         auditLogs: [
           {
+            organizationId: "00000000-0000-4000-8000-000000000001",
             id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             auditType: "AGENT_ROLES_ASSIGNED",
             target: {
@@ -348,6 +356,7 @@ describe("audit-log validators", () => {
       const input = {
         auditLogs: [
           {
+            organizationId: "00000000-0000-4000-8000-000000000001",
             id: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             auditType: "AGENT_ROLES_REMOVED",
             target: {

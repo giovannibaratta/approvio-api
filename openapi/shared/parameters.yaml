@@ -1,0 +1,16 @@
+OrganizationId:
+  name: organizationId
+  in: path
+  required: true
+  description: Opaque organization UUID.
+  schema:
+    type: string
+    format: uuid
+IfMatch:
+  name: If-Match
+  in: header
+  required: true
+  description: Opaque entity tag returned by a prior representation of this resource.
+  schema:
+    type: string
+    minLength: 1

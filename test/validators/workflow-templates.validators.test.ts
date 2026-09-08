@@ -19,6 +19,7 @@ import {
 describe("Workflow Templates Validators", () => {
   describe("validateWorkflowTemplate", () => {
     const validTemplate: WorkflowTemplate = {
+      organizationId: "00000000-0000-4000-8000-000000000001",
       id: "wt1",
       name: "Template 1",
       version: "1.0",
@@ -26,7 +27,6 @@ describe("Workflow Templates Validators", () => {
       allowVotingOnDeprecatedTemplate: false,
       approvalRule: {type: "GROUP_REQUIREMENT", groupId: "g1", minCount: 1},
       spaceId: "s1",
-      concurrencyControl: {version: "1"},
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:00:00Z"
     }
@@ -184,24 +184,12 @@ describe("Workflow Templates Validators", () => {
   })
 
   describe("validateWorkflowTemplateUpdate", () => {
-    it("should validate a payload with only occVersion", () => {
-      // Given
-      const input = {concurrencyControl: {version: "1"}}
-
-      // When
-      const result = validateWorkflowTemplateUpdate(input)
-
-      // Expect
-      expect(result).toBeRight()
-    })
-
     it("should validate with some fields", () => {
       // Given
       const input: WorkflowTemplateUpdate = {
         description: "New desc",
         cancelWorkflows: true,
-        approvalRule: {type: "GROUP_REQUIREMENT", groupId: "g1", minCount: 2},
-        concurrencyControl: {version: "1"}
+        approvalRule: {type: "GROUP_REQUIREMENT", groupId: "g1", minCount: 2}
       }
 
       // When
@@ -213,7 +201,7 @@ describe("Workflow Templates Validators", () => {
 
     it("should reject invalid fields", () => {
       // Given
-      const input = {concurrencyControl: {version: "1"}, cancelWorkflows: "true"}
+      const input = {cancelWorkflows: "true"}
 
       // When
       const result = validateWorkflowTemplateUpdate(input)
@@ -262,6 +250,7 @@ describe("Workflow Templates Validators", () => {
     const validResponse: ListWorkflowTemplates200Response = {
       data: [
         {
+          organizationId: "00000000-0000-4000-8000-000000000001",
           id: "wt1",
           name: "Template 1",
           version: "1.0",

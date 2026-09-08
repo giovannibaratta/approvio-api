@@ -51,6 +51,7 @@ AuditLogType:
 BaseAuditLog:
   type: object
   required:
+    - organizationId
     - id
     - auditType
     - target
@@ -58,6 +59,9 @@ BaseAuditLog:
     - createdAt
     - payload
   properties:
+    organizationId:
+      type: string
+      format: uuid
     id:
       type: string
       format: uuid
@@ -344,4 +348,3 @@ ListAuditLogs200Response:
         $ref: "#/AuditLog"
     pagination:
       $ref: "../shared/schemas.yaml#/CursorPagination"
-

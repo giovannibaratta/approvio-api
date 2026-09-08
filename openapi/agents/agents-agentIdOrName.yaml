@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Get agent details
   description: Returns the details of a specific agent by their ID or name.
@@ -12,8 +14,17 @@ get:
       schema:
         type: string
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Agent details retrieved successfully
+      headers:
+        ETag:
+          description: Opaque version of the returned agent.
+          schema:
+            type: string
       content:
         application/json:
           schema:
@@ -22,3 +33,38 @@ get:
       $ref: ../shared/responses.yaml#/Unauthorized
     "404":
       $ref: ../shared/responses.yaml#/NotFound
+
+delete:
+  operationId: revokeAgent
+  summary: Revoke an agent
+  tags:
+    - Agents
+  description: >
+    Revokes the agent's authentication token and access to the current organization while retaining its
+    record for historical attribution.
+  parameters:
+    - $ref: ../shared/parameters.yaml#/OrganizationId
+    - name: agentIdOrName
+      in: path
+      required: true
+      description: The unique identifier or name of the agent to revoke.
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    "204":
+      description: Successful operation
+    "400":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "401":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "403":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "404":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "409":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "423":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "503":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError

@@ -1,0 +1,30 @@
+post:
+  operationId: selectCliOrganization
+  summary: Select a CLI organization
+  description: Exchanges a platform credential for credentials bound to the selected organization.
+  tags:
+    - Authentication
+  parameters: []
+  responses:
+    "200":
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: ../../openapi.yaml#/components/schemas/TokenResponse
+    "400":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "401":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "404":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "423":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "503":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/CliOrganizationSelection

@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Exchange JWT assertion for access token
   description: |
@@ -28,6 +30,8 @@ post:
         schema:
           $ref: ../agents/schemas.yaml#/AgentTokenRequest
   responses:
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: JWT token generated successfully
       content:

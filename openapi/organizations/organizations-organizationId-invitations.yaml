@@ -1,0 +1,40 @@
+post:
+  operationId: createInvitation
+  summary: Create an account-bound invitation
+  description: Creates a single-use invitation for an exact platform account.
+  tags:
+    - Organizations
+  parameters:
+    - name: organizationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "201":
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/InvitationCreated
+    "400":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "401":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "403":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "404":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "409":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "423":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "503":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/InvitationCreate

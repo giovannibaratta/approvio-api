@@ -44,9 +44,10 @@ QuotaBaseNew:
     - targetId
   properties:
     limit:
-      type: integer
-      minimum: 0
-      description: The maximum value allowed for this quota
+      type: string
+      pattern: '^(0|[1-9][0-9]*)(?![\s\S])'
+      maxLength: 19
+      description: Non-negative decimal integer, up to 9223372036854775807 for metered quotas or 9007199254740991 for resource-count quotas.
     quotaType:
       $ref: "#/QuotaType"
     scope:
@@ -211,9 +212,10 @@ QuotaUpdate:
   type: object
   properties:
     limit:
-      type: integer
-      minimum: 0
-      description: The maximum value allowed for this quota
+      type: string
+      pattern: '^(0|[1-9][0-9]*)(?![\s\S])'
+      maxLength: 19
+      description: Non-negative decimal integer, up to 9223372036854775807 for metered quotas or 9007199254740991 for resource-count quotas.
 
 OrgQuota:
   allOf:

@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Create a new workflow template
   description: Creates a new workflow template with approval rules, actions, and default expiry settings
@@ -11,6 +13,10 @@ post:
         schema:
           $ref: ./schemas.yaml#/WorkflowTemplateCreate
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "201":
       description: Workflow template created successfully
       content:
@@ -35,6 +41,10 @@ get:
       schema:
         $ref: ./schemas.yaml#/ListWorkflowTemplatesParams
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: List of workflow templates
       content:

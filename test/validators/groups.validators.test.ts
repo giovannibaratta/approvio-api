@@ -99,6 +99,7 @@ describe("groups validators", () => {
     const validResponse: ListGroups200Response = {
       groups: [
         {
+          organizationId: "00000000-0000-4000-8000-000000000001",
           id: "group-1",
           name: "Developers",
           entitiesCount: 5,

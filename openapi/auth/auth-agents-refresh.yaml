@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Refresh agent JWT token
   description: Exchanges a refresh token for a new pair of access and refresh tokens. Requires DPoP proof.
@@ -19,6 +21,10 @@ post:
         schema:
           $ref: ./schemas.yaml#/RefreshTokenRequest
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Tokens refreshed successfully
       content:

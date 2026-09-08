@@ -40,3 +40,12 @@ export const isUUIDv4 = (value: string): boolean => value.match(UUID_REGEX_V4) !
 export const isUUIDv7 = (value: string): boolean => value.match(UUID_REGEX_V7) !== null
 
 export const isValidUUID = (value: string): boolean => isUUIDv7(value) || isUUIDv4(value)
+
+export function isUsageQuantityString(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^(0|[1-9][0-9]*)(?![\s\S])/.test(value) &&
+    value.length <= 19 &&
+    (value.length < 19 || value <= "9223372036854775807")
+  )
+}

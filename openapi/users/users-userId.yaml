@@ -1,6 +1,11 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Get user details
-  description: Returns the details of a specific user by their ID.
+  description: |
+    Returns the details, groups, and roles of a user in the selected organization.
+    The ETag can be sent as If-Match when assigning or removing roles. Fetch the
+    user again after a mutation to read its current version.
   operationId: getUser
   tags:
     - Users
@@ -13,12 +18,23 @@ get:
         type: string
         format: uuid
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: User details
+      headers:
+        ETag:
+          description: Opaque version of the returned user.
+          schema:
+            type: string
       content:
         application/json:
           schema:
             $ref: ./schemas.yaml#/User
+    "400":
+      $ref: ../shared/responses.yaml#/BadRequest
     "401":
       $ref: ../shared/responses.yaml#/Unauthorized
     "404":

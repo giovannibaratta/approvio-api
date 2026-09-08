@@ -1,10 +1,12 @@
 import {Workflow, WorkflowCreate, ListWorkflows200Response} from "../generated/openapi/model/models"
 import {singleItemPaginationResponse} from "./pagination.fixture"
+import {MOCK_ORGANIZATION_ID} from "./group.fixtures"
 
 export const MOCK_WORKFLOW_ID = "af20e7fc-66c0-420e-8f35-bf5c1071e6a9"
 export const MOCK_WORKFLOW_TEMPLATE_ID = "5932b816-16de-4334-a85c-f32315a6a49d"
 
 export const workflowResponse: Workflow = {
+  organizationId: MOCK_ORGANIZATION_ID,
   id: MOCK_WORKFLOW_ID,
   name: "Deploy Production Release",
   description: "Approval for releasing feature X to production.",

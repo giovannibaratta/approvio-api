@@ -1,7 +1,8 @@
 import {Either, left, right} from "fp-ts/Either"
 import {APIError} from "../../generated/openapi/model/api-error"
 import {hasOwnProperty, isNonEmptyString} from "../utils/validation.utils"
-import {APIErrorDetailsInner} from "../../generated/openapi/model/models"
+import {APIErrorDetailsInner, OrganizationBoundaryError} from "../../generated/openapi/model/models"
+import {getStringAsEnum} from "../utils/enum"
 import {pipe} from "fp-ts/function"
 import * as A from "fp-ts/Array"
 import * as E from "fp-ts/Either"
@@ -57,4 +58,24 @@ export function validateAPIError(object: unknown): Either<APIErrorValidationErro
 
 export function isAPIError(object: unknown): object is APIError {
   return E.isRight(validateAPIError(object))
+}
+
+export type OrganizationBoundaryErrorValidationError =
+  | "malformed_object"
+  | "missing_code"
+  | "invalid_code"
+  | "missing_message"
+  | "invalid_message"
+
+export function validateOrganizationBoundaryError(
+  object: unknown
+): Either<OrganizationBoundaryErrorValidationError, OrganizationBoundaryError> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+  if (!hasOwnProperty(object, "code")) return left("missing_code")
+  if (!isNonEmptyString(object.code)) return left("invalid_code")
+  const code = getStringAsEnum(object.code, OrganizationBoundaryError.CodeEnum)
+  if (!code) return left("invalid_code")
+  if (!hasOwnProperty(object, "message")) return left("missing_message")
+  if (!isNonEmptyString(object.message)) return left("invalid_message")
+  return right({code, message: object.message})
 }

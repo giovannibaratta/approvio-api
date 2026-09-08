@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 put:
   summary: Assign roles to a user
   description: |
@@ -14,6 +16,7 @@ put:
       schema:
         type: string
         format: uuid
+    - $ref: ../shared/parameters.yaml#/IfMatch
   requestBody:
     required: true
     content:
@@ -21,8 +24,17 @@ put:
         schema:
           $ref: ../roles/schemas.yaml#/RoleAssignmentRequest
   responses:
+    "412":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "204":
       description: Roles assigned successfully
+      headers:
+        ETag:
+          description: Opaque version of the updated user.
+          schema:
+            type: string
     "400":
       description: Invalid request (e.g., unknown role name, invalid scope, duplicate roles)
       content:
@@ -59,6 +71,7 @@ delete:
       schema:
         type: string
         format: uuid
+    - $ref: ../shared/parameters.yaml#/IfMatch
   requestBody:
     required: true
     content:
@@ -66,8 +79,17 @@ delete:
         schema:
           $ref: ../roles/schemas.yaml#/RoleRemovalRequest
   responses:
+    "412":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "204":
       description: Roles removed successfully
+      headers:
+        ETag:
+          description: Opaque version of the updated user.
+          schema:
+            type: string
     "400":
       description: Invalid request (e.g., unknown role name, invalid scope)
       content:

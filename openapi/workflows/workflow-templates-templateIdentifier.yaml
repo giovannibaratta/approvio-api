@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Get workflow template details
   description: Returns the details of a specific workflow template.
@@ -11,9 +13,19 @@ get:
       description: The name or ID of the workflow template to retrieve. If a name is provided, it returns the active revision, falling back to the latest available version if no active revision exists.
       schema:
         type: string
+        minLength: 1
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Workflow template details
+      headers:
+        ETag:
+          description: Opaque version of the returned workflow template.
+          schema:
+            type: string
       content:
         application/json:
           schema:
@@ -35,6 +47,8 @@ put:
       description: The name or the ID of the workflow template to update
       schema:
         type: string
+        minLength: 1
+    - $ref: ../shared/parameters.yaml#/IfMatch
   requestBody:
     required: true
     content:
@@ -42,8 +56,17 @@ put:
         schema:
           $ref: ./schemas.yaml#/WorkflowTemplateUpdate
   responses:
+    "412":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Workflow template updated successfully
+      headers:
+        ETag:
+          description: Opaque version of the returned workflow template.
+          schema:
+            type: string
       content:
         application/json:
           schema:
@@ -67,7 +90,13 @@ delete:
       description: The name or ID of the workflow template to delete
       schema:
         type: string
+        minLength: 1
+    - $ref: ../shared/parameters.yaml#/IfMatch
   responses:
+    "412":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "204":
       description: Workflow template deleted successfully or did not exist.
     "401":

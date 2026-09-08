@@ -6,3 +6,9 @@ generated/
 coverage
 
 .vscode
+
+.repowise
+.claude/CLAUDE.md
+.codex/config.toml
+.codex/hooks.json
+.mcp.json
