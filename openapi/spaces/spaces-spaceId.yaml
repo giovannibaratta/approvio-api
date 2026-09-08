@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Get space details
   description: Returns the details of a specific space
@@ -13,6 +15,10 @@ get:
         type: string
         format: uuid
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Space details
       content:
@@ -38,6 +44,8 @@ delete:
         type: string
         format: uuid
   responses:
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "204":
       description: Space deleted successfully
     "401":

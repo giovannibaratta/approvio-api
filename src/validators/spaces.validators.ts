@@ -1,3 +1,4 @@
+import {isValidUUID} from "../utils/validation.utils"
 import {
   Space,
   SpaceCreate,
@@ -10,6 +11,8 @@ import {hasOwnProperty, isNonEmptyString, isArray} from "../utils/validation.uti
 import {validatePagination, validateSharedListParams} from "./common.validators"
 
 export type SpaceValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "malformed_object"
   | "missing_id"
   | "invalid_id"
@@ -36,7 +39,13 @@ function validateSpace(object: unknown): Either<SpaceValidationError, Space> {
   if (!hasOwnProperty(object, "updatedAt")) return left("missing_updated_at")
   if (!isNonEmptyString(object.updatedAt)) return left("invalid_updated_at")
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   const result: Space = {
+    organizationId: object.organizationId,
+
     id: object.id,
     name: object.name,
     createdAt: object.createdAt,

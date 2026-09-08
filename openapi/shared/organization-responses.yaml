@@ -1,0 +1,19 @@
+ContextChanged:
+  description: Stale browser context. Stop the mutation and reload the server
+    session; never automatically replay it.
+  content:
+    application/json:
+      schema:
+        $ref: ./schemas.yaml#/OrganizationBoundaryError
+Suspended:
+  description: Organization suspended. Visible only to authorized current members.
+  content:
+    application/json:
+      schema:
+        $ref: ./schemas.yaml#/OrganizationBoundaryError
+BoundaryError:
+  description: The request could not be authorized or executed within the selected organization. A missing resource, a foreign resource, and absent membership use the same non-enumerating 404 response.
+  content:
+    application/json:
+      schema:
+        $ref: ./schemas.yaml#/OrganizationBoundaryError

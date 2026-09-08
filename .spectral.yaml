@@ -1,2 +1,13 @@
 extends:
   - "spectral:oas"
+
+rules:
+  enforce-organization-id-param:
+    description: "Paths starting with /o/ must strictly use {organizationId} as the parameter name"
+    message: "Path '{{property}}' must use '{organizationId}', e.g. '/o/{organizationId}/...'"
+    severity: error
+    given: "$.paths[*]~"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "^/o/\\{(?!organizationId\\})[^/]+\\}"

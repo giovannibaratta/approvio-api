@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Initiate Web privilege token generation (step-up)
   description: Initiates step-up authentication flow returning the authorization URL as JSON.
@@ -5,6 +7,10 @@ post:
   tags:
     - Authentication
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Authorization URL generated
       content:

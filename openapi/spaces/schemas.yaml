@@ -31,11 +31,15 @@ SpaceCreate:
 Space:
   type: object
   required:
+    - organizationId
     - id
     - name
     - createdAt
     - updatedAt
   properties:
+    organizationId:
+      type: string
+      format: uuid
     id:
       type: string
       format: uuid

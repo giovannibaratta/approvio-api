@@ -5,10 +5,31 @@ const mockUUID = "d11bb747-1234-4567-89ab-cdef01234567"
 
 describe("Quota Validators", () => {
   describe("validateQuotaCreate", () => {
+    it.each(["0", "9007199254740993", "9223372036854775807"])("accepts exact metered limit %s", limit => {
+      const input = {scope: "Org", targetId: mockUUID, quotaType: "MAX_LLM_TOKENS_PER_MONTH", limit}
+      const result = validateQuotaCreate(input)
+      expect(result).toBeRightOf(input)
+    })
+
+    it.each([1, "01", "-1", "9223372036854775808", "1\n"])("rejects invalid metered limit %s", limit => {
+      const result = validateQuotaCreate({
+        scope: "Org",
+        targetId: mockUUID,
+        quotaType: "MAX_LLM_TOKENS_PER_MONTH",
+        limit
+      })
+      expect(result).toBeLeftOf("invalid_limit")
+    })
+
+    it("accepts decimal strings for count quotas", () => {
+      const result = validateQuotaCreate({scope: "Org", targetId: mockUUID, quotaType: "MAX_GROUPS", limit: "1"})
+      expect(result).toBeRight()
+    })
+
     it("should successfully validate a valid Org quota with MAX_GROUPS", () => {
       // Given
       const input = {
-        limit: 100,
+        limit: "100",
         scope: "Org",
         quotaType: "MAX_GROUPS",
         targetId: mockUUID
@@ -24,7 +45,7 @@ describe("Quota Validators", () => {
     it("should successfully validate a valid Org quota with MAX_ROLES_PER_USER", () => {
       // Given
       const input = {
-        limit: 5,
+        limit: "5",
         scope: "Org",
         quotaType: "MAX_ROLES_PER_USER",
         targetId: mockUUID
@@ -40,7 +61,7 @@ describe("Quota Validators", () => {
     it("should successfully validate a valid Org quota with MAX_CONCURRENT_WORKFLOWS", () => {
       // Given
       const input = {
-        limit: 10,
+        limit: "10",
         scope: "Org",
         quotaType: "MAX_CONCURRENT_WORKFLOWS",
         targetId: mockUUID
@@ -57,7 +78,7 @@ describe("Quota Validators", () => {
       // Given
       const targetId = mockUUID
       const input = {
-        limit: 50,
+        limit: "50",
         scope: "Group",
         quotaType: "MAX_ENTITIES_PER_GROUP",
         targetId
@@ -74,7 +95,7 @@ describe("Quota Validators", () => {
       // Given
       const targetId = mockUUID
       const input = {
-        limit: 5,
+        limit: "5",
         scope: "Space",
         quotaType: "MAX_CONCURRENT_WORKFLOWS",
         targetId
@@ -91,7 +112,7 @@ describe("Quota Validators", () => {
       // Given
       const targetId = mockUUID
       const input = {
-        limit: 2,
+        limit: "2",
         scope: "Space",
         quotaType: "MAX_WORKFLOW_TEMPLATES_PER_SPACE",
         targetId
@@ -108,7 +129,7 @@ describe("Quota Validators", () => {
       // Given
       const targetId = mockUUID
       const input = {
-        limit: 5,
+        limit: "5",
         scope: "User",
         quotaType: "MAX_ROLES_PER_USER",
         targetId
@@ -125,7 +146,7 @@ describe("Quota Validators", () => {
       // Given
       const targetId = mockUUID
       const input = {
-        limit: 10,
+        limit: "10",
         scope: "Workflow",
         quotaType: "MAX_VOTES_PER_WORKFLOW",
         targetId
@@ -167,7 +188,7 @@ describe("Quota Validators", () => {
     it("should fail validation if limit is negative", () => {
       // Given
       const input = {
-        limit: -10,
+        limit: "-10",
         scope: "Org",
         quotaType: "MAX_GROUPS",
         targetId: mockUUID
@@ -183,7 +204,7 @@ describe("Quota Validators", () => {
     it("should fail validation if scope is invalid", () => {
       // Given
       const input = {
-        limit: 10,
+        limit: "10",
         scope: "INVALID_SCOPE",
         quotaType: "MAX_GROUPS"
       }
@@ -199,7 +220,7 @@ describe("Quota Validators", () => {
       // Given
       const targetId = mockUUID
       const input = {
-        limit: 10,
+        limit: "10",
         scope: "Space",
         quotaType: "MAX_GROUPS",
         targetId
@@ -215,7 +236,7 @@ describe("Quota Validators", () => {
     it("should fail validation if Group scope misses targetId", () => {
       // Given
       const input = {
-        limit: 10,
+        limit: "10",
         scope: "Group",
         quotaType: "MAX_ENTITIES_PER_GROUP"
       }
@@ -230,7 +251,7 @@ describe("Quota Validators", () => {
     it("should fail validation if Group scope targetId is not UUID", () => {
       // Given
       const input = {
-        limit: 10,
+        limit: "10",
         scope: "Group",
         quotaType: "MAX_ENTITIES_PER_GROUP",
         targetId: "not-a-uuid"
@@ -245,10 +266,21 @@ describe("Quota Validators", () => {
   })
 
   describe("validateQuotaUpdate", () => {
+    it("rejects numeric limits", () => {
+      const result = validateQuotaUpdate({limit: 10})
+      expect(result).toBeLeftOf("invalid_limit")
+    })
+
+    it("accepts exact decimal metered limits", () => {
+      const input = {limit: "9223372036854775807"}
+      const result = validateQuotaUpdate(input)
+      expect(result).toBeRightOf(input)
+    })
+
     it("should successfully validate a valid quota update", () => {
       // Given
       const input = {
-        limit: 200
+        limit: "200"
       }
 
       // When
@@ -272,7 +304,7 @@ describe("Quota Validators", () => {
     it("should fail validation if limit is negative", () => {
       // Given
       const input = {
-        limit: -5
+        limit: "-5"
       }
 
       // When

@@ -1,0 +1,23 @@
+get:
+  operationId: getWebSession
+  summary: Get browser session context
+  description: Returns the browser session's selected organization.
+  tags:
+    - Authentication
+  parameters: []
+  responses:
+    "200":
+      description: Successful operation
+      headers:
+        ETag:
+          description: Opaque version of the returned browser session context.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/WebSessionContext
+    "401":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "503":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError

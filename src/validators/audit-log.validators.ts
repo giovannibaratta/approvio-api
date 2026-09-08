@@ -86,6 +86,8 @@ function validateAuditLogTarget(object: unknown): Either<AuditLogTargetValidatio
 }
 
 export type BaseAuditLogValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "malformed_object"
   | "missing_id"
   | "invalid_id"
@@ -131,7 +133,13 @@ function validateBaseAuditLog(object: unknown): Either<BaseAuditLogValidationErr
   const payload: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(object.payload)) payload[k] = v
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   return right({
+    organizationId: object.organizationId,
+
     id,
     auditType: auditTypeEnum,
     target: targetValidation.right,
@@ -164,6 +172,7 @@ function validateSpaceCreatedAuditLog(
   if (desc !== undefined && desc !== null && typeof desc !== "string") return left("invalid_description")
 
   const result: SpaceCreatedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "SPACE_CREATED",
     target: base.target,
@@ -186,6 +195,7 @@ function validateSpaceDeletedAuditLog(
   if (base.target.type !== "SPACE") return left("invalid_target")
 
   const result: SpaceDeletedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "SPACE_DELETED",
     target: base.target,
@@ -219,6 +229,7 @@ function validateGroupCreatedAuditLog(
   if (desc !== undefined && desc !== null && typeof desc !== "string") return left("invalid_description")
 
   const result: GroupCreatedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "GROUP_CREATED",
     target: base.target,
@@ -259,6 +270,7 @@ function validateMembershipsAddedAuditLog(
   }
 
   const result: MembershipsAddedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "MEMBERSHIPS_ADDED",
     target: base.target,
@@ -297,6 +309,7 @@ function validateMembershipsRemovedAuditLog(
   }
 
   const result: MembershipsRemovedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "MEMBERSHIPS_REMOVED",
     target: base.target,
@@ -322,6 +335,7 @@ function validateUserRolesAssignedAuditLog(
   if (isLeft(rolesValidation)) return left(rolesValidation.left)
 
   const result: UserRolesAssignedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "USER_ROLES_ASSIGNED",
     target: base.target,
@@ -345,6 +359,7 @@ function validateUserRolesRemovedAuditLog(
   if (isLeft(rolesValidation)) return left(rolesValidation.left)
 
   const result: UserRolesRemovedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "USER_ROLES_REMOVED",
     target: base.target,
@@ -368,6 +383,7 @@ function validateAgentRolesAssignedAuditLog(
   if (isLeft(rolesValidation)) return left(rolesValidation.left)
 
   const result: AgentRolesAssignedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "AGENT_ROLES_ASSIGNED",
     target: base.target,
@@ -391,6 +407,7 @@ function validateAgentRolesRemovedAuditLog(
   if (isLeft(rolesValidation)) return left(rolesValidation.left)
 
   const result: AgentRolesRemovedAuditLog = {
+    organizationId: base.organizationId,
     id: base.id,
     auditType: "AGENT_ROLES_REMOVED",
     target: base.target,

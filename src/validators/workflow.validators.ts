@@ -82,6 +82,8 @@ function validateWorkflowRef(object: unknown): Either<WorkflowRefValidationError
 }
 
 export type WorkflowValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "malformed_object"
   | "missing_id"
   | "invalid_id"
@@ -143,7 +145,13 @@ function validateWorkflow(object: unknown): Either<WorkflowValidationError, Work
     ref = refRes.right
   }
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   return right({
+    organizationId: object.organizationId,
+
     id: object["id"],
     name: object["name"],
     status: object["status"],
@@ -416,6 +424,8 @@ export function validateWorkflowVoteRequest(
 }
 
 export type WorkflowVoteValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "malformed_object"
   | "missing_voter_id"
   | "invalid_voter_id"
@@ -459,7 +469,13 @@ function validateWorkflowVote(object: unknown): Either<WorkflowVoteValidationErr
     votedForGroups = validatedGroups
   }
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   return right({
+    organizationId: object.organizationId,
+
     voterId: object["voterId"],
     voterType: object["voterType"],
     voteType: object["voteType"],

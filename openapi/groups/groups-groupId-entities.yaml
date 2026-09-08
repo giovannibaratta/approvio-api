@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: List entities in a group
   description: Returns a list of all entities (users, systems, etc.) that belong to a specific group, including their roles.
@@ -26,6 +28,10 @@ get:
         type: integer
         default: 20
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: List of entities in the group
       content:
@@ -68,6 +74,8 @@ post:
         schema:
           $ref: ../shared/schemas.yaml#/AddGroupEntitiesRequest
   responses:
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Entities managed successfully. Returns updated group details.
       content:
@@ -112,6 +120,8 @@ delete:
         schema:
           $ref: ../shared/schemas.yaml#/RemoveGroupEntitiesRequest
   responses:
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Entities removed successfully. Returns updated group details.
       content:

@@ -1,0 +1,32 @@
+post:
+  operationId: cancelTemplateWorkflows
+  summary: Cancel workflows for a template
+  description: Cancels active workflows associated with the selected template name or version ID.
+  tags:
+    - Workflow Templates
+  parameters:
+    - $ref: ../shared/parameters.yaml#/OrganizationId
+    - name: templateIdentifier
+      in: path
+      required: true
+      description: The name or ID of the workflow template whose active workflows will be cancelled.
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    "204":
+      description: Successful operation
+    "400":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "401":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "403":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "404":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "409":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "423":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "503":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError

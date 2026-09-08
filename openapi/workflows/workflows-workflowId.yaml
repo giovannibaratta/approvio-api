@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Get workflow details
   description: Returns the details of a specific workflow
@@ -18,6 +20,10 @@ get:
       schema:
         $ref: ../shared/schemas.yaml#/GetWorkflowParams
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Workflow details
       content:

@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Retrieve votes for a workflow
   description: Returns a list of all votes cast for the specified workflow.
@@ -18,6 +20,10 @@ get:
       schema:
         $ref: ./schemas.yaml#/ListWorkflowVotesParams
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: List of votes
       content:

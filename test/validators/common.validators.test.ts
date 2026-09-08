@@ -57,11 +57,11 @@ describe("common validators", () => {
     it("should return right when valid", () => {
       const validReq: GetEntityInfo200Response = {
         entityType: "user",
+        organizationId: "00000000-0000-4000-8000-000000000001",
         id: "00000000-0000-4000-8000-000000000000",
         roles: [],
         orgRole: "admin",
-        groups: [{groupId: "00000000-0000-4000-8000-000000000000", groupName: "Group 1"}],
-        concurrencyControl: {version: "1"}
+        groups: [{groupId: "00000000-0000-4000-8000-000000000000", groupName: "Group 1"}]
       }
       const result = validateGetEntityInfo200Response(validReq)
       expect(result).toBeRightOf(validReq)

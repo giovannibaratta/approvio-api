@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Exchange Web privilege token
   description: Exchanges an IDP token for a high-privilege step-up token and sets it as an HttpOnly cookie.
@@ -11,6 +13,10 @@ post:
         schema:
           $ref: ./schemas.yaml#/PrivilegedTokenExchangeRequest
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "204":
       description: Privilege token set as cookie successfully
     "400":

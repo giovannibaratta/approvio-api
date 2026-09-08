@@ -1,0 +1,18 @@
+get:
+  operationId: getOwnAccount
+  summary: Get the authenticated account
+  description: Returns the platform account associated with the current credential.
+  tags:
+    - Authentication
+  parameters: []
+  responses:
+    "200":
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: ../accounts/schemas.yaml#/Account
+    "401":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "503":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError

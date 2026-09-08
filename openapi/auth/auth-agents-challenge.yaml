@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Generate authentication challenge for agent
   description: |
@@ -20,6 +22,10 @@ post:
         schema:
           $ref: ../agents/schemas.yaml#/AgentChallengeRequest
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Challenge generated successfully
       content:

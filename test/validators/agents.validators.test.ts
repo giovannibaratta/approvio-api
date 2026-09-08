@@ -131,6 +131,7 @@ describe("agents validators", () => {
     const validRes: ListAgents200Response = {
       agents: [
         {
+          organizationId: "00000000-0000-4000-8000-000000000001",
           id: "agent-1",
           name: "agent-name"
         }
@@ -150,6 +151,7 @@ describe("agents validators", () => {
 
   describe("validateAgentGet200Response", () => {
     const validRes: AgentGet200Response = {
+      organizationId: "00000000-0000-4000-8000-000000000001",
       id: "agent-1",
       agentName: "agent-name",
       publicKey: "pub-key",

@@ -1,3 +1,4 @@
+import {isValidUUID} from "../utils/validation.utils"
 import {Either, left, right, isLeft} from "fp-ts/Either"
 import {hasOwnProperty, isNonEmptyString} from "../utils/validation.utils"
 import {getStringAsEnum} from "../utils/enum"
@@ -20,7 +21,6 @@ import {
 } from "../../generated/openapi/model/models"
 import {ListParamsValidationError, validatePagination, validateSharedListParams} from "./common.validators"
 import {prefixLeft, PrefixUnion} from "../utils/types"
-import {validateConcurrencyControl} from "./concurrency-control"
 
 type EmailActionValidationError =
   | "malformed_object"
@@ -221,6 +221,8 @@ function validateApprovalRule(object: unknown): Either<ApprovalRuleValidationErr
 }
 
 export type WorkflowTemplateValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "malformed_object"
   | "invalid_id"
   | "invalid_name"
@@ -262,11 +264,13 @@ export function validateWorkflowTemplate(object: unknown): Either<WorkflowTempla
   if (!hasOwnProperty(object, "spaceId") || !isNonEmptyString(object.spaceId)) return left("invalid_space_id")
   if (!hasOwnProperty(object, "createdAt") || !isNonEmptyString(object.createdAt)) return left("invalid_created_at")
   if (!hasOwnProperty(object, "updatedAt") || !isNonEmptyString(object.updatedAt)) return left("invalid_updated_at")
-  if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
-  const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
-  if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
 
   const result: WorkflowTemplate = {
+    organizationId: object.organizationId,
+
     id: object.id,
     name: object.name,
     version: object.version,
@@ -275,8 +279,7 @@ export function validateWorkflowTemplate(object: unknown): Either<WorkflowTempla
     approvalRule: approvalRuleValidation.right,
     spaceId: object.spaceId,
     createdAt: object.createdAt,
-    updatedAt: object.updatedAt,
-    concurrencyControl: concurrencyControlValidation.right
+    updatedAt: object.updatedAt
   }
 
   if (hasOwnProperty(object, "description") && object.description !== undefined) {
@@ -386,13 +389,7 @@ export function validateWorkflowTemplateUpdate(
 ): Either<WorkflowTemplateUpdateValidationError, WorkflowTemplateUpdate> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
-  if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
-  const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
-  if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
-
-  const result: WorkflowTemplateUpdate = {
-    concurrencyControl: concurrencyControlValidation.right
-  }
+  const result: WorkflowTemplateUpdate = {}
 
   if (hasOwnProperty(object, "description") && object.description !== undefined) {
     if (typeof object.description !== "string") return left("invalid_description")
@@ -453,6 +450,8 @@ export function validateWorkflowTemplateDeprecate(
 }
 
 type WorkflowTemplateSummaryValidationError =
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "malformed_object"
   | "invalid_id"
   | "invalid_name"
@@ -477,7 +476,13 @@ function validateWorkflowTemplateSummary(
   const status = getStringAsEnum(object.status, WorkflowTemplateStatus)
   if (!status) return left("invalid_status")
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (typeof object.organizationId !== "string" || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   const result: WorkflowTemplateSummary = {
+    organizationId: object.organizationId,
+
     id: object.id,
     name: object.name,
     version: object.version,

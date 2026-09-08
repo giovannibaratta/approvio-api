@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Create a new workflow
   description: Creates a new workflow with approvers and rules
@@ -11,6 +13,10 @@ post:
         schema:
           $ref: ./schemas.yaml#/WorkflowCreate
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "201":
       description: Workflow created successfully
       headers:
@@ -37,6 +43,10 @@ get:
       schema:
         $ref: ../shared/schemas.yaml#/ListWorkflowsParams
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: List of workflows
       content:

@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Deprecate a workflow template
   description: Marks a workflow template as deprecated with optional workflow cancellation
@@ -11,6 +13,7 @@ post:
       description: The name or ID of the workflow template to deprecate
       schema:
         type: string
+        minLength: 1
   requestBody:
     description: Options for deprecating a workflow template.
     required: false
@@ -19,6 +22,10 @@ post:
         schema:
           $ref: ./schemas.yaml#/WorkflowTemplateDeprecate
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Workflow template deprecated successfully
       content:

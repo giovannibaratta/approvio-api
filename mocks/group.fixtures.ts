@@ -2,8 +2,10 @@ import {Group, GroupInfo, ListGroups200Response} from "../generated/openapi/mode
 import {singleItemPaginationResponse} from "./pagination.fixture"
 
 export const MOCK_GROUP_ID = "3d3f1904-3c8e-497c-9829-f0b3508e1481"
+export const MOCK_ORGANIZATION_ID = "c794511f-2f7e-43aa-bad2-67dc4f029823"
 
 export const groupResponse: Group = {
+  organizationId: MOCK_ORGANIZATION_ID,
   id: MOCK_GROUP_ID,
   name: "Engineering Team",
   description: "All engineering staff",
