@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Create a new space
   description: Creates a new organizational space
@@ -11,6 +13,8 @@ post:
         schema:
           $ref: ./schemas.yaml#/SpaceCreate
   responses:
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "201":
       description: Space created successfully
       headers:
@@ -43,6 +47,10 @@ get:
       schema:
         $ref: ./schemas.yaml#/ListSpacesParams
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: List of spaces
       content:

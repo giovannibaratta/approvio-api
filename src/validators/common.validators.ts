@@ -10,7 +10,8 @@ import {
 } from "../../generated/openapi/model/models"
 import {validateGroupInfo} from "./groups.validators"
 import {validateRoleOperationItem} from "./roles.validators"
-import {validateConcurrencyControl} from "./concurrency-control"
+
+export type OrganizationIdValidationError = "missing_organization_id" | "invalid_organization_id"
 
 export type PaginationValidationError =
   | "malformed_object"
@@ -142,6 +143,8 @@ export type GetEntityInfo200ResponseValidationError =
   | "invalid_groups"
   | "missing_id"
   | "invalid_id"
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "missing_roles"
   | "invalid_roles"
   | "missing_org_role"
@@ -158,6 +161,10 @@ export function validateGetEntityInfo200Response(
 
   if (!hasOwnProperty(object, "id")) return left("missing_id")
   if (!isNonEmptyString(object.id) || !isUUIDv4(object.id)) return left("invalid_id")
+
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (!isNonEmptyString(object.organizationId) || !isUUIDv4(object.organizationId))
+    return left("invalid_organization_id")
 
   if (!hasOwnProperty(object, "groups") || !isArray(object.groups))
     return left(hasOwnProperty(object, "groups") ? "invalid_groups" : "missing_groups")
@@ -181,23 +188,21 @@ export function validateGetEntityInfo200Response(
 
   if (object.entityType === "user") {
     if (!hasOwnProperty(object, "orgRole")) return left("missing_org_role")
-    if (object.orgRole !== "admin" && object.orgRole !== "member") return left("invalid_org_role")
-
-    if (!hasOwnProperty(object, "concurrencyControl")) return left("invalid_concurrency_control")
-    const concurrencyControlValidation = validateConcurrencyControl(object.concurrencyControl)
-    if (isLeft(concurrencyControlValidation)) return left("invalid_concurrency_control")
+    if (object.orgRole !== "owner" && object.orgRole !== "admin" && object.orgRole !== "member")
+      return left("invalid_org_role")
 
     return right({
       entityType: "user" as const,
+      organizationId: object.organizationId,
       id: object.id,
       groups,
       roles,
-      orgRole: object.orgRole,
-      concurrencyControl: concurrencyControlValidation.right
+      orgRole: object.orgRole
     })
   } else if (object.entityType === "agent")
     return right({
       entityType: "agent" as const,
+      organizationId: object.organizationId,
       id: object.id,
       groups,
       roles

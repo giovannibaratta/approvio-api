@@ -5,7 +5,7 @@ get:
   tags:
     - Organizations
   parameters:
-    - name: orgId
+    - name: organizationId
       in: path
       required: true
       schema:
@@ -22,6 +22,10 @@ get:
       schema:
         type: string
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Organization usage retrieved successfully
       content:

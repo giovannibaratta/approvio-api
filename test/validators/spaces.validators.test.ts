@@ -53,6 +53,7 @@ describe("spaces validators", () => {
     const validResponse: ListSpaces200Response = {
       data: [
         {
+          organizationId: "00000000-0000-4000-8000-000000000001",
           id: "space-1",
           name: "Engineering",
           createdAt: "2024-03-07T12:00:00Z",

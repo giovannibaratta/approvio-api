@@ -85,13 +85,16 @@ GetEntityInfo200Response:
 GetEntityInfoUserResponse:
   type: object
   required:
+    - organizationId
     - id
     - entityType
     - groups
     - roles
     - orgRole
-    - concurrencyControl
   properties:
+    organizationId:
+      type: string
+      format: uuid
     id:
       type: string
       format: uuid
@@ -113,20 +116,23 @@ GetEntityInfoUserResponse:
     orgRole:
       type: string
       enum:
+        - owner
         - admin
         - member
       description: Role assigned to the user within the organization.
-    concurrencyControl:
-      $ref: ../shared/schemas.yaml#/ConcurrencyControl
 
 GetEntityInfoAgentResponse:
   type: object
   required:
+    - organizationId
     - id
     - entityType
     - groups
     - roles
   properties:
+    organizationId:
+      type: string
+      format: uuid
     id:
       type: string
       format: uuid
@@ -187,3 +193,31 @@ InitiateCliLogin200Response:
     authorizationUrl:
       type: string
       description: The authorization URL to redirect to
+WebSessionContext:
+  type: object
+  additionalProperties: false
+  required:
+    - selectedOrganizationId
+  properties:
+    selectedOrganizationId:
+      type: string
+      format: uuid
+      nullable: true
+WebOrganizationSwitch:
+  type: object
+  additionalProperties: false
+  required:
+    - organizationId
+  properties:
+    organizationId:
+      type: string
+      format: uuid
+CliOrganizationSelection:
+  type: object
+  additionalProperties: false
+  required:
+    - organizationId
+  properties:
+    organizationId:
+      type: string
+      format: uuid

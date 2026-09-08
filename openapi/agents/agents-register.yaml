@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 post:
   summary: Register a new agent
   description: Creates a new agent registration entry with generated asymmetric key pair for future authentication
@@ -11,6 +13,8 @@ post:
         schema:
           $ref: ./schemas.yaml#/AgentRegistrationRequest
   responses:
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "201":
       description: Agent registered successfully
       headers:

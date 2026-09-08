@@ -17,13 +17,13 @@ TierFeatures:
 OrganizationEntitlementsResponse:
   type: object
   required:
-    - orgId
+    - organizationId
     - planTier
     - edition
     - features
     - quotas
   properties:
-    orgId:
+    organizationId:
       type: string
       format: uuid
     planTier:
@@ -73,13 +73,13 @@ MetricUsageItem:
 OrganizationUsageResponse:
   type: object
   required:
-    - orgId
+    - organizationId
     - period
     - periodStartsAt
     - periodEndsAt
     - metrics
   properties:
-    orgId:
+    organizationId:
       type: string
       format: uuid
     period:
@@ -100,3 +100,200 @@ OrganizationUsageResponse:
       type: array
       items:
         $ref: "#/MetricUsageItem"
+OrganizationSummary:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - slug
+    - displayName
+    - status
+  properties:
+    id:
+      type: string
+      format: uuid
+    slug:
+      type: string
+      minLength: 3
+      maxLength: 63
+      pattern: ^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])$
+      description: Immutable readable identifier; API addressing uses the opaque id.
+    displayName:
+      type: string
+      minLength: 1
+    status:
+      type: string
+      enum:
+        - active
+        - suspended
+        - deleting
+        - deleted
+Membership:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - organizationId
+    - accountId
+    - displayName
+    - status
+    - orgRole
+  properties:
+    id:
+      type: string
+      format: uuid
+    organizationId:
+      type: string
+      format: uuid
+    accountId:
+      type: string
+      format: uuid
+    displayName:
+      type: string
+      minLength: 1
+    status:
+      type: string
+      enum:
+        - active
+        - removed
+    orgRole:
+      type: string
+      enum:
+        - owner
+        - admin
+        - member
+OrganizationCreate:
+  type: object
+  additionalProperties: false
+  required:
+    - slug
+    - displayName
+  properties:
+    slug:
+      type: string
+      minLength: 3
+      maxLength: 63
+      pattern: ^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])$
+    displayName:
+      type: string
+      minLength: 1
+OrganizationUpdate:
+  type: object
+  additionalProperties: false
+  required:
+    - displayName
+  properties:
+    displayName:
+      type: string
+      minLength: 1
+OrganizationCreateResponse:
+  type: object
+  additionalProperties: false
+  required:
+    - organization
+    - owner
+  properties:
+    organization:
+      $ref: "#/OrganizationSummary"
+    owner:
+      $ref: "#/Membership"
+MembershipRoleUpdate:
+  type: object
+  additionalProperties: false
+  required:
+    - orgRole
+  properties:
+    orgRole:
+      type: string
+      enum:
+        - owner
+        - admin
+        - member
+InvitationCreate:
+  type: object
+  additionalProperties: false
+  required:
+    - accountId
+    - orgRole
+  properties:
+    accountId:
+      type: string
+      format: uuid
+    orgRole:
+      type: string
+      enum:
+        - owner
+        - admin
+        - member
+InvitationCreated:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - expiresAt
+    - token
+  properties:
+    id:
+      type: string
+      format: uuid
+    expiresAt:
+      type: string
+      format: date-time
+    token:
+      type: string
+      minLength: 1
+InvitationAccept:
+  type: object
+  additionalProperties: false
+  required:
+    - token
+  properties:
+    token:
+      type: string
+      minLength: 1
+OrganizationList:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+    - total
+    - page
+    - limit
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/OrganizationSummary"
+    total:
+      type: integer
+      minimum: 0
+    page:
+      type: integer
+      minimum: 1
+    limit:
+      type: integer
+      minimum: 1
+      maximum: 100
+MembershipList:
+  type: object
+  additionalProperties: false
+  required:
+    - items
+    - total
+    - page
+    - limit
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/Membership"
+    total:
+      type: integer
+      minimum: 0
+    page:
+      type: integer
+      minimum: 1
+    limit:
+      type: integer
+      minimum: 1
+      maximum: 100

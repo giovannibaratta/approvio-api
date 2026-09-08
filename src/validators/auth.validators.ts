@@ -6,12 +6,17 @@ import {
   RefreshTokenRequest,
   PrivilegedTokenExchangeRequest,
   PrivilegedTokenResponse,
+  PrivilegedOperation,
   InitiateCliLoginRequest,
   InitiateCliLogin200Response,
-  OidcCallbackRequest
+  OidcCallbackRequest,
+  WebSessionContext,
+  WebOrganizationSwitch,
+  CliOrganizationSelection
 } from "../../generated/openapi/model/models"
 import {Either, left, right} from "fp-ts/Either"
-import {hasOwnProperty, isNonEmptyString} from "../utils/validation.utils"
+import {hasOwnProperty, isNonEmptyString, isValidUUID} from "../utils/validation.utils"
+import {getStringAsEnum} from "../utils/enum"
 
 export type TokenResponseValidationError =
   | "malformed_object"
@@ -22,6 +27,8 @@ export type TokenResponseValidationError =
 
 export type AgentRegistrationResponseValidationError =
   | "malformed_object"
+  | "missing_organization_id"
+  | "invalid_organization_id"
   | "missing_agent_id"
   | "invalid_agent_id"
   | "missing_agent_name"
@@ -53,6 +60,10 @@ export function validateAgentRegistrationResponse(
 ): Either<AgentRegistrationResponseValidationError, AgentRegistrationResponse> {
   if (typeof object !== "object" || object === null) return left("malformed_object")
 
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (!isNonEmptyString(object.organizationId) || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
   if (!hasOwnProperty(object, "agentId")) return left("missing_agent_id")
   if (!isNonEmptyString(object.agentId)) return left("invalid_agent_id")
 
@@ -69,6 +80,7 @@ export function validateAgentRegistrationResponse(
   if (!isNonEmptyString(object.createdAt)) return left("invalid_created_at")
 
   return right({
+    organizationId: object.organizationId,
     agentId: object.agentId,
     agentName: object.agentName,
     publicKey: object.publicKey,
@@ -137,11 +149,13 @@ export function validatePrivilegedTokenExchangeRequest(
 
   if (!hasOwnProperty(object, "operation") || !isNonEmptyString(object.operation))
     return left(hasOwnProperty(object, "operation") ? "invalid_operation" : "missing_operation")
+  const operation = getStringAsEnum(object.operation, PrivilegedOperation)
+  if (!operation) return left("invalid_operation")
 
   const result: PrivilegedTokenExchangeRequest = {
     code: object.code,
     state: object.state,
-    operation: object.operation
+    operation
   }
 
   if (hasOwnProperty(object, "resourceId") && object.resourceId !== undefined) {
@@ -274,4 +288,60 @@ export function validateAuthProvidersResponse(
   }
 
   return right(result)
+}
+
+export type WebSessionContextValidationError =
+  | "malformed_object"
+  | "missing_selected_organization_id"
+  | "invalid_selected_organization_id"
+  | "missing_context_version"
+  | "invalid_context_version"
+
+export function validateWebSessionContext(
+  object: unknown
+): Either<WebSessionContextValidationError, WebSessionContext> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  if (!hasOwnProperty(object, "selectedOrganizationId")) return left("missing_selected_organization_id")
+  if (
+    object.selectedOrganizationId !== null &&
+    (!isNonEmptyString(object.selectedOrganizationId) || !isValidUUID(object.selectedOrganizationId))
+  )
+    return left("invalid_selected_organization_id")
+
+  return right({selectedOrganizationId: object.selectedOrganizationId})
+}
+
+export type WebOrganizationSwitchValidationError =
+  | "malformed_object"
+  | "missing_organization_id"
+  | "invalid_organization_id"
+  | "missing_expected_context_version"
+  | "invalid_expected_context_version"
+
+export function validateWebOrganizationSwitch(
+  object: unknown
+): Either<WebOrganizationSwitchValidationError, WebOrganizationSwitch> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (!isNonEmptyString(object.organizationId) || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+
+  return right({organizationId: object.organizationId})
+}
+
+export type CliOrganizationSelectionValidationError =
+  | "malformed_object"
+  | "missing_organization_id"
+  | "invalid_organization_id"
+
+export function validateCliOrganizationSelection(
+  object: unknown
+): Either<CliOrganizationSelectionValidationError, CliOrganizationSelection> {
+  if (typeof object !== "object" || object === null) return left("malformed_object")
+  if (!hasOwnProperty(object, "organizationId")) return left("missing_organization_id")
+  if (!isNonEmptyString(object.organizationId) || !isValidUUID(object.organizationId))
+    return left("invalid_organization_id")
+  return right({organizationId: object.organizationId})
 }

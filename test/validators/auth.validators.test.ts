@@ -5,7 +5,10 @@ import {
   PrivilegedTokenResponse,
   InitiateCliLoginRequest,
   InitiateCliLogin200Response,
-  OidcCallbackRequest
+  OidcCallbackRequest,
+  WebSessionContext,
+  WebOrganizationSwitch,
+  CliOrganizationSelection
 } from "../../generated/openapi/model/models"
 import {
   validateTokenRequest,
@@ -14,7 +17,10 @@ import {
   validatePrivilegedTokenResponse,
   validateInitiateCliLoginRequest,
   validateInitiateCliLogin200Response,
-  validateOidcCallbackRequest
+  validateOidcCallbackRequest,
+  validateWebSessionContext,
+  validateWebOrganizationSwitch,
+  validateCliOrganizationSelection
 } from "../../src/validators/auth.validators"
 import "../../src/utils/matchers"
 
@@ -98,6 +104,7 @@ describe("auth validators", () => {
 
   describe("validateAgentRegistrationResponse", () => {
     const validResponse: AgentRegistrationResponse = {
+      organizationId: "00000000-0000-4000-8000-000000000001",
       agentId: "agent-123",
       agentName: "test-agent",
       publicKey: "test-pub-key",
@@ -252,7 +259,7 @@ describe("auth validators", () => {
   describe("validatePrivilegedTokenExchangeRequest", () => {
     it("should return right when valid", () => {
       // Given
-      const validReq: PrivilegedTokenExchangeRequest = {code: "c", state: "s", operation: "op"}
+      const validReq: PrivilegedTokenExchangeRequest = {code: "c", state: "s", operation: "vote"}
       // When
       const result = validatePrivilegedTokenExchangeRequest(validReq)
       // Expect
@@ -328,6 +335,29 @@ describe("auth validators", () => {
       const result = validateOidcCallbackRequest(validReq)
       // Expect
       expect(result).toBeRightOf(validReq)
+    })
+  })
+
+  describe("organization context", () => {
+    const organizationId = "00000000-0000-4000-8000-000000000001"
+
+    it("validates browser session context without a selected organization", () => {
+      const context: WebSessionContext = {selectedOrganizationId: null}
+      expect(validateWebSessionContext(context)).toBeRightOf(context)
+    })
+
+    it("validates a versioned browser organization switch", () => {
+      const request: WebOrganizationSwitch = {organizationId}
+      expect(validateWebOrganizationSwitch(request)).toBeRightOf(request)
+    })
+
+    it("rejects a malformed context version", () => {
+      expect(validateWebOrganizationSwitch({organizationId: "invalid"})).toBeLeftOf("invalid_organization_id")
+    })
+
+    it("validates CLI organization selection", () => {
+      const selection: CliOrganizationSelection = {organizationId}
+      expect(validateCliOrganizationSelection(selection)).toBeRightOf(selection)
     })
   })
 })

@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Get user details
   description: Returns the details of a specific user by their ID.
@@ -13,8 +15,17 @@ get:
         type: string
         format: uuid
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: User details
+      headers:
+        ETag:
+          description: Opaque version of the returned user.
+          schema:
+            type: string
       content:
         application/json:
           schema:

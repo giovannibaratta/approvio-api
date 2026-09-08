@@ -1,0 +1,11 @@
+get:
+  operationId: ping
+  summary: Ping the service
+  description: Returns an empty success response when the service process is reachable.
+  tags:
+    - Health
+  parameters: []
+  security: []
+  responses:
+    "204":
+      description: Successful operation

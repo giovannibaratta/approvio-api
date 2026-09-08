@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: List agents
   description: Returns a list of agents
@@ -12,6 +14,10 @@ get:
       schema:
         $ref: ../shared/schemas.yaml#/ListAgentsParams
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: List of agents
       content:

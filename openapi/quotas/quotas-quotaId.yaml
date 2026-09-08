@@ -1,4 +1,5 @@
 parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
   - name: quotaId
     in: path
     required: true
@@ -16,6 +17,10 @@ get:
   security:
     - bearerAuth: []
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: The requested quota
       content:
@@ -42,6 +47,10 @@ patch:
         schema:
           $ref: ./schemas.yaml#/QuotaUpdate
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Quota updated successfully
       content:
@@ -64,6 +73,10 @@ delete:
   security:
     - bearerAuth: []
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "204":
       description: Quota deleted successfully
     "401":

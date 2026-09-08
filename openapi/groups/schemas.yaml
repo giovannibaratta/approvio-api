@@ -66,12 +66,16 @@ GroupCreate:
 Group:
   type: object
   required:
+    - organizationId
     - id
     - name
     - entitiesCount
     - createdAt
     - updatedAt
   properties:
+    organizationId:
+      type: string
+      format: uuid
     id:
       type: string
       format: uuid

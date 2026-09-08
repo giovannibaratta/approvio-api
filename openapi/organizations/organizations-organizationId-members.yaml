@@ -1,0 +1,47 @@
+get:
+  operationId: listMembers
+  summary: List organization members
+  description: Lists active and retained organization-local membership identities.
+  tags:
+    - Organizations
+  parameters:
+    - name: organizationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    - name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    - name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 20
+        maximum: 100
+  responses:
+    "200":
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/MembershipList
+    "400":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "401":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "403":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "404":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "409":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "423":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "503":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError

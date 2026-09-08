@@ -3,7 +3,7 @@ info:
   title: Workflow Approval System API
   description: API for a SaaS platform that allows customers to manage approvals for
     generic workflows, users, and groups.
-  version: 0.0.52
+  version: 1.0.0
 tags:
   - name: Authentication
     description: OIDC authentication and token management
@@ -17,8 +17,6 @@ tags:
     description: Group management
   - name: Spaces
     description: Space management
-  - name: Organization Admins
-    description: Organization administrator management
   - name: Organizations
     description: Organization entitlements and metered usage management
   - name: Workflow Actions
@@ -50,86 +48,146 @@ paths:
     $ref: ./openapi/auth/auth-web-refresh.yaml
   /auth/web/logout:
     $ref: ./openapi/auth/auth-web-logout.yaml
-  /auth/web/initiatePrivilegedTokenExchange:
+  /o/{organizationId}/auth/web/initiatePrivilegedTokenExchange:
     $ref: ./openapi/auth/auth-web-initiatePrivilegedTokenExchange.yaml
-  /auth/web/exchangePrivilegedToken:
+  /o/{organizationId}/auth/web/exchangePrivilegedToken:
     $ref: ./openapi/auth/auth-web-exchangePrivilegedToken.yaml
-  /auth/cli/initiatePrivilegedTokenExchange:
+  /o/{organizationId}/auth/cli/initiatePrivilegedTokenExchange:
     $ref: ./openapi/auth/auth-cli-initiatePrivilegedTokenExchange.yaml
-  /auth/cli/exchangePrivilegedToken:
+  /o/{organizationId}/auth/cli/exchangePrivilegedToken:
     $ref: ./openapi/auth/auth-cli-exchangePrivilegedToken.yaml
   /auth/cli/token:
     $ref: ./openapi/auth/auth-cli-token.yaml
   /auth/cli/refresh:
     $ref: ./openapi/auth/auth-cli-refresh.yaml
-  /auth/info:
+  /o/{organizationId}/auth/info:
     $ref: ./openapi/auth/auth-info.yaml
-  /auth/agents/challenge:
+  /o/{organizationId}/auth/agents/challenge:
     $ref: ./openapi/auth/auth-agents-challenge.yaml
-  /auth/agents/token:
+  /o/{organizationId}/auth/agents/token:
     $ref: ./openapi/auth/auth-agents-token.yaml
-  /auth/agents/refresh:
+  /o/{organizationId}/auth/agents/refresh:
     $ref: ./openapi/auth/auth-agents-refresh.yaml
-  /agents:
+  /o/{organizationId}/agents:
     $ref: ./openapi/agents/agents.yaml
-  /agents/register:
+  /o/{organizationId}/agents/register:
     $ref: ./openapi/agents/agents-register.yaml
-  /agents/{agentIdOrName}:
+  /o/{organizationId}/agents/{agentIdOrName}:
     $ref: ./openapi/agents/agents-agentIdOrName.yaml
-  /agents/{agentId}/roles:
+  /o/{organizationId}/agents/{agentId}/roles:
     $ref: ./openapi/agents/agents-agentId-roles.yaml
-  /roles:
+  /o/{organizationId}/roles:
     $ref: ./openapi/roles/roles.yaml
-  /workflows:
+  /o/{organizationId}/workflows:
     $ref: ./openapi/workflows/workflows.yaml
-  /workflows/{workflowId}:
+  /o/{organizationId}/workflows/{workflowId}:
     $ref: ./openapi/workflows/workflows-workflowId.yaml
-  /workflows/{workflowId}/vote:
+  /o/{organizationId}/workflows/{workflowId}/vote:
     $ref: ./openapi/workflows/workflows-workflowId-vote.yaml
-  /workflows/{workflowId}/votes:
+  /o/{organizationId}/workflows/{workflowId}/votes:
     $ref: ./openapi/workflows/workflows-workflowId-votes.yaml
-  /workflows/{workflowId}/canVote:
+  /o/{organizationId}/workflows/{workflowId}/canVote:
     $ref: ./openapi/workflows/workflows-workflowId-canVote.yaml
-  /users:
+  /o/{organizationId}/users:
     $ref: ./openapi/users/users.yaml
-  /users/{userId}:
+  /o/{organizationId}/users/{userId}:
     $ref: ./openapi/users/users-userId.yaml
-  /users/{userId}/roles:
+  /o/{organizationId}/users/{userId}/roles:
     $ref: ./openapi/users/users-userId-roles.yaml
-  /groups:
+  /o/{organizationId}/groups:
     $ref: ./openapi/groups/groups.yaml
-  /groups/{groupIdentifier}:
+  /o/{organizationId}/groups/{groupIdentifier}:
     $ref: ./openapi/groups/groups-groupIdentifier.yaml
-  /groups/{groupId}/entities:
+  /o/{organizationId}/groups/{groupId}/entities:
     $ref: ./openapi/groups/groups-groupId-entities.yaml
-  /spaces:
+  /o/{organizationId}/spaces:
     $ref: ./openapi/spaces/spaces.yaml
-  /spaces/{spaceId}:
+  /o/{organizationId}/spaces/{spaceId}:
     $ref: ./openapi/spaces/spaces-spaceId.yaml
-  /organization/{organization-name}/admins:
-    $ref: ./openapi/org-admins/organization-organization-name-admins.yaml
-  /workflow-templates:
+  /o/{organizationId}/workflow-templates:
     $ref: ./openapi/workflows/workflow-templates.yaml
-  /workflow-templates/{templateIdentifier}:
+  /o/{organizationId}/workflow-templates/{templateIdentifier}:
     $ref: ./openapi/workflows/workflow-templates-templateIdentifier.yaml
-  /workflow-templates/{templateIdentifier}/deprecate:
+  /o/{organizationId}/workflow-templates/{templateIdentifier}/deprecate:
     $ref: ./openapi/workflows/workflow-templates-templateName-deprecate.yaml
-  /quotas:
+  /o/{organizationId}/quotas:
     $ref: ./openapi/quotas/quotas.yaml
-  /quotas/{quotaId}:
+  /o/{organizationId}/quotas/{quotaId}:
     $ref: ./openapi/quotas/quotas-quotaId.yaml
-  /audit-logs:
+  /o/{organizationId}/audit-logs:
     $ref: ./openapi/audit-logs/audit-logs.yaml
-  /audit-logs/me:
+  /o/{organizationId}/audit-logs/me:
     $ref: ./openapi/audit-logs/audit-logs-me.yaml
-  /resources/resolve:
+  /o/{organizationId}/resources/resolve:
     $ref: ./openapi/resources/resources-resolve.yaml
-  /organizations/{orgId}/entitlements:
+  /o/{organizationId}/entitlements:
     $ref: ./openapi/organizations/organizations-orgId-entitlements.yaml
-  /organizations/{orgId}/usage:
+  /o/{organizationId}/usage:
     $ref: ./openapi/organizations/organizations-orgId-usage.yaml
+  /account:
+    $ref: ./openapi/auth/account.yaml
+  /o:
+    $ref: ./openapi/organizations/organizations.yaml
+  /auth/web/session:
+    $ref: ./openapi/auth/auth-web-session.yaml
+  /auth/web/organization-context:
+    $ref: ./openapi/auth/auth-web-organization-context.yaml
+  /auth/cli/organization-context:
+    $ref: ./openapi/auth/auth-cli-organization-context.yaml
+  /o/{organizationId}:
+    $ref: ./openapi/organizations/organizations-organizationId.yaml
+  /o/{organizationId}/suspend:
+    $ref: ./openapi/organizations/organizations-organizationId-suspend.yaml
+  /o/{organizationId}/resume:
+    $ref: ./openapi/organizations/organizations-organizationId-resume.yaml
+  /o/{organizationId}/members:
+    $ref: ./openapi/organizations/organizations-organizationId-members.yaml
+  /o/{organizationId}/members/{membershipId}:
+    $ref: ./openapi/organizations/organizations-organizationId-members-membershipId.yaml
+  /o/{organizationId}/invitations:
+    $ref: ./openapi/organizations/organizations-organizationId-invitations.yaml
+  /o/{organizationId}/invitations/{invitationId}:
+    $ref: ./openapi/organizations/organizations-organizationId-invitations-invitationId.yaml
+  /o/{organizationId}/invitations/{invitationId}/accept:
+    $ref: ./openapi/organizations/organizations-organizationId-invitations-invitationId-accept.yaml
+  /o/{organizationId}/workflow-templates/{templateIdentifier}/cancel-workflows:
+    $ref: ./openapi/workflows/workflow-template-cancel-workflows.yaml
+  /ping:
+    $ref: ./openapi/system/ping.yaml
 components:
   schemas:
+    MembershipList:
+      $ref: ./openapi/organizations/schemas.yaml#/MembershipList
+    OrganizationList:
+      $ref: ./openapi/organizations/schemas.yaml#/OrganizationList
+    OrganizationBoundaryError:
+      $ref: ./openapi/shared/schemas.yaml#/OrganizationBoundaryError
+    InvitationAccept:
+      $ref: ./openapi/organizations/schemas.yaml#/InvitationAccept
+    InvitationCreated:
+      $ref: ./openapi/organizations/schemas.yaml#/InvitationCreated
+    InvitationCreate:
+      $ref: ./openapi/organizations/schemas.yaml#/InvitationCreate
+    MembershipRoleUpdate:
+      $ref: ./openapi/organizations/schemas.yaml#/MembershipRoleUpdate
+    CliOrganizationSelection:
+      $ref: ./openapi/auth/schemas.yaml#/CliOrganizationSelection
+    WebOrganizationSwitch:
+      $ref: ./openapi/auth/schemas.yaml#/WebOrganizationSwitch
+    WebSessionContext:
+      $ref: ./openapi/auth/schemas.yaml#/WebSessionContext
+    OrganizationCreateResponse:
+      $ref: ./openapi/organizations/schemas.yaml#/OrganizationCreateResponse
+    OrganizationUpdate:
+      $ref: ./openapi/organizations/schemas.yaml#/OrganizationUpdate
+    OrganizationCreate:
+      $ref: ./openapi/organizations/schemas.yaml#/OrganizationCreate
+    Membership:
+      $ref: ./openapi/organizations/schemas.yaml#/Membership
+    OrganizationSummary:
+      $ref: ./openapi/organizations/schemas.yaml#/OrganizationSummary
+    Account:
+      $ref: ./openapi/accounts/schemas.yaml#/Account
     AgentChallengeRequest:
       $ref: ./openapi/agents/schemas.yaml#/AgentChallengeRequest
     AgentChallengeResponse:
@@ -180,16 +238,8 @@ components:
       $ref: ./openapi/spaces/schemas.yaml#/SpaceCreate
     Space:
       $ref: ./openapi/spaces/schemas.yaml#/Space
-    OrganizationAdminCreate:
-      $ref: ./openapi/shared/schemas.yaml#/OrganizationAdminCreate
-    OrganizationAdmin:
-      $ref: ./openapi/shared/schemas.yaml#/OrganizationAdmin
-    OrganizationAdminRemove:
-      $ref: ./openapi/shared/schemas.yaml#/OrganizationAdminRemove
     UserSummary:
       $ref: ./openapi/users/schemas.yaml#/UserSummary
-    UserCreate:
-      $ref: ./openapi/users/schemas.yaml#/UserCreate
     User:
       $ref: ./openapi/users/schemas.yaml#/User
     EntityReference:
@@ -244,8 +294,6 @@ components:
       $ref: ./openapi/shared/schemas.yaml#/VoteVeto
     VoteWithdraw:
       $ref: ./openapi/shared/schemas.yaml#/VoteWithdraw
-    ConcurrencyControl:
-      $ref: ./openapi/shared/schemas.yaml#/ConcurrencyControl
     WorkflowTemplateCreate:
       $ref: ./openapi/workflows/schemas.yaml#/WorkflowTemplateCreate
     WorkflowTemplate:
@@ -344,13 +392,17 @@ components:
     InternalServerError:
       $ref: ./openapi/shared/responses.yaml#/InternalServerError
   securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+      description: HttpOnly browser session credential; cookie mutations require CSRF/origin validation.
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
       description: |
-        JWT token containing authentication information for users or agents.
-        The JWT payload includes: - Core JWT claims: iss (issuer), sub (subject ID), aud (audience), exp/iat/nbf (time claims), jti (token ID) - Standard claims: email (for users), name (display name) - Custom claims: entityType ("user" or "agent")
-        Users must have a valid email, while agents do not require an email field. Permissions and roles are resolved server-side and not included in the token for security.
+        Signed platform-user, tenant-user or tenant-agent credentials. Tenant credentials bind organizationId; agent sub is its UUID. Roles and membership are checked against current server state.
 security:
   - bearerAuth: []
+  - cookieAuth: []

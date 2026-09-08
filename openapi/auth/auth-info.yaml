@@ -1,3 +1,5 @@
+parameters:
+  - $ref: ../shared/parameters.yaml#/OrganizationId
 get:
   summary: Get authenticated entity information
   description: Returns basic information about the authenticated entity
@@ -5,6 +7,10 @@ get:
   tags:
     - Authentication
   responses:
+    "409":
+      $ref: ../shared/organization-responses.yaml#/ContextChanged
+    "423":
+      $ref: ../shared/organization-responses.yaml#/Suspended
     "200":
       description: Entity information retrieved successfully
       content:

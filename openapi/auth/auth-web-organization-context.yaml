@@ -1,0 +1,48 @@
+post:
+  operationId: switchWebOrganization
+  summary: switch Web Organization
+  tags:
+    - Authentication
+  description: Compare-and-swap the selected browser organization using If-Match.
+    Returns new HttpOnly credentials; stale versions
+    return 412 without mutation. Requires cookie authentication and CSRF/origin
+    validation.
+  parameters:
+    - $ref: ../shared/parameters.yaml#/IfMatch
+  responses:
+    "200":
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: ./schemas.yaml#/WebSessionContext
+      headers:
+        ETag:
+          description: Opaque version of the returned browser session context.
+          schema:
+            type: string
+        Set-Cookie:
+          description: Replacement Secure HttpOnly credentials; never expose refresh
+            credentials in JSON.
+          schema:
+            type: string
+    "400":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "401":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "403":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "404":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "412":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "423":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+    "503":
+      $ref: ../shared/organization-responses.yaml#/BoundaryError
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ./schemas.yaml#/WebOrganizationSwitch
